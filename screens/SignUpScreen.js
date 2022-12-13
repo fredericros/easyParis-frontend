@@ -3,60 +3,25 @@ import { TextInput, ImageBackground, StyleSheet, Image, Text, View, TouchableOpa
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import React from "react";
 
-// const res = await DocumentPicker.pick({
-//     type: [DocumentPicker.types.allFiles],
-// });
-// this.setState({ singleFile: res });
-
-// const data = new FormData();
-// data.append('name', 'Image Upload');
-// data.append('file_attachment', fileToUpload);
-
-// let uploadImage = async () => {
-//     if (singleFile != null) {
-//         const fileToUpload = singleFile;
-//         const data = new FormData();
-//         data.append('name', 'Image Upload');
-//         data.append('file_attachment', fileToUpload);
-//         let res = await fetch(
-//             'http://localhost//webservice/user/uploadImage',
-//             {
-//                 method: 'post',
-//                 body: data,
-//                 headers: {
-//                     'Content-Type': 'multipart/form-data; ',
-//                 },
-//             }
-//         );
-//         let responseJson = await res.json();
-//         if (responseJson.status == 1) {
-//             alert('Upload Successful');
-//         }
-//     } else {
-//         //if no file selected the show alert
-//         alert('Please Select File first');
-//     }
-// };
-
 export default function SignUpScreen({ navigation }) {
     return (
 
 
         <View style={styles.container} >
-
-            <TouchableOpacity style={styles.buttonpicture} activeOpacity={0.8}>
-                <Text style={styles.pic}>Easy Paris </Text>
+            <TouchableOpacity onPress={() => navigation.navigate('SignIn')} style={styles.back}>
+                <Text> Back to home</Text>
             </TouchableOpacity>
+
+            <Image style={styles.logo} source={require('../assets/logoeiffel1.jpg')} resizeMode="contain" />
+
             <TextInput style={styles.buttonsignin} placeholder="Username" activeOpacity={0.8} />
 
             <TextInput style={styles.buttonsignin} placeholder="Email" activeOpacity={0.8} />
 
             <TextInput style={styles.buttonsignin} placeholder="Password" activeOpacity={0.8} />
 
-            <TextInput style={styles.buttonabout} placeholder="About you" activeOpacity={0.8} />
-
             <TouchableOpacity style={styles.button} activeOpacity={0.8}>
-                <text>Sign up</text>
+                <Text>Sign up</Text>
             </TouchableOpacity>
         </View>
     );
@@ -68,8 +33,17 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         flexDirection: 'column',
+        backgroundColor: "#fff"
+    },
+    back: {
+        position: "absolute",
+        left: 50,
+        top: 50,
     },
     logo: {
+        width: "60%",
+        height: "40%",
+        marginBottom: 20,
     },
     buttonpicture: {
         alignItems: 'center',
@@ -118,7 +92,7 @@ const styles = StyleSheet.create({
         display: 'flex',
         justifyContent: "center",
         color: 'white',
-        fontSize: 21,
+        fontSize: 25,
         textAlign: "center",
         padding: 8,
         margin: 8,

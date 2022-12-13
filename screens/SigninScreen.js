@@ -2,17 +2,15 @@ import { TextInput, StyleSheet, Image, Text, View, TouchableOpacity, Dimensions 
 import React from "react";
 import { useState, useEffect } from "react";
 
-const window = Dimensions.get("window");
-const screen = Dimensions.get("screen");
-
 
 export default function SigninScreen({ navigation }) {
     return (
         <View style={styles.container}>
-            <Image style={styles.logo} source={require('../assets/logoeiffel1.jpg')} />
 
-            <TouchableOpacity style={styles.buttonup} activeOpacity={0.8}>
-                <Text style={styles.text}>Sign Up</Text>
+            <Image style={styles.logo} source={require('../assets/logoeiffel1.jpg')} resizeMode="contain" />
+
+            <TouchableOpacity onPress={() => navigation.navigate('Signup')} style={styles.buttonup} activeOpacity={0.8}>
+                <Text style={styles.text} textAlign="center" width="100%">Sign up</Text>
             </TouchableOpacity>
             <Text style={styles.barre}></Text>
 
@@ -20,8 +18,8 @@ export default function SigninScreen({ navigation }) {
 
             <TextInput style={styles.buttonsignin} placeholder=" Password" activeOpacity={0.8} />
 
-            <TouchableOpacity style={styles.button} activeOpacity={0.8}>
-                <Text style={styles.text}>Sign In</Text>
+            <TouchableOpacity onPress={() => navigation.navigate('TabNavigator')} style={styles.button} activeOpacity={0.8}>
+                <Text style={styles.text} textAlign="center" width="100%">Sign In</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.buttonforget} activeOpacity={0.8}>
                 <Text style={styles.textforget}>FORGOT PASSWORD</Text>
@@ -37,6 +35,11 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         flexDirection: 'column',
         backgroundColor: "#fff"
+    },
+    back: {
+        position: "absolute",
+        left: 50,
+        top: 80,
     },
     logo: {
         width: "60%",
@@ -93,6 +96,7 @@ const styles = StyleSheet.create({
         borderRadius: 15
     },
     text: {
+        width: "100%",
         color: 'white',
         fontSize: 25,
     },
