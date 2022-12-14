@@ -206,13 +206,13 @@ export default function MapScreen({ navigation }) {
     return (
         <View style={styles.container}>
             <MapView initialRegion={{
-                latitude: 48.858370,
-                longitude: 2.294481,
+                latitude: 48.8584685,
+                longitude: 2.3375905,
                 latitudeDelta: 0,
-                longitudeDelta: 0,
+                longitudeDelta: 0.15,
             }} style={
                 styles.map
-            } mapType="hybrid">
+            }>
                 <Polygon coordinates={points}
                     strokeWidth={2}
                     strokeColor="grey"
@@ -253,6 +253,12 @@ export default function MapScreen({ navigation }) {
                     strokeWidth={2}
                     strokeColor="grey"
                     fillColor="rgba(0,0,255,0.3)" />
+                     <Marker 
+                    coordinate={{ latitude: 48.8549298, longitude: 2.3469339 }} 
+                    title="old center" 
+                    tappable={true} 
+                    isPreselected={true}
+                    pinColor={"yellow"} />
             </MapView>
         </View>
     );
