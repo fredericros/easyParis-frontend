@@ -1,6 +1,12 @@
 import { TextInput, StyleSheet, Image, Text, View, TouchableOpacity, Dimensions } from 'react-native';
 import React from "react";
 import { useState, useEffect } from "react";
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+
+const Stack = createNativeStackNavigator();
+const Tab = createBottomTabNavigator();
 
 
 export default function SigninScreen({ navigation }) {
@@ -9,7 +15,7 @@ export default function SigninScreen({ navigation }) {
 
             <Image style={styles.logo} source={require('../assets/logoeiffel1.jpg')} resizeMode="contain" />
 
-            <TouchableOpacity onPress={() => navigation.navigate('Signup')} style={styles.buttonup} activeOpacity={0.8}>
+            <TouchableOpacity onPress={() => navigation.navigate('SignUp')} style={styles.buttonup} activeOpacity={0.8}>
                 <Text style={styles.text} textAlign="center" width="100%">Sign up</Text>
             </TouchableOpacity>
             <Text style={styles.barre}></Text>

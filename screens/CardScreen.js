@@ -19,7 +19,6 @@ export default function CardScreen({  }) {
     <Box h={590} style={{ backgroundColor: 'white', position: "absolute", top: 370, height: '60%', width: '100%', borderTopLeftRadius: 40, borderTopRightRadius: 40,  }}>
     <Stack m={40} spacing={10} style={{flex: 1}}>
     <Text variant="h4">h1. Heading</Text>
-    <Spacer />
     <Text variant="body1" style={{ textAlign: 'left'}}>
       body1. Lorem ipsum dolor sit amet, consectetur adipisicing elit. Quos
       blanditiis tenetur unde suscipit, quam beatae rerum inventore consectetur,
@@ -27,15 +26,15 @@ export default function CardScreen({  }) {
       Eum quasi quidem quibusdam.
       body1. Lorem ipsum dolor sit amet, consectetur adipisicing elit. Quos
       blanditiis tenetur unde suscipit, quam beatae rerum inventore consectetur,
-      
+     
     </Text>
-    <Spacer />
-    <Spacer />
+   
    
     {/* <Button variant="outlined" title="← Reviews" color="black"  style={{width: '40%' }}/>
     <Button variant="outlined" title="← Reviews" color="black"  style={{width: '40%'}}/> */}
 
-<View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+<View style={{flexDirection: 'row', justifyContent: 'space-between', marginTop: 20}}>
+    
 <Button variant="outlined" title="← Reviews" color="black" style={{width: '40%', justifyContent: 'flex-start'}}/>
 <Button variant="outlined" title="Info →" color="black" style={{width: '40%', justifyContent: 'flex-end'}}/>
 </View>
