@@ -63,7 +63,7 @@ const styles = StyleSheet.create({
         height: 40,
         borderRadius: 15,
         marginBottom: 10,
-        alignItems:'center'
+        alignItems: 'center'
     },
     buttonsignin: {
         display: 'flex',
@@ -99,4 +99,4 @@ const styles = StyleSheet.create({
         fontSize: 15,
     }
 
-});
+}); 
