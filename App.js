@@ -34,6 +34,7 @@ const styles = StyleSheet.create({
 export default function App() {
   const Stack = createNativeStackNavigator();
   const Tab = createBottomTabNavigator();
+
   const TabNavigator = () => {
 
     return (
