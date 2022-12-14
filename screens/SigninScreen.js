@@ -87,7 +87,6 @@ const styles = StyleSheet.create({
         margin: 15,
     },
     buttonforget: {
-        marginTop: 20,
         alignItems: 'center',
         padding: 5,
         margin: 5,
