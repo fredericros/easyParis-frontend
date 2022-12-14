@@ -27,7 +27,7 @@ export default function SignUpScreen({ navigation }) {
             <TextInput style={styles.buttonsignin} placeholder="Password" activeOpacity={0.8} />
 
             <TouchableOpacity style={styles.button} activeOpacity={0.8}>
-                <Text>Sign up</Text>
+                <Text style={styles.signup}>Sign up</Text>
             </TouchableOpacity>
         </View>
     );
@@ -97,16 +97,15 @@ const styles = StyleSheet.create({
     button: {
         display: 'flex',
         justifyContent: "center",
-        color: 'white',
-        fontSize: 25,
         textAlign: "center",
-        padding: 8,
-        margin: 8,
+        padding: 5,
+        margin: 5,
         backgroundColor: '#1E90FF',
         width: 260,
         height: 40,
         borderRadius: 15,
-        marginBottom: 50,
+        marginBottom: 10,
+        alignItems: 'center'
     },
     buttonsignin: {
         display: 'flex',
@@ -138,6 +137,11 @@ const styles = StyleSheet.create({
     textforget: {
         color: 'black',
         fontSize: 15,
+    },
+    signup: {
+        color: "white",
+        fontWeight: "bold",
+        fontSize: 20
     }
 
 }); 
