@@ -17,7 +17,6 @@ const Tabs = () => {
         <Tab.Navigator
             screenOptions={{
                 headerShown: false,
-                showLabel: false,
                 tabBarStyle: {
                     position: "absolute",
                     bottom: 15,
@@ -27,15 +26,16 @@ const Tabs = () => {
                     backgroundColor: "#1E90FF",
                     borderRadius: 20,
                     height: 50,
-                    color: "black",
                     ...styles.shadow
                 }
-
+            }}
+            tabBarOptions={{
+                showLabel: false
             }}
         >
             <Tab.Screen name="Map" component={MapScreen} options={{
                 tabBarIcon: ({ focused }) => (
-                    <View style={{ alignItems: "center", justifyContent: "center", top: 9 }}>
+                    <View style={{ alignItems: "center", justifyContent: "center", top: 3 }}>
                         <Image
                             source={require("../assets/home.png")}
                             resizeMode="contain"
@@ -45,14 +45,14 @@ const Tabs = () => {
                                 tintColor: focused ? "#1933a3" : "#fff"
                             }}
                         />
-                        <Text style={{ color: focused ? "#1933a3" : "#fff", fontSize: 12 }}></Text>
+                        <Text style={{ color: focused ? "#1933a3" : "#fff", fontSize: 12 }}>Home</Text>
                     </View>
                 ),
             }} />
 
             <Tab.Screen name="Places" component={PlacesSavedScreen} options={{
                 tabBarIcon: ({ focused }) => (
-                    <View style={{ alignItems: "center", justifyContent: "center", top: 8 }}>
+                    <View style={{ alignItems: "center", justifyContent: "center" }}>
                         <Image
                             source={require("../assets/heart.png")}
                             resizeMode="contain"
@@ -68,7 +68,7 @@ const Tabs = () => {
             }} />
             <Tab.Screen name="Chatbot" component={ChatBotScreen} options={{
                 tabBarIcon: ({ focused }) => (
-                    <View style={{ alignItems: "center", justifyContent: "center", top: 8 }}>
+                    <View style={{ alignItems: "center", justifyContent: "center" }}>
                         <Image
                             source={require("../assets/tchat.png")}
                             resizeMode="contain"
@@ -84,7 +84,7 @@ const Tabs = () => {
             }} />
             <Tab.Screen name="Profile" component={ProfileScreen} options={{
                 tabBarIcon: ({ focused }) => (
-                    <View style={{ alignItems: "center", justifyContent: "center", top: 8 }}>
+                    <View style={{ alignItems: "center", justifyContent: "center" }}>
                         <Image
                             source={require("../assets/profil.png")}
                             resizeMode="contain"
