@@ -9,6 +9,7 @@ import MapScreen from "../screens/MapScreen";
 import ChatBotScreen from "../screens/ChatBotScreen";
 import PlacesSavedScreen from "../screens/PlacesSavedScreen"
 import ProfileScreen from "../screens/ProfileScreen";
+import CardScreen from "../screens/CardScreen";
 
 const Tab = createBottomTabNavigator();
 
@@ -83,6 +84,23 @@ const Tabs = () => {
                 ),
             }} />
             <Tab.Screen name="Profile" component={ProfileScreen} options={{
+                tabBarIcon: ({ focused }) => (
+                    <View style={{ alignItems: "center", justifyContent: "center" }}>
+                        <Image
+                            source={require("../assets/profil.png")}
+                            resizeMode="contain"
+                            style={{
+                                width: 30,
+                                height: 30,
+                                tintColor: focused ? "#1933a3" : "#fff"
+                            }}
+                        />
+                        <Text style={{ color: focused ? "#1933a3" : "#fff", fontSize: 12 }}>Profil</Text>
+                    </View>
+                ),
+            }} />
+
+<Tab.Screen name="CardScreen" component={CardScreen} options={{
                 tabBarIcon: ({ focused }) => (
                     <View style={{ alignItems: "center", justifyContent: "center" }}>
                         <Image
