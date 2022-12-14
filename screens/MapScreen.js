@@ -191,7 +191,6 @@ const riche = [
     { latitude: 48.8630096, longitude: 2.2873359 },
 ];
 export default function MapScreen({ navigation }) {
-
     useEffect(() => {
         (async () => {
             const { status } = await Location.requestForegroundPermissionsAsync();
