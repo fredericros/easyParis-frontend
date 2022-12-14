@@ -25,7 +25,7 @@ const Tabs = () => {
                 tabBarShowLabel: false,
                 tabBarStyle: {
                     position: "absolute",
-                    bottom: 10,
+                    bottom: 20,
                     left: 35,
                     right: 35,
                     elevation: 0,
