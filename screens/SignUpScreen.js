@@ -29,6 +29,10 @@ export default function SignUpScreen({ navigation }) {
             <TouchableOpacity style={styles.button} activeOpacity={0.8}>
                 <Text style={styles.signup}>Sign up</Text>
             </TouchableOpacity>
+
+            <TouchableOpacity onPress={() => navigation.navigate('SignIn')} style={styles.buttonforget} activeOpacity={0.8}>
+                <Text style={styles.textforget}>Back</Text>
+            </TouchableOpacity>
         </View>
     );
 }
