@@ -21,6 +21,7 @@ import ChatBotScreen from "../screens/ChatBotScreen";
 import PlacesSavedScreen from "../screens/PlacesSavedScreen";
 import ProfileScreen from "../screens/ProfileScreen";
 import CardScreen from "../screens/CardScreen";
+import CardInfoScreen from "../screens/CardInfoScreen";
 
 // Création constante BottomTabNav
 const Stack = createNativeStackNavigator();
@@ -68,7 +69,6 @@ const Tabs = () => {
       <Tab.Screen name="Places" component={PlacesSavedScreen}/>
       <Tab.Screen name="Chatbot" component={ChatBotScreen}/>
       <Tab.Screen name="Profile" component={CardScreen}/>
-
     </Tab.Navigator>
   );
 };

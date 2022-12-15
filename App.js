@@ -26,7 +26,8 @@ import ChatBotScreen from "./screens/ChatBotScreen";
 import PlacesSavedScreen from "./screens/PlacesSavedScreen";
 import ProfileScreen from "./screens/ProfileScreen";
 import Tabs from "./navigation/tabs";
-
+import CardInfoScreen from "./screens/CardInfoScreen";
+import CardScreen from './screens/CardScreen'
 // redux imports
 import { Provider } from "react-redux";
 import { combineReducers, configureStore } from "@reduxjs/toolkit";
@@ -68,8 +69,10 @@ const App = () => {
       <NavigationContainer>
         <Stack.Navigator screenOptions={{ headerShown: false }}>
           <Stack.Screen name="Home" component={Tabs} />
-          <Stack.Screen name="SignIn" component={SigninScreen} />
-          <Stack.Screen name="SignUp" component={SignUpScreen} />
+          <Stack.Screen name='SignIn' component={SigninScreen} />
+          <Stack.Screen name='SignUp' component={SignUpScreen} />
+          <Stack.Screen name='CardInfoScreen' component={CardInfoScreen} /> 
+          <Stack.Screen name='CardScreen' component={CardScreen} />
         </Stack.Navigator>
       </NavigationContainer>
     </Provider>
