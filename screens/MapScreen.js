@@ -11,12 +11,10 @@ import {
 import FontAwesome from "react-native-vector-icons/FontAwesome";
 import MapView, { Polygon, Marker } from "react-native-maps";
 import * as Location from "expo-location";
-
-import { NavigationContainer } from "@react-navigation/native";
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { loadPlaces } from "../reducers/places";
+import ProfileScreen from "./ProfileScreen";
 
 const { height, width } = Dimensions.get("window");
 const LATITUDE_DELTA = 0.22;
@@ -202,17 +200,45 @@ const riche = [
   { latitude: 48.8630096, longitude: 2.2875934 },
   { latitude: 48.8630096, longitude: 2.2873359 },
 ];
+
 export default function MapScreen({ navigation }) {
+  const dispatch = useDispatch();
+  const places = useSelector((state) => state.places.value);
+  const [filteredPlaces, setFilteredPlaces] = useState("district");
+
   useEffect(() => {
     (async () => {
       const { status } = await Location.requestForegroundPermissionsAsync();
 
       if (status === "granted") {
         const location = await Location.getCurrentPositionAsync({});
-        console.log(location);
       }
     })();
+
+    fetch(`http://192.168.9.153:3000/places/${filteredPlaces}`)
+      .then((response) => response.json())
+      .then((data) => {
+        console.log(data.result)
+        data.result && dispatch(loadPlaces(data.places));
+      });
   }, []);
+
+  /*
+  const handleMarker = () => {
+<ProfileScreen/>
+  }
+*/
+
+  const markers = places.map((data, i) => {
+    return (
+      <Marker
+        key={i}
+        coordinate={{ latitude: data.latitude, longitude: data.longitude }}
+        title={data.name}
+        //onPress = {() => {handleMarker()}}
+      />
+    );
+  });
 
   return (
     <View style={styles.container}>
@@ -285,13 +311,7 @@ export default function MapScreen({ navigation }) {
           strokeColor="grey"
           fillColor="rgba(0,0,255,0.3)"
         />
-        <Marker
-          coordinate={{ latitude: 48.8549298, longitude: 2.3469339 }}
-          title="old center"
-          pinColor={"blue"}
-          anchor={{ latitude: 48.8549298, longitude: 2.3469339 }}
-          flat={false}
-        />
+        {markers}
       </MapView>
     </View>
   );

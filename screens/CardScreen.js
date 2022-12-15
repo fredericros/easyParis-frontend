@@ -40,11 +40,6 @@ export default function CardScreen({  }) {
 </View>
 
     </Stack>
-    <Stack  start  m={40}>
-  
-    
-    
-  </Stack>
     </Box>
   </Flex>
   

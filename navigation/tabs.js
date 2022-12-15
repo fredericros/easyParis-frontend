@@ -67,7 +67,7 @@ const Tabs = () => {
       <Tab.Screen name="Map" component={MapScreen}/>
       <Tab.Screen name="Places" component={PlacesSavedScreen}/>
       <Tab.Screen name="Chatbot" component={ChatBotScreen}/>
-      <Tab.Screen name="Profile" component={ProfileScreen}/>
+      <Tab.Screen name="Profile" component={CardScreen}/>
 
     </Tab.Navigator>
   );
