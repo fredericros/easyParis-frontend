@@ -7,8 +7,12 @@ import {
   TouchableOpacity,
   TextInput,
   Dimensions,
+  Modal,
+  ImageBackground,
 } from "react-native";
 import FontAwesome from "react-native-vector-icons/FontAwesome";
+import { Flex, Box } from "@react-native-material/core";
+import { Stack, Button } from "@react-native-material/core";
 import MapView, { Polygon, Marker } from "react-native-maps";
 import * as Location from "expo-location";
 import { useEffect, useState } from "react";
@@ -205,6 +209,7 @@ export default function MapScreen({ navigation }) {
   const dispatch = useDispatch();
   const places = useSelector((state) => state.places.value);
   const [filteredPlaces, setFilteredPlaces] = useState("district");
+  const [modalVisible, setModalVisible] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -215,33 +220,73 @@ export default function MapScreen({ navigation }) {
       }
     })();
 
-    fetch(`http://192.168.9.153:3000/places/${filteredPlaces}`)
+    fetch(`http://192.168.10.168:3000/places/${filteredPlaces}`)
       .then((response) => response.json())
       .then((data) => {
-        console.log(data.result)
         data.result && dispatch(loadPlaces(data.places));
       });
   }, []);
 
-  /*
   const handleMarker = () => {
-<ProfileScreen/>
-  }
-*/
+    setModalVisible(true);
+    console.log(modalVisible);
+  };
+
+  const handleClose = () => {
+    setModalVisible(false);
+  };
 
   const markers = places.map((data, i) => {
     return (
       <Marker
         key={i}
+        pinColor={"blue"}
         coordinate={{ latitude: data.latitude, longitude: data.longitude }}
         title={data.name}
-        //onPress = {() => {handleMarker()}}
+        onPress={() => {
+          handleMarker();
+        }}
       />
     );
   });
 
+  let Image_Http_URL = {
+    uri: "https://res.cloudinary.com/dnvxs5ibr/image/upload/v1671026907/easyParis/tour-eiffel-french-moments_eutbyh.jpg",
+  };
+
   return (
     <View style={styles.container}>
+      <Modal visible={modalVisible} animationType="fade"  transparent={true} style={styles.modal}>
+        <View style={styles.centeredView}>
+          <View style={styles.modalView}>
+            <ImageBackground
+              source={Image_Http_URL}
+              style={styles.backgroundImage}
+            >
+              <View
+                style={{
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <Text>Centered text</Text>
+
+              </View>
+            </ImageBackground>
+
+            <View style={styles.descriptionCard}>
+                <Button style= {styles.closeBtn} title={"close"} onPress={() => handleClose()}></Button>
+            </View>
+
+            
+          </View>
+        </View>
+      </Modal>
+
       <MapView
         initialRegion={{
           latitude: 48.8584685,
@@ -324,4 +369,52 @@ const styles = StyleSheet.create({
   map: {
     flex: 1,
   },
+  centeredView: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalView: {
+    height: "80%",
+    width: "90%",
+    backgroundColor: "white",
+    borderRadius: 20,
+    marginTop: -40,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  backgroundImage: {
+    width: "100%",
+    height: "80%",
+    borderRadius: 20,
+    overflow: "hidden",
+    justifyContent: "flex-end",
+    alignItems: "center",
+  },
+  descriptionCard: {
+    backgroundColor: "white",
+    position: "absolute",
+    top: 338,
+    height: "50%",
+    width: "100%",
+    borderTopLeftRadius: 40,
+    borderTopRightRadius: 40,
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
+    justifyContent:"center",
+    alignItems: "center"
+  },
+  closeBtn : {
+    width:"30%"
+  },
+  modal: {
+    height:10,
+  }
 });
