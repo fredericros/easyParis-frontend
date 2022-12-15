@@ -1,5 +1,5 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Image, View, Text, TouchableOpacity, TextInput } from 'react-native';
+import { StyleSheet, Image, View, Text, TouchableOpacity, TextInput, SafeAreaView, ScrollView, useColorScheme } from 'react-native';
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -15,81 +15,48 @@ import MapScreen from "./screens/MapScreen";
 import ChatBotScreen from "./screens/ChatBotScreen";
 import PlacesSavedScreen from "./screens/PlacesSavedScreen"
 import ProfileScreen from "./screens/ProfileScreen";
-// import { Dimensions } from 'react-native';
+import Tabs from "./navigation/tabs";
 
+// redux imports
+import { Provider } from 'react-redux';
+import { combineReducers, configureStore } from '@reduxjs/toolkit';
 
-// const screenWidth = Dimensions.get('window').width;
+// redux-persist imports
+import { persistStore, persistReducer } from 'redux-persist';
+import { PersistGate } from 'redux-persist/integration/react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import reviews from './reducers/reviews';
+import user from './reducers/user';
+import like from './reducers/like';
 
-// const tabBarWidth = screenWidth * 0.9;
+const Stack = createNativeStackNavigator();
+const Tab = createBottomTabNavigator();
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
+const reducers = combineReducers({ user, reviews, like });
+const persistConfig = { key: 'easyParis', storage: AsyncStorage };
+
+const store = configureStore({
+  reducer: persistReducer(persistConfig, reducers),
+  middleware: (getDefaultMiddleware) => getDefaultMiddleware({ serializableCheck: false }),
 });
 
-export default function App() {
-  const Stack = createNativeStackNavigator();
-  const Tab = createBottomTabNavigator();
-
-  const TabNavigator = () => {
-
-    return (
-      <Tab.Navigator screenOptions={({ route }) => ({
-
-        tabBarIcon: ({ color, size }) => {
-          let iconName = '';
-
-          if (
-
-            route.name
-            === 'Map') {
-            iconName = 'map-marker';
-          } else if (
-            route.name
-            === 'Places') {
-            iconName = 'heart';
-          } else if (
-            route.name
-            === 'Chatbot') {
-            iconName = 'comments-o';
-          } else if (
-            route.name
-            === 'Profile') {
-            iconName = 'user';
-          }
-
-          return <FontAwesome name={iconName} size={30} color={color} />;
-        },
-        tabBarActiveTintColor: '#1933a3',
-        tabBarInactiveTintColor: '#fafafc',
-        headerShown: false,
-        tabBarActiveBackgroundColor: '#1E90FF',
-        tabBarInactiveBackgroundColor: '#1E90FF',
-
-      })}>
-
-        <Tab.Screen name="Map" component={MapScreen} />
-        <Tab.Screen name="Places" component={PlacesSavedScreen} />
-        <Tab.Screen name="Chatbot" component={ChatBotScreen} />
-        <Tab.Screen name="Profile" component={ProfileScreen} />
-      </Tab.Navigator >
+const persistor = persistStore(store);
 
 
-    );
-  }
-
+const App = () => {
   return (
+    <PersistGate persistor={persistor}>
+      <NavigationContainer>
+        {/*Ancienne façon d'appeler le screen Tabs*/}
+        {/* <Tabs /> */}
+        <Stack.Navigator screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="Home" component={Tabs} />
+          <Stack.Screen name='SignIn' component={SigninScreen} />
+          <Stack.Screen name='SignUp' component={SignUpScreen} />
+        </Stack.Navigator>
+      </NavigationContainer>
+    </PersistGate>
+  )
+}
 
-    <NavigationContainer>
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
-        <Stack.Screen name='SignIn' component={SigninScreen} />
-        <Stack.Screen name='Signup' component={SignUpScreen} />
-        <Stack.Screen name="TabNavigator" component={TabNavigator} />
-      </Stack.Navigator>
-    </NavigationContainer >
-  );
-};
+export default App;

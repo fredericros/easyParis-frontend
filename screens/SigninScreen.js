@@ -1,6 +1,12 @@
 import { TextInput, StyleSheet, Image, Text, View, TouchableOpacity, Dimensions } from 'react-native';
 import React from "react";
 import { useState, useEffect } from "react";
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+
+const Stack = createNativeStackNavigator();
+const Tab = createBottomTabNavigator();
 
 
 export default function SigninScreen({ navigation }) {
@@ -9,8 +15,8 @@ export default function SigninScreen({ navigation }) {
 
             <Image style={styles.logo} source={require('../assets/logoeiffel1.jpg')} resizeMode="contain" />
 
-            <TouchableOpacity onPress={() => navigation.navigate('Signup')} style={styles.buttonup} activeOpacity={0.8}>
-                <Text style={styles.text} textAlign="center" width="100%">Sign up</Text>
+            <TouchableOpacity onPress={() => navigation.navigate('SignUp')} style={styles.button} activeOpacity={0.8}>
+                <Text style={styles.text}>Sign up</Text>
             </TouchableOpacity>
             <Text style={styles.barre}></Text>
 
@@ -19,7 +25,7 @@ export default function SigninScreen({ navigation }) {
             <TextInput style={styles.buttonsignin} placeholder=" Password" activeOpacity={0.8} />
 
             <TouchableOpacity onPress={() => navigation.navigate('TabNavigator')} style={styles.button} activeOpacity={0.8}>
-                <Text style={styles.text} textAlign="center" width="100%">Sign In</Text>
+                <Text style={styles.text}>Sign In</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.buttonforget} activeOpacity={0.8}>
                 <Text style={styles.textforget}>FORGOT PASSWORD</Text>
@@ -46,18 +52,6 @@ const styles = StyleSheet.create({
         height: "40%",
         marginBottom: 20,
     },
-    buttonup: {
-        display: 'flex',
-        justifyContent: "center",
-        textAlign: "center",
-        padding: 5,
-        margin: 5,
-        backgroundColor: '#1E90FF',
-        width: 260,
-        height: 40,
-        borderRadius: 15,
-        marginBottom: 10,
-    },
     button: {
         display: 'flex',
         justifyContent: "center",
@@ -68,7 +62,8 @@ const styles = StyleSheet.create({
         width: 260,
         height: 40,
         borderRadius: 15,
-        marginBottom: 50,
+        marginBottom: 10,
+        alignItems: 'center'
     },
     buttonsignin: {
         display: 'flex',
@@ -87,7 +82,6 @@ const styles = StyleSheet.create({
         margin: 15,
     },
     buttonforget: {
-        marginTop: 20,
         alignItems: 'center',
         padding: 5,
         margin: 5,
@@ -96,13 +90,13 @@ const styles = StyleSheet.create({
         borderRadius: 15
     },
     text: {
-        width: "100%",
+        fontWeight: "bold",
         color: 'white',
-        fontSize: 25,
+        fontSize: 20,
     },
     textforget: {
         color: 'black',
         fontSize: 15,
     }
 
-});
+}); 
