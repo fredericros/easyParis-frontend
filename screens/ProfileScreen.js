@@ -79,40 +79,45 @@ export default function ProfileScreen({ navigation }) {
 
 
     return (
+
+
+
         <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+            {!hasToken && navigation.navigate('Signin')
+                ||
+                <View style={styles.borderContainer}>
+                    <View style={styles.border}>
+                        <Button title="+Add picture" onPress={PickImage} style={{ width: 200, height: 200 }} activeOpacity={0.5}> <Text style={styles.add}>+Add picture</Text></Button>
 
-            <View style={styles.borderContainer}>
-                <View style={styles.border}>
-                    <Button title="+Add picture" onPress={PickImage} style={{ width: 200, height: 200 }} activeOpacity={0.5}> <Text style={styles.add}>+Add picture</Text></Button>
+                        {Image && <Image source={{ uri: image }} style={styles.add} />}
+                        {/* <Text onPress={() => navigation.navigate('SignIn')} style={styles.add} activeOpacity={0.5}>+ Add picture</Text> */}
+                    </View>
 
-                    {Image && <Image source={{ uri: image }} style={styles.add} />}
-                    {/* <Text onPress={() => navigation.navigate('SignIn')} style={styles.add} activeOpacity={0.5}>+ Add picture</Text> */}
-                </View>
+                    <View style={styles.containerProfil}>
+                        <Text style={styles.welcome}>Welcome,</Text>
+                        <Text style={styles.name}>user name</Text>
+                        <View style={styles.logoutContainer}>
+                            <Text onPress={() => { dispatch(logout()); navigation.navigate('SignIn'); console.log('ok') }} style={styles.logout}>Logout</Text>
+                        </View>
+                    </View>
 
-                <View style={styles.containerProfil}>
-                    <Text style={styles.welcome}>Welcome,</Text>
-                    <Text style={styles.name}>user name</Text>
-                    <View style={styles.logoutContainer}>
-                        <Text onPress={() => { dispatch(logout()); navigation.navigate('SignIn'); console.log('ok') }} style={styles.logout}>Logout</Text>
+                    <View style={styles.descriptionBackground}>
+                        <View style={styles.descriptionContainer}>
+                            <Text style={styles.descriptionbutton}>Description</Text>
+                            <Text style={styles.editButton}>Edit</Text>
+                        </View>
+                        <TextInput style={styles.containerAboutYou} placeholder="About me" />
+                    </View>
+
+                    <View style={styles.reviewBackground}>
+                        <View style={styles.descriptionContainer}>
+                            <Text style={styles.descriptionbutton}>My Reviews</Text>
+                            <Text style={styles.editButton}>0</Text>
+                        </View>
+                        <Text style={styles.containerAboutYou}></Text>
                     </View>
                 </View>
-
-                <View style={styles.descriptionBackground}>
-                    <View style={styles.descriptionContainer}>
-                        <Text style={styles.descriptionbutton}>Description</Text>
-                        <Text style={styles.editButton}>Edit</Text>
-                    </View>
-                    <TextInput style={styles.containerAboutYou} placeholder="About me" />
-                </View>
-
-                <View style={styles.reviewBackground}>
-                    <View style={styles.descriptionContainer}>
-                        <Text style={styles.descriptionbutton}>My Reviews</Text>
-                        <Text style={styles.editButton}>0</Text>
-                    </View>
-                    <Text style={styles.containerAboutYou}></Text>
-                </View>
-            </View>
+            }
         </KeyboardAvoidingView >
     );
 }
