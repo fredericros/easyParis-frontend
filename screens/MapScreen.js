@@ -8,9 +8,9 @@ import {
   TextInput,
   ImageBackground,
   ScrollView,
+  Modal
 } from "react-native";
 import FontAwesome from "react-native-vector-icons/FontAwesome";
-import Modal from "react-native-modal";
 import { Flex, Box, Wrap } from "@react-native-material/core";
 import { Stack } from "@react-native-material/core";
 import MapView, { Polygon, Marker, Callout, CustomMarker, PROVIDER_GOOGLE } from "react-native-maps";
