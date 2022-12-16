@@ -6,9 +6,7 @@ import {
   Text,
   TouchableOpacity,
   TextInput,
-  Modal,
   ImageBackground,
-  Button,
   ScrollView,
 } from "react-native";
 import FontAwesome from "react-native-vector-icons/FontAwesome";
@@ -483,7 +481,6 @@ export default function MapScreen({ navigation }) {
         }}
         style={styles.map}
       >
-        <Button style = {styles.filterBtn}></Button>
         {districtArea}
         {marker}
       </MapView>
@@ -510,10 +507,10 @@ const styles = StyleSheet.create({
     ...Platform.select({
       android: {
         height: screenHeight * 0.8,
-        width: screenWidth * 0.9,,
+        width: screenWidth * 0.9,
         backgroundColor: "white",
         borderRadius: 20,
-        marginTop: -90,
+        marginTop: -40,
         alignItems: "center",
         shadowColor: "#000",
         shadowOffset: {
