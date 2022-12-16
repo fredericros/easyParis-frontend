@@ -381,7 +381,7 @@ export default function MapScreen({ navigation }) {
     <View style={styles.container}>
       <Modal
         visible={modalVisible}
-        animationType="fade"
+        animationType="slide"
         transparent={true}
         style={styles.modal}
       >
@@ -567,7 +567,7 @@ const styles = StyleSheet.create({
         height: screenHeight * 0.4,
         backgroundColor: "white",
         position: "absolute",
-        top: 322,
+        width: "100%",
         borderTopLeftRadius: 40,
         borderTopRightRadius: 40,
         borderBottomLeftRadius: 20,
