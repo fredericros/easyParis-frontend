@@ -24,7 +24,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import reviews from "./reducers/reviews";
 import user from "./reducers/user";
 import like from "./reducers/like";
-// import places from "./reducers/places";
+import places from "./reducers/places";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -53,21 +53,13 @@ const TabNavigator = () => {
       tabBarIcon: ({ color, size }) => {
         let iconName = '';
 
-        if (
-          route.name
-          === 'Map') {
+        if (route.name === 'Map') {
           iconName = 'home';
-        } else if (
-          route.name
-          === 'Places') {
+        } else if (route.name === 'Places') {
           iconName = 'heart';
-        } else if (
-          route.name
-          === 'Chatbot') {
+        } else if (route.name === 'Chatbot') {
           iconName = 'twitch';
-        } else if (
-          route.name
-          === 'Profile') {
+        } else if (route.name === 'Profile') {
           iconName = 'user-circle';
         }
         return <FontAwesome name={iconName} size={28} color={color} />;
@@ -131,5 +123,4 @@ const styles = StyleSheet.create({
   },
 });
 
-
-export default App; 
+export default App;
