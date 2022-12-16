@@ -6,19 +6,52 @@ import {
   Text,
   TouchableOpacity,
   TextInput,
-  Dimensions,
+  Modal,
   ImageBackground,
+  Button,
+  ScrollView,
 } from "react-native";
 import FontAwesome from "react-native-vector-icons/FontAwesome";
 import Modal from "react-native-modal";
-import { Flex, Box } from "@react-native-material/core";
-import { Stack, Button } from "@react-native-material/core";
+import { Flex, Box, Wrap } from "@react-native-material/core";
+import { Stack } from "@react-native-material/core";
 import MapView, { Polygon, Marker, Callout, CustomMarker, PROVIDER_GOOGLE } from "react-native-maps";
 import * as Location from "expo-location";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { loadPlaces } from "../reducers/places";
 import ProfileScreen from "./ProfileScreen";
+import { Dimensions } from 'react-native';
+
+const screenWidth = Dimensions.get('window').width;
+const screenHeight = Dimensions.get('window').height;
+import {
+  useFonts,
+  Poppins_100Thin,
+  Poppins_100Thin_Italic,
+  Poppins_200ExtraLight,
+  Poppins_200ExtraLight_Italic,
+  Poppins_300Light,
+  Poppins_300Light_Italic,
+  Poppins_400Regular,
+  Poppins_400Regular_Italic,
+  Poppins_500Medium,
+  Poppins_500Medium_Italic,
+  Poppins_600SemiBold,
+  Poppins_600SemiBold_Italic,
+  Poppins_700Bold,
+  Poppins_700Bold_Italic,
+  Poppins_800ExtraBold,
+  Poppins_800ExtraBold_Italic,
+  Poppins_900Black,
+  Poppins_900Black_Italic,
+} from "@expo-google-fonts/poppins";
+
+import AppLoading from "expo-app-loading";
+// adding the import for the swiper
+import Swiper from "react-native-swiper";
+
+import App from "./test.js";
 
 const { height, width } = Dimensions.get("window");
 const LATITUDE_DELTA = 0.22;
@@ -206,6 +239,26 @@ const riche = [
 ];
 
 export default function MapScreen({ navigation }) {
+  let [fontsLoaded] = useFonts({
+    Poppins_100Thin,
+    Poppins_100Thin_Italic,
+    Poppins_200ExtraLight,
+    Poppins_200ExtraLight_Italic,
+    Poppins_300Light,
+    Poppins_300Light_Italic,
+    Poppins_400Regular,
+    Poppins_400Regular_Italic,
+    Poppins_500Medium,
+    Poppins_500Medium_Italic,
+    Poppins_600SemiBold,
+    Poppins_600SemiBold_Italic,
+    Poppins_700Bold,
+    Poppins_700Bold_Italic,
+    Poppins_800ExtraBold,
+    Poppins_800ExtraBold_Italic,
+    Poppins_900Black,
+    Poppins_900Black_Italic,
+  });
 
   const dispatch = useDispatch();
   const places = useSelector((state) => state.places.value);
@@ -330,22 +383,93 @@ export default function MapScreen({ navigation }) {
     <View style={styles.container}>
       <Modal
         visible={modalVisible}
-        coverScreen={false}
-        backdropOpacity={0.6}
-        animationType="slide"
-        onBackdropPress={() => setModalVisible(false)}
-        style={styles.modal}>
-        <View style={styles.centeredView}>
-          <View style={styles.modalView}>
-            <ImageBackground
-              source={Image_Http_URL}
-              style={styles.backgroundImage}
-            />
-            <View style={styles.descriptionCard}>
-              <Button style={styles.closeBtn} title={"close"} onPress={() => handleClose()}></Button>
+        animationType="fade"
+        transparent={true}
+        style={styles.modal}
+      >
+        <Swiper
+          loop={false}
+          style={styles.wrapper}
+          paginationStyle={{ bottom: 0,
+            left: 0,
+            top: screenHeight * 0.70,
+            right: 0,}
+           
+          }
+          containerStyle={{ height: 150, flex: 1 }}
+        >
+          <View style={styles.centeredView}>
+            <View style={styles.modalView}>
+              <ImageBackground
+                source={Image_Http_URL}
+                style={styles.backgroundImage}
+              ></ImageBackground>
+
+              <View style={styles.descriptionCard}>
+              <TouchableOpacity></TouchableOpacity>
+                <FontAwesome
+                  aria-hidden="true"
+                  name="times-circle-o"
+                  size={40}
+                  color="black"
+                  onPress={() => handleClose()}
+                  style={styles.closeBtn}
+                />
+                {/* here we will need to add a map to add costom name */}
+                <Text style={styles.cardTittle}>TOUR EIFFEL</Text>
+                {/* This is for the text about the place = alsi needs mao */}
+                <Text style={styles.cardText}>
+                  Locally nicknamed "La dame de fer" (French for "Iron Lady"),
+                  it was constructed from 1887 to 1889 as the centerpiece of the
+                  1889 World's Fair. Although initially criticised by some of
+                  France's leading artists and intellectuals for its design, it
+                  has since become a global cultural icon of France and one of
+                  the most recognisable structures in the world
+                </Text>
+                <TouchableOpacity style={styles.heartBtn}>
+                  <FontAwesome name="heart" size={30} color="black" />
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.goBtn}>
+                  <FontAwesome name="location-arrow" size={40} color="blue" />
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
-        </View>
+
+          <View style={styles.slide2centeredView}>
+            <View style={styles.slide2modalView}>
+              <View style={styles.cardInfoMaintTitleBLock}>
+                <Text style={styles.cardInfoMaintTitle}>INFORMATION</Text>
+              </View>
+              <View style={styles.cardInfoOpeningHours}>
+                <Text style={styles.cardInfoTitle}>⏱ OPENING HOURS</Text>
+                <Text style={styles.cardInfoText}>• 9.30am to 10.45pm</Text>
+                <Text style={styles.cardInfoText}>• The stairs close at 6pm</Text>
+              </View>
+              <View style={styles.cardInfoTickets}>
+                <Text style={styles.cardInfoTitle}>🎟️ Tickets and Prices</Text>
+                <Text style={styles.cardInfoText}>• Lift to 2nd floor: from 4,30€ to 17,10€</Text>
+                <Text style={styles.cardInfoText}>• Lift to top: from 6,70€ to 26,80€</Text>
+                <Text style={styles.cardInfoText}>• Stairs 2nd floor: from 2,70€ to 10,70€</Text>
+                <Text style={styles.cardInfoText}>
+                  • Stairs 2nd + Lift to top: from 5,10€ to 20,40€
+                </Text>
+                <Text style={styles.cardInfoText}>• Ticket to top + Champagne: 45,80€</Text>
+              </View>
+
+              <View style={styles.cardInfoTips}>
+                <Text style={styles.cardInfoTitle}>✅ Tips</Text>
+                <Text style={styles.cardInfoText}>• Buy your tickets in advance</Text>
+                <Text style={styles.cardInfoText}>• Be aware of the security checks</Text>
+                <Text style={styles.cardInfoText}>• Dress warmly if you go to the top</Text>
+              </View>
+
+              <TouchableOpacity style={styles.cardInfoBtn}>
+                <Text>GO TO WEBSITE</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Swiper>
       </Modal>
 
       <MapView
@@ -380,12 +504,13 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+   
   },
   modalView: {
     ...Platform.select({
       android: {
-        height: "90%",
-        width: "90%",
+        height: screenHeight * 0.8,
+        width: screenWidth * 0.9,,
         backgroundColor: "white",
         borderRadius: 20,
         marginTop: -90,
@@ -400,8 +525,8 @@ const styles = StyleSheet.create({
         elevation: 5,
       },
       ios: {
-        height: "80%",
-        width: "90%",
+        height: screenHeight * 0.8,
+        width: screenWidth * 0.9,
         backgroundColor: "white",
         borderRadius: 20,
         marginTop: -40,
@@ -419,7 +544,7 @@ const styles = StyleSheet.create({
   },
   backgroundImage: {
     width: "100%",
-    height: "80%",
+    height: screenHeight * 0.5,
     borderRadius: 20,
     overflow: "hidden",
     justifyContent: "flex-end",
@@ -428,10 +553,10 @@ const styles = StyleSheet.create({
   descriptionCard: {
     ...Platform.select({
       android: {
+        top: screenHeight * 0.34,
+        height: screenHeight * 0.4,
         backgroundColor: "white",
         position: "absolute",
-        top: 296,
-        height: "50%",
         width: "100%",
         borderTopLeftRadius: 40,
         borderTopRightRadius: 40,
@@ -441,11 +566,11 @@ const styles = StyleSheet.create({
         alignItems: "center"
       },
       ios: {
+        top: screenHeight * 0.34,
+        height: screenHeight * 0.4,
         backgroundColor: "white",
         position: "absolute",
         top: 322,
-        height: "50%",
-        width: "100%",
         borderTopLeftRadius: 40,
         borderTopRightRadius: 40,
         borderBottomLeftRadius: 20,
@@ -455,10 +580,13 @@ const styles = StyleSheet.create({
       },
   })},
   closeBtn: {
-    width: "30%"
+    width: "30%",
+    position: "absolute",
+    bottom: screenHeight * 0.67,
+    left: screenWidth * 0.77,
   },
   modal: {
-    height: 10,
+    height:  10,
   },
   bubble: {
     opacity: 0.92,
@@ -513,7 +641,159 @@ const styles = StyleSheet.create({
     top:70,
     left: 40
 
+  },
+  cardTittle: {
+    position: "absolute",
+    top: screenHeight * 0.01,
+    left: 30,
+    fontWeight: "600",
+    fontSize: 30,
+    lineHeight: 54,
+    fontFamily: "Poppins_600SemiBold",
+    width: "80%",
+  },
+
+  cardText: {
+    fontWeight: "300",
+    fontFamily: "Poppins_400Regular",
+    lineHeight: 20,
+    fontSize: 18,
+    width: "80%",
+    marginTop: 50,
+    textAlign: "left",
+  },
+  heartBtn: {
+    position: "absolute",
+    bottom: screenHeight * 0.37,
+    left: screenWidth * 0.70,
+    backgroundColor: "white",
+    height: 60,
+    width: 60,
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 50,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 8,
+    },
+    shadowOpacity: 0.44,
+    shadowRadius: 10.32,
+
+    elevation: 16,
+
+  },
+
+  goBtn: {
+    position: "absolute",
+    bottom: screenHeight * 0.37,
+    left: screenWidth * 0.52,
+    backgroundColor: "white",
+    height: 60,
+    width: 60,
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 50,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 8,
+    },
+    shadowOpacity: 0.44,
+    shadowRadius: 10.32,
+
+    elevation: 16,
+  },
+
+  wrapper: {
+    height: screenHeight * 1,
+  },
+
+  slide2centeredView: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  slide2modalView: {
+    height: screenHeight * 0.8,
+    width: screenWidth * 0.9,
+    backgroundColor: "white",
+    borderRadius: 20,
+    marginTop: -40,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  cardInfoMaintTitle: {
+    marginTop: screenHeight * 0.05,
+    textAlign: "center",
+    fontSize: 36,    
+    fontWeight: "600",
+    fontFamily: "Poppins_400Regular",
+   
+  },
+
+  cardInfoTitle: {
+    lineHeight: 33,
+    fontSize: 30,
+    fontWeight: "600",
+    fontFamily: "Poppins_400Regular",
+    textAlign: "center",
+    paddingTop: 20,
+   
+  },
+
+  cardInfoText: {
+    fontSize: 16,
+    fontWeight: "600",
+    fontFamily: "Poppins_400Regular",
+    width: 400,
+    height: screenHeight * 0.04,
+    textAlign: 'center',
+    
+  },
+
+  cardInfoMaintTitleBLock:{
+    borderBottomColor: 'red',
+    borderBottomWidth: 2,
+    height: '13%',
+  },
+
+  cardInfoOpeningHours:{
+    height: screenHeight * 0.13,
+
+  },
+
+  cardInfoTickets:{
+    height: screenHeight * 0.26,
+  },
+
+  cardInfoTips:{
+    height: screenHeight * 0.195,
+    
+    },
+
+  cardInfoBtn:{
+    
+    borderBottomColor: 'black',
+    borderWidth: 2,
+    borderRadius: 20,
+    width: screenWidth * 0.6,
+    height: screenHeight * 0.06,
+    padding: 10,
+justifyContent: 'center',
+alignItems: 'center',
+fontSize: 20,
+
   }
+
+
 });
 
 const mapStyle = [
