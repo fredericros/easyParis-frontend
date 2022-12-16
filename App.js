@@ -73,6 +73,8 @@ const App = () => {
           <Stack.Screen name='SignUp' component={SignUpScreen} />
           <Stack.Screen name='CardInfoScreen' component={CardInfoScreen} /> 
           <Stack.Screen name='CardScreen' component={CardScreen} />
+        
+
         </Stack.Navigator>
       </NavigationContainer>
     </Provider>

@@ -60,7 +60,7 @@ export default function CardInfoScreen({navigation}) {
             <Text style={{ lineHeight: 24, fontSize: '16px', fontWeight: '600', fontFamily: 'Poppins_400Regular', }}>• Lift to 2nd floor: from 4,30€ to 17,10€</Text>
             <Text style={{ lineHeight: 24, fontSize: '16px', fontWeight: '600', fontFamily: 'Poppins_400Regular', }}>• Lift to top: from 6,70€ to 26,80€</Text>
             <Text style={{ lineHeight: 24, fontSize: '16px', fontWeight: '600', fontFamily: 'Poppins_400Regular', }}>• Stairs to 2nd floor: from 2,70€ to 10,70€</Text>
-            <Text style={{ lineHeight: 24, fontSize: '16px', fontWeight: '600', fontFamily: 'Poppins_400Regular', }}>• Stairs to 2nd floor + Lift to top: from 5,10€ to 20,40€</Text>
+            <Text style={{ lineHeight: 24, fontSize: '16px', fontWeight: '600', fontFamily: 'Poppins_400Regular', }}>• Stairs to 2nd + Lift to top: from 5,10€ to 20,40€</Text>
             <Text style={{ lineHeight: 24, fontSize: '16px', fontWeight: '600', fontFamily: 'Poppins_400Regular', }}>• Ticket to top + Champagne: 45,80€</Text>
           </View>
         );
@@ -85,18 +85,18 @@ export default function CardInfoScreen({navigation}) {
     <Box h={900} style={{ backgroundColor: 'white' }}>
     <Stack m={40} spacing={20} style={{flex: 1}}>
     <Text variant="h4" style={{marginTop: '10%', textAlign: 'center', fontSize: '36px', fontWeight: '600', fontFamily: 'Poppins_400Regular',  }} >Information</Text>
-    <View style={{flex: 1, justifyContent: 'space-between'}}>
+    <View style={{flex: 1, justifyContent: 'space-arround'}}>
     <OpeningHours  />
       <TicketsAndPrices />
       <Tips />
-      <Box  style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', height: '30%', marginTop: 60}}>
+      {/* <Box  style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', height: '30%', marginTop: 60}}>
     
     <Button variant="outlined" title="← Back" color="black" style={{width: '40%', justifyContent: 'flex-start'}} 
        onPress={() => navigation.navigate('CardScreen')}
     />
     <Button variant="outlined" title="WEBSITE" color="black" style={{width: '40%', justifyContent: 'flex-end'}}
    />
-    </Box>
+    </Box> */}
     
       </View>
    
