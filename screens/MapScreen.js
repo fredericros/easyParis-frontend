@@ -277,7 +277,7 @@ export default function MapScreen({ navigation }) {
 
     // === FETCH DE LA ROUTE BACKEND POUR RECUPERER LES PLACES ======================================= //
 
-    fetch(`http://192.168.10.156:3000/places/${filteredPlaces}`)
+    fetch(`http://192.168.1.13:3000/places/${filteredPlaces}`)
       .then((response) => response.json())
       .then((data) => {
         data.result && dispatch(loadPlaces(data.places));
@@ -537,7 +537,7 @@ const styles = StyleSheet.create({
         shadowRadius: 4,
         elevation: 5,
       },
-  })
+    })
   },
   backgroundImage: {
     width: "100%",
@@ -575,7 +575,8 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         alignItems: "center"
       },
-  })},
+    })
+  },
   closeBtn: {
     width: "30%",
     position: "absolute",

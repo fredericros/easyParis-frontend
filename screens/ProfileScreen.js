@@ -1,65 +1,123 @@
+
 import { Button, Image, KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View, ScrollView, FlatList } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { stopLocationUpdatesAsync } from 'expo-location';
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from 'react-redux';
-import { user, logout } from '../reducers/user';
+import { user, tweet, review } from '../reducers/user';
 import { NavigationProp, ParamListBase } from '@react-navigation/native';
+import { login, logout } from '../reducers/user';
+import * as Imagepicker from 'expo-image-picker';
+import Constants from 'expo-constants';
+
+
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
 export default function ProfileScreen({ navigation }) {
 
-    const user = useSelector((state) => state.user.value)
-    const dispatch = useDispatch()
+    /*----------------------------------- IMAGE PICKER -----------------------------------*/
+    const [image, setImage] = useState(null);
 
     useEffect(() => {
-        if (user.token) {
-          navigation.navigate('Home', { screen: 'Map' })
+        async function requestPermissions() {
+            if (Platform.OS !== 'web') {
+                const { status } = await Imagepicker.requestMediaLibraryPermissionsAsync();
+                if (status !== 'granted') {
+                    alert('Permission denied!');
+                }
+            }
         }
-      },[])
+        requestPermissions();
 
-      const handleLogout = () => {
-        dispatch(logout())
-      };
+        // Vérification de l'existence de la méthode destroy et appel de cette méthode si elle existe
+        return () => {
+            if (Imagepicker.destroy) {
+                Imagepicker.destroy();
+            }
+        }
+    }, []);
+
+    const PickImage = async () => {
+        let result = await Imagepicker.launchImageLibraryAsync({
+            mediaTypes: Imagepicker.MediaTypeOptions.All,
+            allowsEditing: true,
+            aspect: [4, 3],
+            quality: 1
+        });
+        if (!result.canceled) {
+            // Affiche l'image selectionné, ne pas modifier
+            setImage(result.assets[0].uri);
+        }
+    };
+    /*----------------------------------- FIN IMAGE PICKER -----------------------------------*/
+
+    const dispatch = useDispatch();
+
+
+    const Page = () => {
+        const dispatch = useDispatch();
+        const user = useSelector((state) => state.user.value);
+
+        //pas sur pour le l'écriture de la route
+        fetch(`http://localhost:3000/users/${user.token}`, {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ token: user.token }),
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (user.token) {
+                    return <ProfileScreen />;
+                } else {
+                    return <SignInScreen />;
+                }
+            });
+    };
 
 
     return (
+
+
+
         <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+            {!hasToken && navigation.navigate('Signin')
+                ||
+                <View style={styles.borderContainer}>
+                    <View style={styles.border}>
+                        <Button title="+Add picture" onPress={PickImage} style={{ width: 200, height: 200 }} activeOpacity={0.5}> <Text style={styles.add}>+Add picture</Text></Button>
 
-            <View style={styles.borderContainer}>
-                <View style={styles.border}>
-                    <Text onPress={() => navigation.navigate('SignIn')} style={styles.add} activeOpacity={0.5}>+ Add picture</Text>
-                </View>
+                        {Image && <Image source={{ uri: image }} style={styles.add} />}
+                        {/* <Text onPress={() => navigation.navigate('SignIn')} style={styles.add} activeOpacity={0.5}>+ Add picture</Text> */}
+                    </View>
 
-                <View style={styles.containerProfil}>
-                    <Text style={styles.welcome}>Welcome,</Text>
-                    <Text style={
-styles.name
-}>user name</Text>
-                    <View style={styles.logoutContainer}>
-                        <Text onPress={() => handleLogout()} style={styles.logout}>Logout</Text>
+                    <View style={styles.containerProfil}>
+                        <Text style={styles.welcome}>Welcome,</Text>
+                        <Text style={styles.name}>user name</Text>
+                        <View style={styles.logoutContainer}>
+                            <Text onPress={() => { dispatch(logout()); navigation.navigate('SignIn'); console.log('ok') }} style={styles.logout}>Logout</Text>
+                        </View>
+                    </View>
+
+                    <View style={styles.descriptionBackground}>
+                        <View style={styles.descriptionContainer}>
+                            <Text style={styles.descriptionbutton}>Description</Text>
+                            <Text style={styles.editButton}>Edit</Text>
+                        </View>
+                        <TextInput style={styles.containerAboutYou} placeholder="About me" />
+                    </View>
+
+                    <View style={styles.reviewBackground}>
+                        <View style={styles.descriptionContainer}>
+                            <Text style={styles.descriptionbutton}>My Reviews</Text>
+                            <Text style={styles.editButton}>0</Text>
+                        </View>
+                        <Text style={styles.containerAboutYou}></Text>
                     </View>
                 </View>
-
-                <View style={styles.descriptionBackground}>
-                    <View style={styles.descriptionContainer}>
-                        <Text style={styles.descriptionbutton}>Description</Text>
-                        <Text style={styles.editButton}>Edit</Text>
-                    </View>
-                    <TextInput style={styles.containerAboutYou} placeholder="About me" />
-                </View>
-
-                <View style={styles.reviewBackground}>
-                    <View style={styles.descriptionContainer}>
-                        <Text style={styles.descriptionbutton}>My Reviews</Text>
-                        <Text style={styles.editButton}>0</Text>
-                    </View>
-                    <Text style={styles.containerAboutYou}></Text>
-                </View>
-            </View>
+            }
         </KeyboardAvoidingView >
     );
 }
@@ -98,6 +156,7 @@ const styles = StyleSheet.create({
     add: {
         // borderWidth: 4,
         // borderColor: "#1E90FF",
+        backgroundColor: "none",
         padding: 50,
         borderRadius: 80
     },
@@ -190,4 +249,5 @@ const styles = StyleSheet.create({
         height: 230,
         borderRadius: 30,
     },
-}); 
+});
+
