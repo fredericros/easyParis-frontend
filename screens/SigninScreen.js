@@ -24,7 +24,7 @@ export default function SigninScreen({ navigation }) {
 
             <TextInput style={styles.buttonsignin} placeholder=" Password" activeOpacity={0.8} />
 
-            <TouchableOpacity onPress={() => navigation.navigate('TabNavigator')} style={styles.button} activeOpacity={0.8}>
+            <TouchableOpacity onPress={() => navigation.navigate('Home')} style={styles.button} activeOpacity={0.8}>
                 <Text style={styles.text}>Sign In</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.buttonforget} activeOpacity={0.8}>

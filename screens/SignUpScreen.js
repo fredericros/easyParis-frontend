@@ -26,7 +26,7 @@ export default function SignUpScreen({ navigation }) {
 
             <TextInput style={styles.buttonsignin} placeholder="Password" activeOpacity={0.8} />
 
-            <TouchableOpacity style={styles.button} activeOpacity={0.8}>
+            <TouchableOpacity onPress={() => navigation.navigate('Home')} style={styles.button} activeOpacity={0.8}>
                 <Text style={styles.signup}>Sign up</Text>
             </TouchableOpacity>
         </View>

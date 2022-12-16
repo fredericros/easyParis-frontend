@@ -7,13 +7,13 @@ import {
   TouchableOpacity,
   TextInput,
   Dimensions,
-  Modal,
   ImageBackground,
 } from "react-native";
 import FontAwesome from "react-native-vector-icons/FontAwesome";
+import Modal from "react-native-modal";
 import { Flex, Box } from "@react-native-material/core";
 import { Stack, Button } from "@react-native-material/core";
-import MapView, { Polygon, Marker } from "react-native-maps";
+import MapView, { Polygon, Marker, Callout, CustomMarker, PROVIDER_GOOGLE } from "react-native-maps";
 import * as Location from "expo-location";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -206,10 +206,13 @@ const riche = [
 ];
 
 export default function MapScreen({ navigation }) {
+
   const dispatch = useDispatch();
   const places = useSelector((state) => state.places.value);
   const [filteredPlaces, setFilteredPlaces] = useState("district");
-  const [modalVisible, setModalVisible] = useState(false);
+
+
+  // === USEEFFECT D'INITIALISATION, DEMANDE DE l'AUTORISATION DE TRACAGE GPS ===================== //
 
   useEffect(() => {
     (async () => {
@@ -220,33 +223,70 @@ export default function MapScreen({ navigation }) {
       }
     })();
 
-    fetch(`http://192.168.10.168:3000/places/${filteredPlaces}`)
+
+    // === FETCH DE LA ROUTE BACKEND POUR RECUPERER LES PLACES ======================================= //
+
+    fetch(`http://192.168.10.156:3000/places/${filteredPlaces}`)
       .then((response) => response.json())
       .then((data) => {
         data.result && dispatch(loadPlaces(data.places));
       });
   }, []);
 
+
+  // === GESTION DE LA MODALE ====================================================================== //
+
+  const [modalVisible, setModalVisible] = useState(false);
+
   const handleMarker = () => {
     setModalVisible(true);
-    console.log(modalVisible);
   };
 
   const handleClose = () => {
     setModalVisible(false);
   };
 
-  const markers = places.map((data, i) => {
+  console.log(modalVisible);
+
+  // === GESTION DES MARQUEURS ===================================================================== //
+
+  const CustomMarker = ({ title, description }) => (
+    <View>
+      <View style={styles.bubble}>
+        <Text style={styles.bubbleTitle}>{title}</Text>
+      </View>
+      <View style={styles.bubbleArrowBorder}></View>
+    </View>
+  );
+
+
+  /*  CUSTOM MARKER WITH IMAGE
+  
+      const CustomMarker = ({ title, description }) => (
+      <View>
+        <View style = {styles.bubble}>
+          <Text style = {styles.bubbleTitle}>{title}</Text>
+          <Image
+          style = {styles.bubbleImage}
+          source={require('../assets/')}
+          />
+        </View>
+        <View style = {styles.bubbleArrowBorder}></View>
+      </View>
+    );
+  */
+
+  const marker = places.map((data, i) => {
     return (
       <Marker
         key={i}
-        pinColor={"blue"}
         coordinate={{ latitude: data.latitude, longitude: data.longitude }}
-        title={data.name}
         onPress={() => {
           handleMarker();
         }}
-      />
+      >
+        <CustomMarker title={data.name} />
+      </Marker>
     );
   });
 
@@ -254,40 +294,63 @@ export default function MapScreen({ navigation }) {
     uri: "https://res.cloudinary.com/dnvxs5ibr/image/upload/v1671026907/easyParis/tour-eiffel-french-moments_eutbyh.jpg",
   };
 
+
+
+  // === GESTION DES QUARTIERS ===================================================================== //
+
+  const districtAreas = [
+    { coordinates: points, strokeWidth: 2, strokeColor: "grey", fillColor: "rgba(218, 144, 88, 0.1)" },
+    { coordinates: montmartre, strokeWidth: 2, strokeColor: "grey", fillColor: "rgba(0, 0, 255, 0.3)" },
+    { coordinates: leMarais, strokeWidth: 2, strokeColor: "grey", fillColor: "rgba(0, 0, 255, 0.3)" },
+    { coordinates: latin, strokeWidth: 2, strokeColor: "grey", fillColor: "rgba(0, 0, 255, 0.3)" },
+    { coordinates: saintGermain, strokeWidth: 2, strokeColor: "grey", fillColor: "rgba(0, 0, 255, 0.3)" },
+    { coordinates: champsElysée, strokeWidth: 2, strokeColor: "grey", fillColor: "rgba(0, 0, 255, 0.3)" },
+    { coordinates: multicultural, strokeWidth: 2, strokeColor: "grey", fillColor: "rgba(0, 0, 255, 0.3)" },
+    { coordinates: historic, strokeWidth: 2, strokeColor: "grey", fillColor: "rgba(0, 0, 255, 0.3)" },
+    { coordinates: vieuxCentre, strokeWidth: 2, strokeColor: "grey", fillColor: "rgba(0, 0, 255, 0.3)" },
+    { coordinates: riche, strokeWidth: 2, strokeColor: "grey", fillColor: "rgba(0, 0, 255, 0.3)" },
+  ]
+
+  const districtArea = districtAreas.map((data, i) => {
+    return (
+      <Polygon
+        key={i}
+        coordinates={data.coordinates}
+        strokeWidth={data.strokeWidth}
+        strokeColor={data.strokeColor}
+        fillColor={data.fillColor}
+      />
+    )
+  })
+
+
+  // === RETURN ================================================================================ //
+
   return (
     <View style={styles.container}>
-      <Modal visible={modalVisible} animationType="fade"  transparent={true} style={styles.modal}>
+      <Modal
+        visible={modalVisible}
+        coverScreen={false}
+        backdropOpacity={0.6}
+        animationType="slide"
+        onBackdropPress={() => setModalVisible(false)}
+        style={styles.modal}>
         <View style={styles.centeredView}>
           <View style={styles.modalView}>
             <ImageBackground
               source={Image_Http_URL}
               style={styles.backgroundImage}
-            >
-              <View
-                style={{
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
-              >
-                <Text>Centered text</Text>
-
-              </View>
-            </ImageBackground>
-
+            />
             <View style={styles.descriptionCard}>
-                <Button style= {styles.closeBtn} title={"close"} onPress={() => handleClose()}></Button>
+              <Button style={styles.closeBtn} title={"close"} onPress={() => handleClose()}></Button>
             </View>
-
-            
           </View>
         </View>
       </Modal>
 
       <MapView
+        provider={PROVIDER_GOOGLE}
+        customMapStyle={mapStyle}
         initialRegion={{
           latitude: 48.8584685,
           longitude: 2.3375905,
@@ -296,71 +359,14 @@ export default function MapScreen({ navigation }) {
         }}
         style={styles.map}
       >
-        <Polygon
-          coordinates={points}
-          strokeWidth={2}
-          strokeColor="grey"
-          fillColor="rgba(0,255,100,0.1)"
-        />
-        <Polygon
-          coordinates={montmartre}
-          strokeWidth={2}
-          strokeColor="grey"
-          fillColor="rgba(0,0,255,0.3)"
-        />
-        <Polygon
-          coordinates={leMarais}
-          strokeWidth={2}
-          strokeColor="grey"
-          fillColor="rgba(0,0,255,0.3)"
-        />
-        <Polygon
-          coordinates={latin}
-          strokeWidth={2}
-          strokeColor="grey"
-          fillColor="rgba(0,0,255,0.3)"
-        />
-        <Polygon
-          coordinates={saintGermain}
-          strokeWidth={2}
-          strokeColor="grey"
-          fillColor="rgba(0,0,255,0.3)"
-        />
-        <Polygon
-          coordinates={champsElysée}
-          strokeWidth={2}
-          strokeColor="grey"
-          fillColor="rgba(0,0,255,0.3)"
-        />
-        <Polygon
-          coordinates={multicultural}
-          strokeWidth={2}
-          strokeColor="grey"
-          fillColor="rgba(0,0,255,0.3)"
-        />
-        <Polygon
-          coordinates={historic}
-          strokeWidth={2}
-          strokeColor="grey"
-          fillColor="rgba(0,0,255,0.3)"
-        />
-        <Polygon
-          coordinates={vieuxCentre}
-          strokeWidth={2}
-          strokeColor="grey"
-          fillColor="rgba(0,0,255,0.3)"
-        />
-        <Polygon
-          coordinates={riche}
-          strokeWidth={2}
-          strokeColor="grey"
-          fillColor="rgba(0,0,255,0.3)"
-        />
-        {markers}
+        {districtArea}
+        {marker}
       </MapView>
     </View>
   );
 }
+
+// === STYLE ================================================================================= //
 
 const styles = StyleSheet.create({
   container: {
@@ -375,20 +381,40 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   modalView: {
-    height: "80%",
-    width: "90%",
-    backgroundColor: "white",
-    borderRadius: 20,
-    marginTop: -40,
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
+    ...Platform.select({
+      android: {
+        height: "90%",
+        width: "90%",
+        backgroundColor: "white",
+        borderRadius: 20,
+        marginTop: -90,
+        alignItems: "center",
+        shadowColor: "#000",
+        shadowOffset: {
+          width: 0,
+          height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
+        elevation: 5,
+      },
+      ios: {
+        height: "80%",
+        width: "90%",
+        backgroundColor: "white",
+        borderRadius: 20,
+        marginTop: -40,
+        alignItems: "center",
+        shadowColor: "#000",
+        shadowOffset: {
+          width: 0,
+          height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
+        elevation: 5,
+      },
+  })
   },
   backgroundImage: {
     width: "100%",
@@ -399,22 +425,277 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   descriptionCard: {
-    backgroundColor: "white",
-    position: "absolute",
-    top: 338,
-    height: "50%",
-    width: "100%",
-    borderTopLeftRadius: 40,
-    borderTopRightRadius: 40,
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20,
-    justifyContent:"center",
-    alignItems: "center"
-  },
-  closeBtn : {
-    width:"30%"
+    ...Platform.select({
+      android: {
+        backgroundColor: "white",
+        position: "absolute",
+        top: 296,
+        height: "50%",
+        width: "100%",
+        borderTopLeftRadius: 40,
+        borderTopRightRadius: 40,
+        borderBottomLeftRadius: 20,
+        borderBottomRightRadius: 20,
+        justifyContent: "center",
+        alignItems: "center"
+      },
+      ios: {
+        backgroundColor: "white",
+        position: "absolute",
+        top: 322,
+        height: "50%",
+        width: "100%",
+        borderTopLeftRadius: 40,
+        borderTopRightRadius: 40,
+        borderBottomLeftRadius: 20,
+        borderBottomRightRadius: 20,
+        justifyContent: "center",
+        alignItems: "center"
+      },
+  })},
+  closeBtn: {
+    width: "30%"
   },
   modal: {
-    height:10,
-  }
+    height: 10,
+  },
+  bubble: {
+    opacity: 0.92,
+    flexDirection: "row",
+    alignSelf: "flex-start",
+    justifyContent: "center",
+    backgroundColor: "#fff",
+    borderRadius: 16,
+    borderColor: "#fff",
+    borderWidth: 0.5,
+    padding: 10,
+    width: 110,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+
+  },
+  bubbleTitle: {
+    fontSize: 14,
+    fontWeight: "bold",
+    marginBottom: 4,
+  },
+  bubbleArrowBorder: {
+    opacity: 0.92,
+    backgroundColor: "transparent",
+    borderColor: "transparent",
+    borderTopColor: "#fff",
+    borderWidth: 16,
+    alignSelf: "center",
+    marginTop: -0.5,
+
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 9,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  bubbleImage: {
+
+  },
 });
+
+const mapStyle = [
+  {
+    "featureType": "administrative",
+    "stylers": [
+      {
+        "visibility": "off"
+      }
+    ]
+  },
+  {
+    "featureType": "landscape.man_made",
+    "stylers": [
+      {
+        "visibility": "off"
+      }
+    ]
+  },
+  {
+    "featureType": "landscape.natural",
+    "stylers": [
+      {
+        "visibility": "simplified"
+      }
+    ]
+  },
+  {
+    "featureType": "landscape.natural.landcover",
+    "stylers": [
+      {
+        "visibility": "off"
+      }
+    ]
+  },
+  {
+    "featureType": "poi.attraction",
+    "stylers": [
+      {
+        "visibility": "off"
+      }
+    ]
+  },
+  {
+    "featureType": "poi.business",
+    "stylers": [
+      {
+        "visibility": "off"
+      }
+    ]
+  },
+  {
+    "featureType": "poi.government",
+    "stylers": [
+      {
+        "visibility": "off"
+      }
+    ]
+  },
+  {
+    "featureType": "poi.medical",
+    "stylers": [
+      {
+        "visibility": "off"
+      }
+    ]
+  },
+  {
+    "featureType": "poi.park",
+    "stylers": [
+      {
+        "color": "#b2d7bc"
+      }
+    ]
+  },
+  {
+    "featureType": "poi.park",
+    "elementType": "geometry.fill",
+    "stylers": [
+      {
+        "visibility": "simplified"
+      }
+    ]
+  },
+  {
+    "featureType": "poi.park",
+    "elementType": "geometry.stroke",
+    "stylers": [
+      {
+        "visibility": "simplified"
+      }
+    ]
+  },
+  {
+    "featureType": "poi.park",
+    "elementType": "labels.text",
+    "stylers": [
+      {
+        "color": "#669372"
+      },
+      {
+        "visibility": "simplified"
+      }
+    ]
+  },
+  {
+    "featureType": "poi.place_of_worship",
+    "stylers": [
+      {
+        "visibility": "off"
+      }
+    ]
+  },
+  {
+    "featureType": "poi.school",
+    "stylers": [
+      {
+        "visibility": "off"
+      }
+    ]
+  },
+  {
+    "featureType": "poi.sports_complex",
+    "stylers": [
+      {
+        "visibility": "off"
+      }
+    ]
+  },
+  {
+    "featureType": "road",
+    "elementType": "labels",
+    "stylers": [
+      {
+        "visibility": "off"
+      }
+    ]
+  },
+  {
+    "featureType": "road.highway",
+    "stylers": [
+      {
+        "color": "#e1decc"
+      }
+    ]
+  },
+  {
+    "featureType": "road.highway",
+    "elementType": "geometry.stroke",
+    "stylers": [
+      {
+        "color": "#b6b477"
+      }
+    ]
+  },
+  {
+    "featureType": "transit",
+    "stylers": [
+      {
+        "visibility": "off"
+      }
+    ]
+  },
+  {
+    "featureType": "transit",
+    "elementType": "geometry",
+    "stylers": [
+      {
+        "visibility": "off"
+      }
+    ]
+  },
+  {
+    "featureType": "water",
+    "stylers": [
+      {
+        "color": "#88bcdd"
+      },
+      {
+        "visibility": "simplified"
+      }
+    ]
+  },
+  {
+    "featureType": "water",
+    "elementType": "labels",
+    "stylers": [
+      {
+        "color": "#0f4d76"
+      }
+    ]
+  }
+]
