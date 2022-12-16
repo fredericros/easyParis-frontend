@@ -311,7 +311,7 @@ export default function MapScreen({ navigation }) {
     <View style={styles.container}>
       <Modal
         visible={modalVisible}
-        animationType="fade"
+        animationType="slide"
         transparent={true}
         style={styles.modal}
       >
@@ -514,18 +514,34 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   descriptionCard: {
-    backgroundColor: "white",
-    position: "absolute",
-    top: screenHeight * 0.34,
-    height: screenHeight * 0.4,
-    width: "100%",
-    borderTopLeftRadius: 40,
-    borderTopRightRadius: 40,
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20,
-    justifyContent: "center",
-    alignItems: "center",
-  },
+    ...Platform.select({
+      android: {
+        top: screenHeight * 0.34,
+        height: screenHeight * 0.4,
+        backgroundColor: "white",
+        position: "absolute",
+        width: "100%",
+        borderTopLeftRadius: 40,
+        borderTopRightRadius: 40,
+        borderBottomLeftRadius: 20,
+        borderBottomRightRadius: 20,
+        justifyContent: "center",
+        alignItems: "center"
+      },
+      ios: {
+        top: screenHeight * 0.34,
+        height: screenHeight * 0.4,
+        backgroundColor: "white",
+        position: "absolute",
+        width: "100%",
+        borderTopLeftRadius: 40,
+        borderTopRightRadius: 40,
+        borderBottomLeftRadius: 20,
+        borderBottomRightRadius: 20,
+        justifyContent: "center",
+        alignItems: "center"
+      },
+  })},
   closeBtn: {
     width: "30%",
     position: "absolute",
