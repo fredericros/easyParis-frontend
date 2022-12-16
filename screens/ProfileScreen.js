@@ -4,15 +4,58 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { stopLocationUpdatesAsync } from 'expo-location';
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from 'react-redux';
 import { user, tweet, review } from '../reducers/user';
 import { NavigationProp, ParamListBase } from '@react-navigation/native';
+import { login, logout } from '../reducers/user';
+import * as Imagepicker from 'expo-image-picker';
+import Constants from 'expo-constants';
+
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
 export default function ProfileScreen({ navigation }) {
+
+    /*----------------------------------- IMAGE PICKER -----------------------------------*/
+    const [image, setImage] = useState(null);
+
+    useEffect(() => {
+        async function requestPermissions() {
+            if (Platform.OS !== 'web') {
+                const { status } = await Imagepicker.requestMediaLibraryPermissionsAsync();
+                if (status !== 'granted') {
+                    alert('Permission denied!');
+                }
+            }
+        }
+        requestPermissions();
+
+        // Vérification de l'existence de la méthode destroy et appel de cette méthode si elle existe
+        return () => {
+            if (Imagepicker.destroy) {
+                Imagepicker.destroy();
+            }
+        }
+    }, []);
+
+    const PickImage = async () => {
+        let result = await Imagepicker.launchImageLibraryAsync({
+            mediaTypes: Imagepicker.MediaTypeOptions.All,
+            allowsEditing: true,
+            aspect: [4, 3],
+            quality: 1
+        });
+        if (!result.canceled) {
+            // Affiche l'image selectionné, ne pas modifier
+            setImage(result.assets[0].uri);
+        }
+    };
+    /*----------------------------------- FIN IMAGE PICKER -----------------------------------*/
+
+    const dispatch = useDispatch();
+
 
     const Page = () => {
         const dispatch = useDispatch();
@@ -34,19 +77,23 @@ export default function ProfileScreen({ navigation }) {
             });
     };
 
+
     return (
         <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
 
             <View style={styles.borderContainer}>
                 <View style={styles.border}>
-                    <Text onPress={() => navigation.navigate('SignIn')} style={styles.add} activeOpacity={0.5}>+ Add picture</Text>
+                    <Button title="+Add picture" onPress={PickImage} style={{ width: 200, height: 200 }} activeOpacity={0.5}> <Text style={styles.add}>+Add picture</Text></Button>
+
+                    {Image && <Image source={{ uri: image }} style={styles.add} />}
+                    {/* <Text onPress={() => navigation.navigate('SignIn')} style={styles.add} activeOpacity={0.5}>+ Add picture</Text> */}
                 </View>
 
                 <View style={styles.containerProfil}>
                     <Text style={styles.welcome}>Welcome,</Text>
                     <Text style={styles.name}>user name</Text>
                     <View style={styles.logoutContainer}>
-                        <Text onPress={() => navigation.navigate('SignIn')} style={styles.logout}>Logout</Text>
+                        <Text onPress={() => { dispatch(logout()); navigation.navigate('SignIn'); console.log('ok') }} style={styles.logout}>Logout</Text>
                     </View>
                 </View>
 
@@ -104,6 +151,7 @@ const styles = StyleSheet.create({
     add: {
         // borderWidth: 4,
         // borderColor: "#1E90FF",
+        backgroundColor: "none",
         padding: 50,
         borderRadius: 80
     },

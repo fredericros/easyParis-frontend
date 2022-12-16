@@ -2,14 +2,59 @@ import { StatusBar } from 'expo-status-bar';
 import { TextInput, ImageBackground, StyleSheet, Image, Text, View, TouchableOpacity } from 'react-native';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import React from "react";
+import { useState, useEffect } from "react";
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import SigninScreen from './SigninScreen';
+import ProfileScreen from './ProfileScreen';
+import { Provider } from 'react-redux';
+import { configureStore } from '@reduxjs/toolkit';
+
+//Import SignUp
+import { useDispatch, useSelector } from 'react-redux';
+import { user, tweet, review } from '../reducers/user';
+import { NavigationProp, ParamListBase } from '@react-navigation/native';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
+//Constante pour définir la bonne écriture de l'adresse mail
+const EMAIL_REGEX = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+
+
 export default function SignUpScreen({ navigation }) {
+
+    const [email, setEmail] = useState('');
+    const [username, setUsername] = useState('');
+    const [password, setPassword] = useState('');
+    const [emailError, setEmailError] = useState('');
+
+    const dispatch = useDispatch();
+    const user = useSelector((state) => state.user.value);
+
+
+    const signUpSubmit = () => {
+        fetch('http://192.168.1.15:3000/users/signup', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, email, password }),
+        }).then(response => response.json())
+            .then(data => {
+                data.result && dispatch(login({ token: data.token, username, email }));
+            });
+        navigation.navigate('Home');
+    };
+    //Comme en haut ou bas ?
+    // return Homescreen ? ou profile ?
+
+    /*Si la route a posté les nouvelles informations, redirection vers la page 'HomeScreen'
+    const navigation = useNavigation();
+    if (user.token) {
+      navigation.navigate('HomeScreen');
+    }
+    */
+
     return (
 
 
@@ -20,13 +65,13 @@ export default function SignUpScreen({ navigation }) {
 
             <Image style={styles.logo} source={require('../assets/logoeiffel1.jpg')} resizeMode="contain" />
 
-            <TextInput style={styles.buttonsignin} placeholder="Username" activeOpacity={0.8} />
+            <TextInput style={styles.buttonsignin} onChangeText={(value) => setUsername(value)} value={username} placeholder="Username" activeOpacity={0.8} />
 
-            <TextInput style={styles.buttonsignin} placeholder="Email" activeOpacity={0.8} />
+            <TextInput style={styles.buttonsignin} onChangeText={(value) => setEmail(value)} value={email} placeholder="Email" activeOpacity={0.8} />
 
-            <TextInput style={styles.buttonsignin} placeholder="Password" activeOpacity={0.8} />
+            <TextInput style={styles.buttonsignin} onChangeText={(value) => setPassword(value)} value={password} placeholder="Password" activeOpacity={0.8} />
 
-            <TouchableOpacity onPress={() => navigation.navigate('Home')} style={styles.button} activeOpacity={0.8}>
+            <TouchableOpacity onPress={() => signUpSubmit()} style={styles.button} activeOpacity={0.8}>
                 <Text style={styles.signup}>Sign up</Text>
             </TouchableOpacity>
 
@@ -36,7 +81,6 @@ export default function SignUpScreen({ navigation }) {
         </View>
     );
 }
-
 const styles = StyleSheet.create({
     container: {
         flex: 1,
@@ -148,4 +192,4 @@ const styles = StyleSheet.create({
         fontSize: 20
     }
 
-}); 
+});
