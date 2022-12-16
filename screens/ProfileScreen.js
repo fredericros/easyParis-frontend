@@ -1,33 +1,66 @@
-
-import {
-    Button,
-    Image,
-    KeyboardAvoidingView,
-    Platform,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-} from 'react-native';
-
+import { Button, Image, KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View, ScrollView, FlatList } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-
-import { useEffect } from 'react';
-
+import { stopLocationUpdatesAsync } from 'expo-location';
+import { useState, useEffect } from "react";
+import { useDispatch, useSelector } from 'react-redux';
+import { user, logout } from '../reducers/user';
+import { NavigationProp, ParamListBase } from '@react-navigation/native';
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
 export default function ProfileScreen({ navigation }) {
 
+    const user = useSelector((state) => state.user.value)
+    const dispatch = useDispatch()
+
+    useEffect(() => {
+        if (user.token) {
+          navigation.navigate('Home', { screen: 'Map' })
+        }
+      },[])
+
+      const handleLogout = () => {
+        dispatch(logout())
+      };
+
+
     return (
         <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-            <Text style={styles.title}>Welcome to ProfileScreen</Text>
-            <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('SignIn')}>
-                <Text style={styles.text}>Déconnexion</Text>
-            </TouchableOpacity>
-        </KeyboardAvoidingView>
+
+            <View style={styles.borderContainer}>
+                <View style={styles.border}>
+                    <Text onPress={() => navigation.navigate('SignIn')} style={styles.add} activeOpacity={0.5}>+ Add picture</Text>
+                </View>
+
+                <View style={styles.containerProfil}>
+                    <Text style={styles.welcome}>Welcome,</Text>
+                    <Text style={
+styles.name
+}>user name</Text>
+                    <View style={styles.logoutContainer}>
+                        <Text onPress={() => handleLogout()} style={styles.logout}>Logout</Text>
+                    </View>
+                </View>
+
+                <View style={styles.descriptionBackground}>
+                    <View style={styles.descriptionContainer}>
+                        <Text style={styles.descriptionbutton}>Description</Text>
+                        <Text style={styles.editButton}>Edit</Text>
+                    </View>
+                    <TextInput style={styles.containerAboutYou} placeholder="About me" />
+                </View>
+
+                <View style={styles.reviewBackground}>
+                    <View style={styles.descriptionContainer}>
+                        <Text style={styles.descriptionbutton}>My Reviews</Text>
+                        <Text style={styles.editButton}>0</Text>
+                    </View>
+                    <Text style={styles.containerAboutYou}></Text>
+                </View>
+            </View>
+        </KeyboardAvoidingView >
     );
 }
 
@@ -35,32 +68,126 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#ffffff',
-        alignItems: 'center',
-        justifyContent: 'center',
+        alignItems: "center",
+        justifyContent: "flex-start",
+        marginTop: -90,
     },
-    title: {
-        color: 'black',
-        fontSize: 25,
+    borderContainer: {
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        alignContent: "center",
+        flexDirection: "row",
+        flexWrap: "wrap",
+        height: "100%",
+        // borderWidth: 4,
+        // borderColor: "#1E90FF",
     },
-    button: {
-        alignItems: 'flex-end',
-        justifyContent: 'center',
-        width: 30,
-        height: 100,
-        backgroundColor: 'black',
+    border: {
+        borderWidth: 4,
+        borderColor: "#1E90FF",
+        borderRadius: 80,
+        backgroundColor: "#rgba(158, 202, 241, .4)",
+        justifyContent: "center",
+        alignItems: "center",
+        height: 160,
+        width: 160,
+        marginTop: 50,
+        marginLeft: -10,
     },
-    button: {
-        alignItems: 'center',
-        padding: 5,
-        margin: 5,
-        backgroundColor: '#1E90FF',
-        width: 260,
+    add: {
+        // borderWidth: 4,
+        // borderColor: "#1E90FF",
+        padding: 50,
+        borderRadius: 80
+    },
+    containerProfil: {
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+    },
+    welcome: {
+        justifyContent: "center",
+        marginLeft: 15,
+        fontSize: 40,
+        color: "#1E90FF"
+    },
+    name: {
+        justifyContent: "center",
+        marginLeft: 18,
+        fontSize: 30,
+        color: "black"
+    },
+    logoutContainer: {
+        display: "flex",
+        marginTop: 15
+    },
+    logout: {
+        backgroundColor: "#rgba(158, 202, 241, .4)",
         height: 40,
-        borderRadius: 10,
-        marginBottom: 50,
+        width: 140,
+        textAlign: "center",
+        textAlignVertical: "center",
+        borderRadius: 20,
+        fontSize: 20,
+        marginLeft: 20,
     },
-    text: {
-        color: 'white',
-        fontSize: 25,
+    descriptionBackground: {
+        backgroundColor: "#rgba(158, 202, 241, .4)",
+        marginTop: 50,
+        width: "80%",
+        height: 200,
+        borderRadius: 30,
     },
-});
+    descriptionContainer: {
+        display: "flex",
+        flexDirection: "row",
+        backgroundColor: "#1E90FF",
+        display: "flex",
+        justifyContent: "flex-start",
+        alignItems: "center",
+        width: "87%",
+        display: "flex",
+        height: 50,
+        borderRadius: 30,
+        paddingLeft: 15,
+        borderWidth: 4,
+        borderColor: "#1E90FF",
+    },
+    descriptionbutton: {
+        display: "flex",
+        color: "white",
+        fontSize: 20,
+        fontWeight: "bold",
+    },
+    editButton: {
+        backgroundColor: "#fff",
+        textAlignVertical: "center",
+        height: 50,
+        width: "40%",
+        borderRadius: 30,
+        marginLeft: 88,
+        borderWidth: 2,
+        borderColor: "#1E90FF",
+        textAlign: "center",
+        fontSize: 20,
+        flexWrap: "nowrap",
+
+    },
+    containerAboutYou: {
+        paddingLeft: 10,
+        paddingTop: 5,
+        paddingBottom: 105
+    },
+    barre: {
+        borderWidth: 1,
+        borderColor: "#9d9da3",
+    },
+    reviewBackground: {
+        backgroundColor: "#d5d5da",
+        marginTop: 10,
+        width: "80%",
+        height: 230,
+        borderRadius: 30,
+    },
+}); 

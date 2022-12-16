@@ -359,6 +359,7 @@ export default function MapScreen({ navigation }) {
         }}
         style={styles.map}
       >
+        <Button style = {styles.filterBtn}></Button>
         {districtArea}
         {marker}
       </MapView>
@@ -506,6 +507,13 @@ const styles = StyleSheet.create({
   bubbleImage: {
 
   },
+  filterBtn: {
+    width: 150,
+    height: 50,
+    top:70,
+    left: 40
+
+  }
 });
 
 const mapStyle = [
