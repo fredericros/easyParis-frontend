@@ -43,7 +43,7 @@ export default function SignUpScreen({ navigation }) {
             .then(data => {
                 data.result && dispatch(login({ token: data.token, username, email }));
             });
-        navigation.navigate('Home');
+        navigation.navigate('SignIn');
     };
     //Comme en haut ou bas ?
     // return Homescreen ? ou profile ?

@@ -2,6 +2,7 @@ import { StatusBar } from 'expo-status-bar';
 import { TextInput, StyleSheet, Image, Text, View, TouchableOpacity, Dimensions } from 'react-native';
 import React from "react";
 import { useState, useEffect } from "react";
+import { createStackNavigator } from 'react-navigation-stack';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -64,6 +65,9 @@ export default function SigninScreen({ navigation }) {
             </TouchableOpacity>
             <TouchableOpacity style={styles.buttonforget} activeOpacity={0.8}>
                 <Text style={styles.textforget}>FORGOT PASSWORD</Text>
+                <TouchableOpacity onPress={() => navigation.navigate('Home')} style={styles.buttonforget} activeOpacity={0.8}>
+                    <Text style={styles.textforget}>Back</Text>
+                </TouchableOpacity>
             </TouchableOpacity>
         </View>
     );
