@@ -277,7 +277,7 @@ export default function MapScreen({ navigation }) {
 
     // === FETCH DE LA ROUTE BACKEND POUR RECUPERER LES PLACES ======================================= //
 
-    fetch(`http://192.168.1.13:3000/places/${filteredPlaces}`)
+    fetch(`http://192.168.1.113:3000/places/${filteredPlaces}`)
       .then((response) => response.json())
       .then((data) => {
         data.result && dispatch(loadPlaces(data.places));
@@ -296,8 +296,6 @@ export default function MapScreen({ navigation }) {
   const handleClose = () => {
     setModalVisible(false);
   };
-
-  console.log(modalVisible);
 
   // === GESTION DES MARQUEURS ===================================================================== //
 

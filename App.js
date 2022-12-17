@@ -16,7 +16,7 @@ import ProfileScreen from "./screens/ProfileScreen";
 
 
 // redux imports
-import { Provider } from "react-redux";
+import { Provider, useSelector } from "react-redux";
 import { combineReducers, configureStore } from "@reduxjs/toolkit";
 
 // redux-persist imports
@@ -49,7 +49,12 @@ const store = configureStore({
   reducer: { user, reviews, like, places },
 });
 
+
 const TabNavigator = () => {
+
+  const user = useSelector((state) => state.user.value)
+
+
   return (
     <Tab.Navigator screenOptions={({ route }) => ({
       tabBarIcon: ({ color, size }) => {
@@ -89,7 +94,7 @@ const TabNavigator = () => {
       <Tab.Screen name="Map" component={MapScreen} />
       <Tab.Screen name="Places" component={PlacesSavedScreen} />
       <Tab.Screen name="Chatbot" component={ChatBotScreen} />
-      <Tab.Screen name="Profile" component={ProfileScreen} style={styles.none} />
+      <Tab.Screen name="Profile" component= {!user.token? SigninScreen : ProfileScreen} />
     </Tab.Navigator>
   );
 };
@@ -124,7 +129,6 @@ const App = () => {
       <NavigationContainer>
         <Stack.Navigator screenOptions={{ headerShown: false }}>
           <Stack.Screen name="Home" component={TabNavigator} />
-          <Stack.Screen name="SignIn" component={SigninScreen} />
           <Stack.Screen name="SignUp" component={SignUpScreen} />
         </Stack.Navigator>
       </NavigationContainer>

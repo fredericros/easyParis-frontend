@@ -1,23 +1,10 @@
-import { StatusBar } from 'expo-status-bar';
 import { TextInput, ImageBackground, StyleSheet, Image, Text, View, TouchableOpacity } from 'react-native';
-import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import React from "react";
-import { useState, useEffect } from "react";
-import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import SigninScreen from './SigninScreen';
-import ProfileScreen from './ProfileScreen';
-import { Provider } from 'react-redux';
-import { configureStore } from '@reduxjs/toolkit';
+import { useState } from "react";
 
 //Import SignUp
 import { useDispatch, useSelector } from 'react-redux';
-import { user, tweet, review } from '../reducers/user';
-import { NavigationProp, ParamListBase } from '@react-navigation/native';
-
-const Stack = createNativeStackNavigator();
-const Tab = createBottomTabNavigator();
+import { login } from '../reducers/user';
 
 //Constante pour définir la bonne écriture de l'adresse mail
 const EMAIL_REGEX = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -28,40 +15,30 @@ export default function SignUpScreen({ navigation }) {
     const [email, setEmail] = useState('');
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
-    const [emailError, setEmailError] = useState('');
 
     const dispatch = useDispatch();
     const user = useSelector((state) => state.user.value);
 
 
-    const signUpSubmit = () => {
-        fetch('http://192.168.1.15:3000/users/signup', {
+    const signupSubmit = () => {
+        fetch('http://192.168.1.113:3000/users/signup', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ username, email, password }),
         }).then(response => response.json())
             .then(data => {
-                data.result && dispatch(login({ token: data.token, username, email }));
+                if (data.result) {
+                    dispatch(login({ token: data.token, username, email }));
+                    navigation.navigate('Home', { screen: 'Profile' });
+                } else {
+                    dispatch(login({ signupError: data.error }))
+                }
             });
-        navigation.navigate('SignIn');
     };
-    //Comme en haut ou bas ?
-    // return Homescreen ? ou profile ?
 
-    /*Si la route a posté les nouvelles informations, redirection vers la page 'HomeScreen'
-    const navigation = useNavigation();
-    if (user.token) {
-      navigation.navigate('HomeScreen');
-    }
-    */
 
     return (
-
-
         <View style={styles.container} >
-            <TouchableOpacity onPress={() => navigation.navigate('SignIn')} style={styles.back}>
-                <Text> Back to home</Text>
-            </TouchableOpacity>
 
             <Image style={styles.logo} source={require('../assets/logoeiffel1.jpg')} resizeMode="contain" />
 
@@ -71,13 +48,11 @@ export default function SignUpScreen({ navigation }) {
 
             <TextInput style={styles.buttonsignin} onChangeText={(value) => setPassword(value)} value={password} placeholder="Password" activeOpacity={0.8} />
 
-            <TouchableOpacity onPress={() => signUpSubmit()} style={styles.button} activeOpacity={0.8}>
+            <TouchableOpacity onPress={() => signupSubmit()} style={styles.button} activeOpacity={0.8}>
                 <Text style={styles.signup}>Sign up</Text>
             </TouchableOpacity>
+            <Text style={styles.error}>{user.signupError}</Text>
 
-            <TouchableOpacity onPress={() => navigation.navigate('SignIn')} style={styles.buttonforget} activeOpacity={0.8}>
-                <Text style={styles.textforget}>Back</Text>
-            </TouchableOpacity>
         </View>
     );
 }
@@ -190,6 +165,9 @@ const styles = StyleSheet.create({
         color: "white",
         fontWeight: "bold",
         fontSize: 20
-    }
-
+    },
+    error: {
+        marginTop: 10,
+        color: 'red',
+    },
 });

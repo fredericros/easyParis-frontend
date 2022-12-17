@@ -79,12 +79,7 @@ export default function ProfileScreen({ navigation }) {
 
 
     return (
-
-
-
         <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-            {!hasToken && navigation.navigate('Signin')
-                ||
                 <View style={styles.borderContainer}>
                     <View style={styles.border}>
                         <Button title="+Add picture" onPress={PickImage} style={{ width: 200, height: 200 }} activeOpacity={0.5}> <Text style={styles.add}>+Add picture</Text></Button>
@@ -97,7 +92,7 @@ export default function ProfileScreen({ navigation }) {
                         <Text style={styles.welcome}>Welcome,</Text>
                         <Text style={styles.name}>user name</Text>
                         <View style={styles.logoutContainer}>
-                            <Text onPress={() => { dispatch(logout()); navigation.navigate('SignIn'); console.log('ok') }} style={styles.logout}>Logout</Text>
+                            <Text onPress={() => { dispatch(logout()); navigation.navigate('Home'); console.log('ok') }} style={styles.logout}>Logout</Text>
                         </View>
                     </View>
 
@@ -117,7 +112,7 @@ export default function ProfileScreen({ navigation }) {
                         <Text style={styles.containerAboutYou}></Text>
                     </View>
                 </View>
-            }
+
         </KeyboardAvoidingView >
     );
 }
