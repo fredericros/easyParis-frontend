@@ -13,7 +13,7 @@ import MapScreen from "./screens/MapScreen";
 import ChatBotScreen from "./screens/ChatBotScreen";
 import PlacesSavedScreen from "./screens/PlacesSavedScreen";
 import ProfileScreen from "./screens/ProfileScreen";
-
+import DirectionMapScreen from "./screens/DirectionMapScreen";
 
 // redux imports
 import { Provider, useSelector } from "react-redux";
@@ -129,7 +129,8 @@ const App = () => {
       <NavigationContainer>
         <Stack.Navigator screenOptions={{ headerShown: false }}>
           <Stack.Screen name="Home" component={TabNavigator} />
-          <Stack.Screen name="SignUp" component={SignUpScreen} />
+          <Stack.Screen name="SignUp" component={SignUpScreen} /> 
+          <Stack.Screen name="DirectionMapScreen" component={DirectionMapScreen}/>
         </Stack.Navigator>
       </NavigationContainer>
     </Provider>

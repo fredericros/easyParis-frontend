@@ -102,7 +102,7 @@ export default function MapScreen({ navigation }) {
 
     
     useEffect(() => {
-      fetch(`http://172.20.10.4:3000/places/${filteredPlaces}`)
+      fetch(`http://192.168.10.177:3000/places/${filteredPlaces}`)
       .then((response) => response.json())
       .then((data) => {
         data.result && dispatch(loadPlaces(data.places));
@@ -114,7 +114,7 @@ export default function MapScreen({ navigation }) {
       // === FETCH DE LA ROUTE BACKEND POUR RECUPERER LES PLACESFILTREES AU CLICK SUR UN BOUTON FILTRE ======================================= //
 
 const handleFilter = (filter) => {
-  fetch(`http://172.20.10.4:3000/places/${filter}`)
+  fetch(`http://192.168.10.177:3000/places/${filter}`)
   .then((response) => response.json())
   .then((data) => {
     data.result && dispatch(loadPlaces(data.places));
@@ -157,7 +157,7 @@ const handleFilter = (filter) => {
             handleMarker();
           }}
         >
-          <CustomMarker title={data.name} />
+          <CustomMarker title={data.title} />
         </Marker>
       );
     });
@@ -283,7 +283,10 @@ const handleFilter = (filter) => {
                   <FontAwesome name="heart" size={30} color="black" />
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.goBtn}>
-                  <FontAwesome name="location-arrow" size={40} color="blue" />
+                  <FontAwesome name="location-arrow" size={40} color="blue" onPress={() => {
+            navigation.navigate("DirectionMapScreen")
+            
+        }}/>
                 </TouchableOpacity>
               </View>
             </View>
