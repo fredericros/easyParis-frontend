@@ -102,7 +102,7 @@ export default function MapScreen({ navigation }) {
 
     
     useEffect(() => {
-      fetch(`http://192.168.10.177:3000/places/${filteredPlaces}`)
+      fetch(`http://172.20.10.4:3000/places/${filteredPlaces}`)
       .then((response) => response.json())
       .then((data) => {
         data.result && dispatch(loadPlaces(data.places));
@@ -114,7 +114,7 @@ export default function MapScreen({ navigation }) {
       // === FETCH DE LA ROUTE BACKEND POUR RECUPERER LES PLACESFILTREES AU CLICK SUR UN BOUTON FILTRE ======================================= //
 
 const handleFilter = (filter) => {
-  fetch(`http://192.168.1.113:3000/places/${filter}`)
+  fetch(`http://172.20.10.4:3000/places/${filter}`)
   .then((response) => response.json())
   .then((data) => {
     data.result && dispatch(loadPlaces(data.places));
@@ -127,6 +127,7 @@ const handleFilter = (filter) => {
   
   const handleMarker = () => {
     setModalVisible(true);
+    
   };
 
   const handleClose = () => {
@@ -282,9 +283,7 @@ const handleFilter = (filter) => {
                   <FontAwesome name="heart" size={30} color="black" />
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.goBtn}>
-                  <FontAwesome name="location-arrow" size={40} color="blue"  onPress={() => {
-          handleGoTo();
-        }} />
+                  <FontAwesome name="location-arrow" size={40} color="blue" />
                 </TouchableOpacity>
               </View>
             </View>
@@ -295,6 +294,14 @@ const handleFilter = (filter) => {
               <View style={styles.cardInfoMaintTitleBLock}>
                 <Text style={styles.cardInfoMaintTitle}>INFORMATION</Text>
               </View>
+              <FontAwesome
+                  aria-hidden="true"
+                  name="times-circle-o"
+                  size={40}
+                  color="black"
+                  onPress={() => handleClose()}
+                  style={styles.closeBtnSlide2}
+                />
               <View style={styles.cardInfoOpeningHours}>
                 <Text style={styles.cardInfoTitle}>⏱ OPENING HOURS</Text>
                 <Text style={styles.cardInfoText}>• 9.30am to 10.45pm</Text>
@@ -363,7 +370,14 @@ const handleFilter = (filter) => {
               </View>
               </View>
               </ScrollView>
-             
+              <FontAwesome
+                  aria-hidden="true"
+                  name="times-circle-o"
+                  size={40}
+                  color="black"
+                  onPress={() => handleClose()}
+                  style={styles.closeBtnSlide2}
+                />
               <View style={styles.inputContainer} ><TextInput
         style={styles.input}
         placeholder="Add a review"
@@ -892,6 +906,13 @@ textBtnSubnit:{
   alignItems: 'center',
   fontSize: 20,
   paddingRight: 20,
+},
+
+closeBtnSlide2:{
+  width: "30%",
+    position: "absolute",
+    bottom: screenHeight * 0.72,
+    left: screenWidth * 0.77,
 }
 
 });

@@ -5,6 +5,7 @@ import {
   Text,
   View,
   TouchableOpacity,
+  KeyboardAvoidingView,
 } from "react-native";
 import React from "react";
 import { useState } from "react";
@@ -21,7 +22,7 @@ export default function SigninScreen({ navigation }) {
   const user = useSelector((state) => state.user.value);
 
   const signinSubmit = () => {
-    fetch("http://192.168.10.177:3000/users/signin", {
+    fetch("http://172.20.10.4:3000/users/signin", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username, password }),
@@ -37,7 +38,7 @@ export default function SigninScreen({ navigation }) {
   };
 
   return (
-    <View style={styles.container}>
+    <KeyboardAvoidingView behavior='padding' style={styles.container}>
       <Image
         style={styles.logo}
         source={require("../assets/logoeiffel1.jpg")}
@@ -82,7 +83,7 @@ export default function SigninScreen({ navigation }) {
       <Text style={styles.error}>{user.signinError}</Text>
 
 
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 
