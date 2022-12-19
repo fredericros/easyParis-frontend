@@ -27,6 +27,7 @@ import reviews from "./reducers/reviews";
 import user from "./reducers/user";
 import like from "./reducers/like";
 import places from "./reducers/places";
+import actualPlaces from "./reducers/actualPlaces";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -46,7 +47,7 @@ const persistor = persistStore(store);
 ==================================================================== */
 
 const store = configureStore({
-  reducer: { user, reviews, like, places },
+  reducer: { user, reviews, like, places, actualPlaces },
 });
 
 

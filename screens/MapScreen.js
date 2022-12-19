@@ -22,6 +22,7 @@ import { Dimensions } from 'react-native';
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { loadPlaces } from "../reducers/places";
+import { loadActualPlace } from "../reducers/actualPlaces";
 
 import {
   useFonts,
@@ -81,6 +82,7 @@ export default function MapScreen({ navigation }) {
 
   const dispatch = useDispatch();
   const places = useSelector((state) => state.places.value);
+  const actualPlace = useSelector((state)=> state.actualPlaces.value)
   const [filteredPlaces, setFilteredPlaces] = useState("district");
   const [categoryVisible, setCategoryVisible] = useState(true);
 
@@ -102,7 +104,7 @@ export default function MapScreen({ navigation }) {
 
     
     useEffect(() => {
-      fetch(`http:/192.168.108.153:3000/places/${filteredPlaces}`)
+      fetch(`http:/192.168.10.153:3000/places/${filteredPlaces}`)
       .then((response) => response.json())
       .then((data) => {
         data.result && dispatch(loadPlaces(data.places));
@@ -114,7 +116,7 @@ export default function MapScreen({ navigation }) {
       // === FETCH DE LA ROUTE BACKEND POUR RECUPERER LES PLACESFILTREES AU CLICK SUR UN BOUTON FILTRE ======================================= //
 
 const handleFilter = (filter) => {
-  fetch(`http://192.168.108.153:3000/places/${filter}`)
+  fetch(`http://192.168.10.153:3000/places/${filter}`)
   .then((response) => response.json())
   .then((data) => {
     data.result && dispatch(loadPlaces(data.places));
@@ -157,9 +159,10 @@ const handleFilter = (filter) => {
           coordinate={{ latitude: data.latitude, longitude: data.longitude }}
           onPress={() => {
             handleMarker();
+            dispatch(loadActualPlace(data))
           }}
         >
-          <CustomMarker title={data.name} />
+          <CustomMarker title={data.title} />
         </Marker>
       );
     });
@@ -190,6 +193,7 @@ const handleFilter = (filter) => {
         coordinate={{ latitude: data.latitude, longitude: data.longitude }}
         onPress={() => {
           handleMarker();
+          dispatch(loadActualPlace(data))
         }}
       >
         <CustomImgMarker title={data.title} image={data.photo} />
@@ -198,9 +202,9 @@ const handleFilter = (filter) => {
   });
 
 
-  let Image_Http_URL = {
-    uri: "https://res.cloudinary.com/dnvxs5ibr/image/upload/v1671026907/easyParis/tour-eiffel-french-moments_eutbyh.jpg",
-  };
+
+  // === GESTION DES CARDS ===================================================================== //
+
 
 
 
@@ -237,161 +241,172 @@ const handleFilter = (filter) => {
 
   return (
     <View style={styles.container}>
-      <Modal
-        visible={modalVisible}
-        animationType="slide"
-        transparent={true}
-        style={styles.modal}
+        <Modal
+      visible={modalVisible}
+      animationType="slide"
+      transparent={true}
+      style={styles.modal}
+    >
+      <Swiper
+        loop={false}
+        style={styles.wrapper}
+        paginationStyle={{ bottom: 0,
+          left: 0,
+          top: screenHeight * 0.70,
+          right: 0,}
+         
+        }
+        containerStyle={{ height: 150, flex: 1 }}
       >
-        <Swiper
-          loop={false}
-          style={styles.wrapper}
-          paginationStyle={{ bottom: 0,
-            left: 0,
-            top: screenHeight * 0.70,
-            right: 0,}
-           
-          }
-          containerStyle={{ height: 150, flex: 1 }}
-        >
-          <View style={styles.centeredView}>
-            <View style={styles.modalView}>
-              <ImageBackground
-                source={Image_Http_URL}
-                style={styles.backgroundImage}
-              ></ImageBackground>
+        <View style={styles.centeredView}>
+          <View style={styles.modalView}>
+            <ImageBackground
+              source={{uri: actualPlace.photo}}
+              style={styles.backgroundImage}
+            ></ImageBackground>
 
-              <View style={styles.descriptionCard}>
-              <TouchableOpacity></TouchableOpacity>
-                <FontAwesome
+            <View style={styles.descriptionCard}>
+            <TouchableOpacity></TouchableOpacity>
+              <FontAwesome
+                aria-hidden="true"
+                name="times-circle-o"
+                size={40}
+                color="black"
+                onPress={() => handleClose()}
+                style={styles.closeBtn}
+              />
+              {/* here we will need to add a map to add costom name */}
+              <Text style={styles.cardTittle}>{actualPlace.title}</Text>
+              {/* This is for the text about the place = alsi needs mao */}
+              <Text style={styles.cardText}>
+              {actualPlace.description}
+              </Text>
+              <TouchableOpacity style={styles.heartBtn}>
+                <FontAwesome name="heart" size={30} color="black" />
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.goBtn}>
+                <FontAwesome name="location-arrow" size={40} color="blue"  onPress={() => {
+        handleGoTo();
+      }} />
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+
+        <View style={styles.slide2centeredView}>
+          <View style={styles.slide2modalView}>
+            <View style={styles.cardInfoMaintTitleBLock}>
+              <Text style={styles.cardInfoMaintTitle}>INFORMATION</Text>
+            </View>
+            <FontAwesome
                   aria-hidden="true"
                   name="times-circle-o"
                   size={40}
                   color="black"
                   onPress={() => handleClose()}
-                  style={styles.closeBtn}
+                  style={styles.closeBtnSlide2}
                 />
-                {/* here we will need to add a map to add costom name */}
-                <Text style={styles.cardTittle}>TOUR EIFFEL</Text>
-                {/* This is for the text about the place = alsi needs mao */}
-                <Text style={styles.cardText}>
-                  Locally nicknamed "La dame de fer" (French for "Iron Lady"),
-                  it was constructed from 1887 to 1889 as the centerpiece of the
-                  1889 World's Fair. Although initially criticised by some of
-                  France's leading artists and intellectuals for its design, it
-                  has since become a global cultural icon of France and one of
-                  the most recognisable structures in the world
-                </Text>
-                <TouchableOpacity style={styles.heartBtn}>
-                  <FontAwesome name="heart" size={30} color="black" />
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.goBtn}>
-                  <FontAwesome name="location-arrow" size={40} color="blue"  onPress={() => {
-          handleGoTo();
-        }} />
-                </TouchableOpacity>
-              </View>
+            <View style={styles.cardInfoOpeningHours}>
+              <Text style={styles.cardInfoTitle}>⏱ OPENING HOURS</Text>
+              <Text style={styles.cardInfoText}>• 9.30am to 10.45pm</Text>
+              <Text style={styles.cardInfoText}>• The stairs close at 6pm</Text>
             </View>
-          </View>
-
-          <View style={styles.slide2centeredView}>
-            <View style={styles.slide2modalView}>
-              <View style={styles.cardInfoMaintTitleBLock}>
-                <Text style={styles.cardInfoMaintTitle}>INFORMATION</Text>
-              </View>
-              <View style={styles.cardInfoOpeningHours}>
-                <Text style={styles.cardInfoTitle}>⏱ OPENING HOURS</Text>
-                <Text style={styles.cardInfoText}>• 9.30am to 10.45pm</Text>
-                <Text style={styles.cardInfoText}>• The stairs close at 6pm</Text>
-              </View>
-              <View style={styles.cardInfoTickets}>
-                <Text style={styles.cardInfoTitle}>🎟️ Tickets and Prices</Text>
-                <Text style={styles.cardInfoText}>• Lift to 2nd floor: from 4,30€ to 17,10€</Text>
-                <Text style={styles.cardInfoText}>• Lift to top: from 6,70€ to 26,80€</Text>
-                <Text style={styles.cardInfoText}>• Stairs 2nd floor: from 2,70€ to 10,70€</Text>
-                <Text style={styles.cardInfoText}>
-                  • Stairs 2nd + Lift to top: from 5,10€ to 20,40€
-                </Text>
-                <Text style={styles.cardInfoText}>• Ticket to top + Champagne: 45,80€</Text>
-              </View>
-
-              <View style={styles.cardInfoTips}>
-                <Text style={styles.cardInfoTitle}>✅ Tips</Text>
-                <Text style={styles.cardInfoText}>• Buy your tickets in advance</Text>
-                <Text style={styles.cardInfoText}>• Be aware of the security checks</Text>
-                <Text style={styles.cardInfoText}>• Dress warmly if you go to the top</Text>
-              </View>
-
-              <TouchableOpacity style={styles.cardInfoBtn}>
-                <Text>GO TO WEBSITE</Text>
-              </TouchableOpacity>
+            <View style={styles.cardInfoTickets}>
+              <Text style={styles.cardInfoTitle}>🎟️ Tickets and Prices</Text>
+              <Text style={styles.cardInfoText}>• Lift to 2nd floor: from 4,30€ to 17,10€</Text>
+              <Text style={styles.cardInfoText}>• Lift to top: from 6,70€ to 26,80€</Text>
+              <Text style={styles.cardInfoText}>• Stairs 2nd floor: from 2,70€ to 10,70€</Text>
+              <Text style={styles.cardInfoText}>
+                • Stairs 2nd + Lift to top: from 5,10€ to 20,40€
+              </Text>
+              <Text style={styles.cardInfoText}>• Ticket to top + Champagne: 45,80€</Text>
             </View>
+
+            <View style={styles.cardInfoTips}>
+              <Text style={styles.cardInfoTitle}>✅ Tips</Text>
+              <Text style={styles.cardInfoText}>• Buy your tickets in advance</Text>
+              <Text style={styles.cardInfoText}>• Be aware of the security checks</Text>
+              <Text style={styles.cardInfoText}>• Dress warmly if you go to the top</Text>
+            </View>
+
+            <TouchableOpacity style={styles.cardInfoBtn}>
+              <Text>GO TO WEBSITE</Text>
+            </TouchableOpacity>
           </View>
-          <KeyboardAvoidingView behavior='padding' style={styles.slide2centeredView}>
-            
-            <View style={styles.slide3modalView}>
-            
-              <View>
-                <Text style={styles.slide3Tittle}>REVIEWS</Text>
+        </View>
+        <KeyboardAvoidingView behavior='padding' style={styles.slide2centeredView}>
+          
+          <View style={styles.slide3modalView}>
+          
+            <View>
+              <Text style={styles.slide3Tittle}>REVIEWS</Text>
+            </View>
+           
+            <ScrollView vertical style={styles.scrollUsersReview}>
+            <View styles={{height: '10%', backgroundColor: 'blue',}}>
+            <View >
+              <View style={styles.slide3User}>
+              <Text style={styles.slide3UserName}>USER1</Text>
+              <Text  style={styles.slide3Date}>28/12/2022</Text>
               </View>
-             
-              <ScrollView vertical style={styles.scrollUsersReview}>
-              <View styles={{height: '10%', backgroundColor: 'blue',}}>
-              <View >
-                <View style={styles.slide3User}>
-                <Text style={styles.slide3UserName}>USER1</Text>
-                <Text  style={styles.slide3Date}>28/12/2022</Text>
-                </View>
-               <View>
-                
-                <Text style={styles.slide3Description}>The Eiffel Tower is an iconic landmark located in Paris, France. It was completed in 1889 and was the tallest man-made structure in the world at the time. The tower is made of iron and stands 324 meters tall, with three levels that can be accessed by elevator or stairs.</Text></View>
-              </View>
-              <View >
-                <View style={styles.slide3User}>
-                <Text style={styles.slide3UserName}>USER1</Text>
-                <Text  style={styles.slide3Date}>28/12/2022</Text>
-                </View>
-               <View>
-                
-                <Text style={styles.slide3Description}>The Eiffel Tower is an iconic landmark located in Paris, France. It was completed in 1889 and was the tallest man-made structure in the world at the time. The tower is made of iron and stands 324 meters tall, with three levels that can be accessed by elevator or stairs.</Text></View>
-              </View>
-              <View >
-                <View style={styles.slide3User}>
-                <Text style={styles.slide3UserName}>USER1</Text>
-                <Text  style={styles.slide3Date}>28/12/2022</Text>
-                </View>
-               <View>
-                
-                <Text style={styles.slide3Description}>The Eiffel Tower is an iconic landmark located in Paris, France. It was completed in 1889 and was the tallest man-made structure in the world at the time. The tower is made of iron and stands 324 meters tall, with three levels that can be accessed by elevator or stairs.</Text></View>
+             <View>
               
+              <Text style={styles.slide3Description}>The Eiffel Tower is an iconic landmark located in Paris, France. It was completed in 1889 and was the tallest man-made structure in the world at the time. The tower is made of iron and stands 324 meters tall, with three levels that can be accessed by elevator or stairs.</Text></View>
+            </View>
+            <View >
+              <View style={styles.slide3User}>
+              <Text style={styles.slide3UserName}>USER1</Text>
+              <Text  style={styles.slide3Date}>28/12/2022</Text>
               </View>
+             <View>
+              
+              <Text style={styles.slide3Description}>The Eiffel Tower is an iconic landmark located in Paris, France. It was completed in 1889 and was the tallest man-made structure in the world at the time. The tower is made of iron and stands 324 meters tall, with three levels that can be accessed by elevator or stairs.</Text></View>
+            </View>
+            <View >
+              <View style={styles.slide3User}>
+              <Text style={styles.slide3UserName}>USER1</Text>
+              <Text  style={styles.slide3Date}>28/12/2022</Text>
               </View>
-              </ScrollView>
-             
-              <View style={styles.inputContainer} ><TextInput
-        style={styles.input}
-        placeholder="Add a review"
-        placeholderTextColor="#66757F"
-        maxLength='100'
+             <View>
+              
+              <Text style={styles.slide3Description}>The Eiffel Tower is an iconic landmark located in Paris, France. It was completed in 1889 and was the tallest man-made structure in the world at the time. The tower is made of iron and stands 324 meters tall, with three levels that can be accessed by elevator or stairs.</Text></View>
+            
+            </View>
+            </View>
+            </ScrollView>
+            <FontAwesome
+                  aria-hidden="true"
+                  name="times-circle-o"
+                  size={40}
+                  color="black"
+                  onPress={() => handleClose()}
+                  style={styles.closeBtnSlide2}
+                />
+           
+            <View style={styles.inputContainer} ><TextInput
+      style={styles.input}
+      placeholder="Add a review"
+      placeholderTextColor="#66757F"
+      maxLength={100}
 
-      />
-     
-      </View>
-      <TouchableOpacity style={styles.submitButtonReview}>
+    />
+   
+    </View>
+    <TouchableOpacity style={styles.submitButtonReview}>
 
 <Text style={styles.textBtnSubnit}>Post review</Text>
 <TouchableOpacity style={styles.submittBtn}>
-                  <FontAwesome name="paper-plane" size={25} color="black" />
-                </TouchableOpacity>
+                <FontAwesome name="paper-plane" size={25} color="black" />
+              </TouchableOpacity>
 </TouchableOpacity>
 
-            </View>
-            
-         
-          </KeyboardAvoidingView>
-      
-        </Swiper>
-      </Modal>
+          </View>
+          
+       
+        </KeyboardAvoidingView>
+    
+      </Swiper>
+    </Modal>
 
       <View style={styles.filterContainer}>
         <ScrollView horizontal={true} style={styles.scrollView}>
@@ -640,7 +655,9 @@ const styles = StyleSheet.create({
     left: 30,
     fontWeight: "600",
     fontSize: 30,
-    lineHeight: 54,
+    lineHeight: 35,
+    paddingTop: 10,
+    marginBottom: 10,
     fontFamily: "Poppins_600SemiBold",
     width: "80%",
   },
@@ -650,8 +667,8 @@ const styles = StyleSheet.create({
     fontFamily: "Poppins_400Regular",
     lineHeight: 20,
     fontSize: 18,
-    width: "80%",
-    marginTop: 50,
+    width: "85%",
+    paddingTop: 90,
     textAlign: "left",
   },
   heartBtn: {
@@ -896,6 +913,12 @@ textBtnSubnit:{
   alignItems: 'center',
   fontSize: 20,
   paddingRight: 20,
+},
+closeBtnSlide2:{
+  width: "30%",
+    position: "absolute",
+    bottom: screenHeight * 0.72,
+    left: screenWidth * 0.77,
 }
 
 });

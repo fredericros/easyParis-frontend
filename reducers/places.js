@@ -11,7 +11,7 @@ export const placesSlice = createSlice({
     loadPlaces: (state, action) => {
       state.value = action.payload;
     },
-    
+
   },
 });
 
