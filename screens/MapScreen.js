@@ -5,10 +5,16 @@ import {
   Text,
   TouchableOpacity,
   ImageBackground,
+  ScrollView,
   Modal,
-  ScrollView
+  KeyboardAvoidingView,
+  TextInput,
+
 } from "react-native";
 import FontAwesome from "react-native-vector-icons/FontAwesome";
+
+import { Flex, Box, Wrap } from "@react-native-material/core";
+import { Stack } from "@react-native-material/core";
 import MapView, { Polygon, Marker, Callout, CustomMarker, PROVIDER_GOOGLE } from "react-native-maps";
 import * as Location from "expo-location";
 import { Dimensions } from 'react-native';
@@ -118,7 +124,7 @@ const handleFilter = (filter) => {
   // === GESTION DE LA MODALE ====================================================================== //
 
   const [modalVisible, setModalVisible] = useState(false);
-
+  
   const handleMarker = () => {
     setModalVisible(true);
   };
@@ -282,7 +288,9 @@ const handleFilter = (filter) => {
                   <FontAwesome name="heart" size={30} color="black" />
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.goBtn}>
-                  <FontAwesome name="location-arrow" size={40} color="blue" />
+                  <FontAwesome name="location-arrow" size={40} color="blue"  onPress={() => {
+          handleGoTo();
+        }} />
                 </TouchableOpacity>
               </View>
             </View>
@@ -321,6 +329,69 @@ const handleFilter = (filter) => {
               </TouchableOpacity>
             </View>
           </View>
+          <KeyboardAvoidingView behavior='padding' style={styles.slide2centeredView}>
+            
+            <View style={styles.slide3modalView}>
+            
+              <View>
+                <Text style={styles.slide3Tittle}>REVIEWS</Text>
+              </View>
+             
+              <ScrollView vertical style={styles.scrollUsersReview}>
+              <View styles={{height: '10%', backgroundColor: 'blue',}}>
+              <View >
+                <View style={styles.slide3User}>
+                <Text style={styles.slide3UserName}>USER1</Text>
+                <Text  style={styles.slide3Date}>28/12/2022</Text>
+                </View>
+               <View>
+                
+                <Text style={styles.slide3Description}>The Eiffel Tower is an iconic landmark located in Paris, France. It was completed in 1889 and was the tallest man-made structure in the world at the time. The tower is made of iron and stands 324 meters tall, with three levels that can be accessed by elevator or stairs.</Text></View>
+              </View>
+              <View >
+                <View style={styles.slide3User}>
+                <Text style={styles.slide3UserName}>USER1</Text>
+                <Text  style={styles.slide3Date}>28/12/2022</Text>
+                </View>
+               <View>
+                
+                <Text style={styles.slide3Description}>The Eiffel Tower is an iconic landmark located in Paris, France. It was completed in 1889 and was the tallest man-made structure in the world at the time. The tower is made of iron and stands 324 meters tall, with three levels that can be accessed by elevator or stairs.</Text></View>
+              </View>
+              <View >
+                <View style={styles.slide3User}>
+                <Text style={styles.slide3UserName}>USER1</Text>
+                <Text  style={styles.slide3Date}>28/12/2022</Text>
+                </View>
+               <View>
+                
+                <Text style={styles.slide3Description}>The Eiffel Tower is an iconic landmark located in Paris, France. It was completed in 1889 and was the tallest man-made structure in the world at the time. The tower is made of iron and stands 324 meters tall, with three levels that can be accessed by elevator or stairs.</Text></View>
+              
+              </View>
+              </View>
+              </ScrollView>
+             
+              <View style={styles.inputContainer} ><TextInput
+        style={styles.input}
+        placeholder="Add a review"
+        placeholderTextColor="#66757F"
+        maxLength='100'
+
+      />
+     
+      </View>
+      <TouchableOpacity style={styles.submitButtonReview}>
+
+<Text style={styles.textBtnSubnit}>Post review</Text>
+<TouchableOpacity style={styles.submittBtn}>
+                  <FontAwesome name="paper-plane" size={25} color="black" />
+                </TouchableOpacity>
+</TouchableOpacity>
+
+            </View>
+            
+         
+          </KeyboardAvoidingView>
+      
         </Swiper>
       </Modal>
 
@@ -342,6 +413,15 @@ const handleFilter = (filter) => {
           </TouchableOpacity>
         </ScrollView>
         </View>
+
+      {/* <Modal
+        visible={modalVisibleGoto}
+        animationType="slide"
+        transparent={true}
+        style={styles.modal}
+      >
+
+      </Modal> */}
 
 
       <MapView
@@ -647,15 +727,15 @@ const styles = StyleSheet.create({
   cardInfoMaintTitle: {
     marginTop: screenHeight * 0.05,
     textAlign: "center",
-    fontSize: 36,    
+    fontSize: 30,    
     fontWeight: "600",
-    fontFamily: "Poppins_400Regular",
+    fontFamily: "Poppins_700Bold",
    
   },
 
   cardInfoTitle: {
     lineHeight: 33,
-    fontSize: 30,
+    fontSize: 25,
     fontWeight: "600",
     fontFamily: "Poppins_400Regular",
     textAlign: "center",
@@ -705,6 +785,120 @@ justifyContent: 'center',
 alignItems: 'center',
 fontSize: 20,
   },
+
+
+
+  slide3Tittle: {
+    marginTop: screenHeight * 0.05,
+   alignContent: 'center',
+    fontSize: 30,    
+    fontWeight: "600",
+    fontFamily: "Poppins_700Bold",
+   
+    
+  },
+
+  reviewblock:{
+
+  },
+
+  slide3modalView: {
+    height: screenHeight * 0.8,
+    width: screenWidth * 0.9,
+    backgroundColor: "white",
+    borderRadius: 20,
+    marginTop: -40,
+    alignItems: "center",
+    paddingLeft: 20,
+    paddingRight: 10,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+
+  slide3User:{
+    
+    flexDirection: 'row',
+
+    paddingTop: 10,
+  },
+
+  slide3UserName:{
+    alignItems: 'flex-start',
+paddingRight: 10,
+fontFamily: 'Poppins_600SemiBold',
+fontSize: 20,
+  },
+
+
+slide3Date:{
+  paddingRight: 10,
+fontFamily: 'Poppins_400Regular',
+fontSize: 16,
+},
+
+slide3Description:{
+  fontSize: 16,
+  alignItems: 'center',justifyContent: 'center',
+  
+},
+
+scrollUsersReview:{
+  flexGrow: 0.5,
+},
+
+input:{
+  backgroundColor: '#e9f2ff',
+  paddingBottom: 120,
+    margin: 12,
+   
+    padding: 20,
+    borderRadius: 25,
+fontSize: 20,
+justifyContent: 'flex-start',
+alignItems: 'flex-start',
+
+},
+
+inputContainer:{
+  position: 'absolute',
+  top: screenHeight * 0.46,
+  bottom: 0,
+  right: 0,
+  left: 0,
+  height: '50%',
+},
+submitButtonReview:{
+
+  borderBottomColor: 'black',
+    borderWidth: 2,
+    borderRadius: 20,
+    width: screenWidth * 0.6,
+    height: screenHeight * 0.06,
+    padding: 10,
+justifyContent: 'center',
+alignItems: 'center',
+fontSize: 20,
+position: 'absolute',
+top: screenHeight * 0.69,
+flexDirection: 'row',
+
+
+
+  
+},
+
+textBtnSubnit:{
+  justifyContent: 'center',
+  alignItems: 'center',
+  fontSize: 20,
+  paddingRight: 20,
+}
 
 });
 

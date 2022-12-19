@@ -1,43 +1,61 @@
-import React, { useState } from 'react'
-import { Modal, View, Text, Button } from 'react-native'
-import Swiper from 'react-native-swiper'
+import React from 'react';
+import { View, Text, TextInput, Button } from 'react-native';
 
-const App = () => {
-  const [modalVisible1, setModalVisible1] = useState(false)
-  const [modalVisible2, setModalVisible2] = useState(false)
-  const [modalVisible3, setModalVisible3] = useState(false)
+class Reviews extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      reviews: [],
+      newReviewText: ''
+    };
+  }
 
-  return (
-    <Swiper style={{ width: "100%", height: "100%" }}>
-      <Modal visible={modalVisible1} animationType="slide">
-        <View style={{ margin: 22 }}>
-          <Text>Modal 1</Text>
-          <Button
-            title="Close"
-            onPress={() => setModalVisible1(!modalVisible1)}
-          />
-        </View>
-      </Modal>
-      <Modal visible={modalVisible2} animationType="slide">
-        <View style={{ margin: 22 }}>
-          <Text>Modal 2</Text>
-          <Button
-            title="Close"
-            onPress={() => setModalVisible2(!modalVisible2)}
-          />
-        </View>
-      </Modal>
-      <Modal visible={modalVisible3} animationType="slide">
-        <View style={{ margin: 22 }}>
-          <Text>Modal 3</Text>
-          <Button
-            title="Close"
-            onPress={() => setModalVisible3(!modalVisible3)}
-          />
-        </View>
-      </Modal>
-    </Swiper>
-  )
+  componentDidMount() {
+    // Make an API call to fetch the list of reviews
+    // and update the state with the returned data
+    fetch('/api/reviews')
+      .then(response => response.json())
+      .then(data => {
+        this.setState({ reviews: data });
+      });
+  }
+
+  handleChange(text) {
+    this.setState({ newReviewText: text });
+  }
+
+  handleSubmit() {
+    // Make an API call to submit the new review
+    // and update the state with the returned data
+    fetch('/api/reviews', {
+      method: 'POST',
+      body: JSON.stringify({ text: this.state.newReviewText }),
+      headers: { 'Content-Type': 'application/json' }
+    })
+      .then(response => response.json())
+      .then(data => {
+        this.setState({
+          reviews: [...this.state.reviews, data],
+          newReviewText: ''
+        });
+      });
+  }
+
+  render() {
+    return (
+      <View>
+        <Text>Reviews</Text>
+        {this.state.reviews.map(review => (
+          <Text key={review.id}>{review.text}</Text>
+        ))}
+        <TextInput
+          value={this.state.newReviewText}
+          onChangeText={this.handleChange.bind(this)}
+        />
+        <Button onPress={this.handleSubmit.bind(this)} title="Submit" />
+      </View>
+    );
+  }
 }
 
-export default App
+export default Reviews;
