@@ -21,7 +21,7 @@ export default function SignUpScreen({ navigation }) {
 
 
     const signupSubmit = () => {
-        fetch('http://192.168.1.113:3000/users/signup', {
+        fetch('http://192.168.1.13:3000/users/signup', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ username, email, password }),
@@ -38,6 +38,7 @@ export default function SignUpScreen({ navigation }) {
 
 
     return (
+
         <View style={styles.container} >
 
             <Image style={styles.logo} source={require('../assets/logoeiffel1.jpg')} resizeMode="contain" />

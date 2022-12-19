@@ -1,13 +1,4 @@
-import {
-  StyleSheet,
-  Image,
-  View,
-  Text,
-  TouchableOpacity,
-  ImageBackground,
-  Modal,
-  ScrollView
-} from "react-native";
+import { StyleSheet, Image, View, Text, TouchableOpacity, ImageBackground, Modal, ScrollView } from "react-native";
 import FontAwesome from "react-native-vector-icons/FontAwesome";
 import MapView, { Polygon, Marker, Callout, CustomMarker, PROVIDER_GOOGLE } from "react-native-maps";
 import * as Location from "expo-location";
@@ -92,28 +83,28 @@ export default function MapScreen({ navigation }) {
   }, []);
 
 
-    // === FETCH DE LA ROUTE BACKEND POUR RECUPERER LES PLACES A L'INITILAISATION ======================================= //
+  // === FETCH DE LA ROUTE BACKEND POUR RECUPERER LES PLACES A L'INITILAISATION ======================================= //
 
-    
-    useEffect(() => {
-      fetch(`http://192.168.1.113:3000/places/${filteredPlaces}`)
+
+  useEffect(() => {
+    fetch(`http://192.168.1.13:3000/places/${filteredPlaces}`)
       .then((response) => response.json())
       .then((data) => {
         data.result && dispatch(loadPlaces(data.places));
       });
-    },[])
+  }, [])
 
 
 
-      // === FETCH DE LA ROUTE BACKEND POUR RECUPERER LES PLACESFILTREES AU CLICK SUR UN BOUTON FILTRE ======================================= //
+  // === FETCH DE LA ROUTE BACKEND POUR RECUPERER LES PLACESFILTREES AU CLICK SUR UN BOUTON FILTRE ======================================= //
 
-const handleFilter = (filter) => {
-  fetch(`http://192.168.1.113:3000/places/${filter}`)
-  .then((response) => response.json())
-  .then((data) => {
-    data.result && dispatch(loadPlaces(data.places));
-  });
-}
+  const handleFilter = (filter) => {
+    fetch(`http://192.168.1.13:3000/places/${filter}`)
+      .then((response) => response.json())
+      .then((data) => {
+        data.result && dispatch(loadPlaces(data.places));
+      });
+  }
 
   // === GESTION DE LA MODALE ====================================================================== //
 
@@ -130,7 +121,7 @@ const handleFilter = (filter) => {
   // === GESTION DES MARQUEURS ===================================================================== //
 
 
-// CUSTOM MARKER FOR DISTRICTS (NO PHOTO)
+  // CUSTOM MARKER FOR DISTRICTS (NO PHOTO)
 
   const CustomMarker = ({ title }) => (
     <View>
@@ -140,39 +131,39 @@ const handleFilter = (filter) => {
       <View style={styles.bubbleArrowBorder}></View>
     </View>
   );
-  
-    const categoryMarker = places.map((data, i) => {
-      return (
-        <Marker
-          key={i}
-          coordinate={{ latitude: data.latitude, longitude: data.longitude }}
-          onPress={() => {
-            handleMarker();
-          }}
-        >
-          <CustomMarker title={data.name} />
-        </Marker>
-      );
-    });
+
+  const categoryMarker = places.map((data, i) => {
+    return (
+      <Marker
+        key={i}
+        coordinate={{ latitude: data.latitude, longitude: data.longitude }}
+        onPress={() => {
+          handleMarker();
+        }}
+      >
+        <CustomMarker title={data.name} />
+      </Marker>
+    );
+  });
 
 
   // CUSTOM MARKER FOR PLACES (WITH PHOTO)
-  
-      const CustomImgMarker = ({ title, image }) => (
-      <View>
-        <View style = {styles.bubble}>
-          <Image
-          style = {styles.bubbleImage}
-          source={{uri:image}}
-          />
-          <View style={styles.textMarker}>
-          <Text style = {styles.bubbleTitle}>{title}</Text>
-          </View>
+
+  const CustomImgMarker = ({ title, image }) => (
+    <View>
+      <View style={styles.bubble}>
+        <Image
+          style={styles.bubbleImage}
+          source={{ uri: image }}
+        />
+        <View style={styles.textMarker}>
+          <Text style={styles.bubbleTitle}>{title}</Text>
         </View>
-        <View style = {styles.bubbleArrowBorder}></View>
       </View>
-    );
-  
+      <View style={styles.bubbleArrowBorder}></View>
+    </View>
+  );
+
 
   const placeMarker = places.map((data, i) => {
     return (
@@ -236,11 +227,13 @@ const handleFilter = (filter) => {
         <Swiper
           loop={false}
           style={styles.wrapper}
-          paginationStyle={{ bottom: 0,
+          paginationStyle={{
+            bottom: 0,
             left: 0,
             top: screenHeight * 0.70,
-            right: 0,}
-           
+            right: 0,
+          }
+
           }
           containerStyle={{ height: 150, flex: 1 }}
         >
@@ -252,7 +245,7 @@ const handleFilter = (filter) => {
               ></ImageBackground>
 
               <View style={styles.descriptionCard}>
-              <TouchableOpacity></TouchableOpacity>
+                <TouchableOpacity></TouchableOpacity>
                 <FontAwesome
                   aria-hidden="true"
                   name="times-circle-o"
@@ -320,22 +313,24 @@ const handleFilter = (filter) => {
 
       <View style={styles.filterContainer}>
         <ScrollView horizontal={true} style={styles.scrollView}>
-          <TouchableOpacity style={styles.filterBtn} 
-          onPress={()=> {
-            handleFilter("district") 
-            setCategoryVisible(true)}}>
+          <TouchableOpacity style={styles.filterBtn}
+            onPress={() => {
+              handleFilter("district")
+              setCategoryVisible(true)
+            }}>
             <Text style={styles.filterText}>🗺️ Disctricts</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.filterBtn} onPress={()=> {
+          <TouchableOpacity style={styles.filterBtn} onPress={() => {
             handleFilter("monuments")
-            setCategoryVisible(false)}}>
+            setCategoryVisible(false)
+          }}>
             <Text style={styles.filterText}>🏰 Monuments</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.filterBtn}>
             <Text style={styles.filterText}>🕍 Churches</Text>
           </TouchableOpacity>
         </ScrollView>
-        </View>
+      </View>
 
 
       <MapView
@@ -350,7 +345,7 @@ const handleFilter = (filter) => {
         style={styles.map}
       >
         {districtArea}
-        {categoryVisible? categoryMarker : placeMarker} 
+        {categoryVisible ? categoryMarker : placeMarker}
       </MapView>
     </View>
   );
@@ -369,7 +364,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-   
+
   },
   modalView: {
     ...Platform.select({
@@ -452,7 +447,7 @@ const styles = StyleSheet.create({
     left: screenWidth * 0.77,
   },
   modal: {
-    height:  10,
+    height: 10,
   },
 
   bubbleCategory: {
@@ -494,10 +489,10 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 5,
   },
-  textMarker:{
-    width:'55%',
-    justifyContent:'center',
-    alignItems:"center"
+  textMarker: {
+    width: '55%',
+    justifyContent: 'center',
+    alignItems: "center"
   },
   bubbleTitle: {
     fontSize: 14,
@@ -523,11 +518,11 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   bubbleImage: {
-    alignSelf:"center",
-    height:60,
-    width:60,
-    borderRadius:10,
-    marginRight:10
+    alignSelf: "center",
+    height: 60,
+    width: 60,
+    borderRadius: 10,
+    marginRight: 10
   },
 
   filterContainer: {
@@ -537,18 +532,18 @@ const styles = StyleSheet.create({
     backgroundColor: 'pink',
   },
   filterBtn: {
-    alignItems:"center",
-    justifyContent:"center",
-    backgroundColor:"#EA9774",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#EA9774",
     width: 150,
     height: 60,
-    top:50,
-    borderRadius:20,
-    margin:15,
+    top: 50,
+    borderRadius: 20,
+    margin: 15,
   },
-  filterText:{
-    color:"white",
-    fontWeight:"bold",
+  filterText: {
+    color: "white",
+    fontWeight: "bold",
   },
   cardTittle: {
     position: "absolute",
@@ -641,10 +636,10 @@ const styles = StyleSheet.create({
   cardInfoMaintTitle: {
     marginTop: screenHeight * 0.05,
     textAlign: "center",
-    fontSize: 36,    
+    fontSize: 36,
     fontWeight: "600",
     fontFamily: "Poppins_400Regular",
-   
+
   },
 
   cardInfoTitle: {
@@ -654,7 +649,7 @@ const styles = StyleSheet.create({
     fontFamily: "Poppins_400Regular",
     textAlign: "center",
     paddingTop: 20,
-   
+
   },
 
   cardInfoText: {
@@ -664,40 +659,40 @@ const styles = StyleSheet.create({
     width: 400,
     height: screenHeight * 0.04,
     textAlign: 'center',
-    
+
   },
 
-  cardInfoMaintTitleBLock:{
+  cardInfoMaintTitleBLock: {
     borderBottomColor: 'red',
     borderBottomWidth: 2,
     height: '13%',
   },
 
-  cardInfoOpeningHours:{
+  cardInfoOpeningHours: {
     height: screenHeight * 0.13,
 
   },
 
-  cardInfoTickets:{
+  cardInfoTickets: {
     height: screenHeight * 0.26,
   },
 
-  cardInfoTips:{
+  cardInfoTips: {
     height: screenHeight * 0.195,
-    
-    },
 
-  cardInfoBtn:{
-    
+  },
+
+  cardInfoBtn: {
+
     borderBottomColor: 'black',
     borderWidth: 2,
     borderRadius: 20,
     width: screenWidth * 0.6,
     height: screenHeight * 0.06,
     padding: 10,
-justifyContent: 'center',
-alignItems: 'center',
-fontSize: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    fontSize: 20,
   },
 
 });

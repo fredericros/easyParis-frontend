@@ -1,14 +1,7 @@
-import {
-  TextInput,
-  StyleSheet,
-  Image,
-  Text,
-  View,
-  TouchableOpacity,
-} from "react-native";
+import { TextInput, StyleSheet, Image, Text, View, TouchableOpacity, } from "react-native";
 import React from "react";
 import { useState } from "react";
-import { login, logout} from "../reducers/user";
+import { login, logout } from "../reducers/user";
 
 //Import SignIn
 import { useDispatch, useSelector } from "react-redux";
@@ -21,68 +14,46 @@ export default function SigninScreen({ navigation }) {
   const user = useSelector((state) => state.user.value);
 
   const signinSubmit = () => {
-    fetch("http://192.168.1.113:3000/users/signin", {
+    fetch("http://192.168.1.13:3000/users/signin", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username, password }),
     })
       .then((response) => response.json())
       .then((data) => {
-       if(data.result) {
-           dispatch(login({ token: data.token, username: data.username }));
+        if (data.result) {
+          dispatch(login({ token: data.token, username: data.username }));
         } else {
-            dispatch(login({ signinError: data.error }))
-        } 
+          dispatch(login({ signinError: data.error }))
+        }
       });
   };
 
   return (
-    <View style={styles.container}>
-      <Image
-        style={styles.logo}
-        source={require("../assets/logoeiffel1.jpg")}
-        resizeMode="contain"
-      />
+    <NavigationContainer>
+      <View style={styles.container}>
+        <Image style={styles.logo} source={require("../assets/logoeiffel1.jpg")} resizeMode="contain" />
 
-      <TouchableOpacity
-        onPress={() => {
-            navigation.navigate("SignUp")
-            dispatch(logout())
-        }}
-        style={styles.button}
-        activeOpacity={0.8}
-      >
-        <Text style={styles.text}>Sign up</Text>
-      </TouchableOpacity>
-      <Text style={styles.barre}></Text>
+        <TouchableOpacity onPress={() => {
+          navigation.navigate("SignUp")
+          dispatch(logout())
+        }} style={styles.button} activeOpacity={0.8}>
+          <Text style={styles.text}>Sign up</Text>
+        </TouchableOpacity>
+        <Text style={styles.barre}></Text>
 
-      <TextInput
-        onChangeText={(value) => setUsername(value)}
-        value={username}
-        style={styles.buttonsignin}
-        placeholder=" Username"
-        activeOpacity={0.8}
-      />
+        <TextInput onChangeText={(value) => setUsername(value)} value={username} style={styles.buttonsignin} placeholder=" Username" activeOpacity={0.8} />
 
-      <TextInput
-        onChangeText={(value) => setPassword(value)}
-        value={password}
-        style={styles.buttonsignin}
-        placeholder=" Password"
-        activeOpacity={0.8}
-      />
+        <TextInput onChangeText={(value) => setPassword(value)} value={password} style={styles.buttonsignin} placeholder=" Password" activeOpacity={0.8} />
 
-      <TouchableOpacity
-        onPress={() => signinSubmit()}
-        style={styles.button}
-        activeOpacity={0.8}
-      >
-        <Text style={styles.text}>Sign In</Text>
-      </TouchableOpacity>
-      <Text style={styles.error}>{user.signinError}</Text>
+        <TouchableOpacity onPress={() => signinSubmit()} style={styles.button} activeOpacity={0.8}>
+          <Text style={styles.text}>Sign In</Text>
+        </TouchableOpacity>
+        <Text style={styles.error}>{user.signinError}</Text>
 
 
-    </View>
+      </View>
+    </NavigationContainer>
   );
 }
 
@@ -135,5 +106,5 @@ const styles = StyleSheet.create({
   error: {
     margin: 10,
     color: 'red',
-},
+  },
 });

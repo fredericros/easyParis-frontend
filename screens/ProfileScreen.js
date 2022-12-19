@@ -1,4 +1,3 @@
-
 import { Button, Image, KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View, ScrollView, FlatList } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -17,7 +16,8 @@ const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
 export default function ProfileScreen({ navigation }) {
-
+    const [username, setUsername] = useState('');
+    const hasToken = false;
     /*----------------------------------- IMAGE PICKER -----------------------------------*/
     const [image, setImage] = useState(null);
 
@@ -55,7 +55,6 @@ export default function ProfileScreen({ navigation }) {
     /*----------------------------------- FIN IMAGE PICKER -----------------------------------*/
 
     const dispatch = useDispatch();
-    const user = useSelector((state) => state.user.value) 
 
 
     const Page = () => {
@@ -80,41 +79,50 @@ export default function ProfileScreen({ navigation }) {
 
 
     return (
-        <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-                <View style={styles.borderContainer}>
-                    <View style={styles.border}>
-                        <Button title="+Add picture" onPress={PickImage} style={{ width: 200, height: 200 }} activeOpacity={0.5}> <Text style={styles.add}>+Add picture</Text></Button>
 
-                        {Image && <Image source={{ uri: image }} style={styles.add} />}
-                        {/* <Text onPress={() => navigation.navigate('SignIn')} style={styles.add} activeOpacity={0.5}>+ Add picture</Text> */}
-                    </View>
 
-                    <View style={styles.containerProfil}>
-                        <Text style={styles.welcome}>Welcome,</Text>
-                        <Text style={styles.name}>{user.username}</Text>
-                        <View style={styles.logoutContainer}>
-                            <Text onPress={() => { dispatch(logout()); navigation.navigate('Home'); console.log('ok') }} style={styles.logout}>Logout</Text>
+        <NavigationContainer>
+            <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+                {!hasToken && navigation.navigate('Signin')
+                    ||
+                    <View style={styles.borderContainer}>
+                        <View style={styles.border}>
+
+
+                            {Image && <Image source={{ uri: image }} style={styles.add} />}
+                            {/* <Text onPress={() => navigation.navigate('SignIn')} style={styles.add} activeOpacity={0.5}>+ Add picture</Text> */}
+                            <Button title="+Add picture" onPress={PickImage} style={{ width: 200, height: 200 }} activeOpacity={0.5}><Text style={styles.add}></Text></Button>
+                        </View>
+
+                        <View style={styles.containerProfil}>
+                            <Text style={styles.welcome}>Welcome,</Text>
+                            <Text style={
+                                styles.name
+                            }>user name</Text>
+                            <View style={styles.logoutContainer}>
+                                <Text onPress={() => { dispatch(logout()); navigation.navigate('Signin'); console.log('ok') }} style={styles.logout}>Logout</Text>
+                            </View>
+                        </View>
+
+                        <View style={styles.descriptionBackground}>
+                            <View style={styles.descriptionContainer}>
+                                <Text style={styles.descriptionbutton}>Description</Text>
+                                <Text style={styles.editButton}>Edit</Text>
+                            </View>
+                            <TextInput style={styles.containerAboutYou} placeholder="About me" />
+                        </View>
+
+                        <View style={styles.reviewBackground}>
+                            <View style={styles.descriptionContainer}>
+                                <Text style={styles.descriptionbutton}>My Reviews</Text>
+                                <Text style={styles.editButton}>0</Text>
+                            </View>
+                            <Text style={styles.containerAboutYou}></Text>
                         </View>
                     </View>
-
-                    <View style={styles.descriptionBackground}>
-                        <View style={styles.descriptionContainer}>
-                            <Text style={styles.descriptionbutton}>Description</Text>
-                            <Text style={styles.editButton}>Edit</Text>
-                        </View>
-                        <TextInput style={styles.containerAboutYou} placeholder="About me" />
-                    </View>
-
-                    <View style={styles.reviewBackground}>
-                        <View style={styles.descriptionContainer}>
-                            <Text style={styles.descriptionbutton}>My Reviews</Text>
-                            <Text style={styles.editButton}>0</Text>
-                        </View>
-                        <Text style={styles.containerAboutYou}></Text>
-                    </View>
-                </View>
-
-        </KeyboardAvoidingView >
+                }
+            </KeyboardAvoidingView >
+        </NavigationContainer>
     );
 }
 
@@ -144,16 +152,20 @@ const styles = StyleSheet.create({
         backgroundColor: "#rgba(158, 202, 241, .4)",
         justifyContent: "center",
         alignItems: "center",
-        height: 160,
-        width: 160,
-        marginTop: 50,
+        height: 140,
+        width: 140,
+        marginTop: 40,
         marginLeft: -10,
+        marginBottom: 20,
     },
+
     add: {
         // borderWidth: 4,
         // borderColor: "#1E90FF",
         backgroundColor: "none",
-        padding: 50,
+        marginTop: 30,
+        padding: 72,
+        paddingBottom: 70,
         borderRadius: 80
     },
     containerProfil: {
@@ -227,7 +239,6 @@ const styles = StyleSheet.create({
         textAlign: "center",
         fontSize: 20,
         flexWrap: "nowrap",
-
     },
     containerAboutYou: {
         paddingLeft: 10,
@@ -246,4 +257,3 @@ const styles = StyleSheet.create({
         borderRadius: 30,
     },
 });
-
