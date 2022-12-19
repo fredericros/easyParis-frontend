@@ -283,10 +283,7 @@ const handleFilter = (filter) => {
                   <FontAwesome name="heart" size={30} color="black" />
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.goBtn}>
-                  <FontAwesome name="location-arrow" size={40} color="blue" onPress={() => {
-            navigation.navigate("DirectionMapScreen")
-            handleClose()
-        }}/>
+                  <FontAwesome name="location-arrow" size={40} color="blue"/>
                 </TouchableOpacity>
               </View>
             </View>
