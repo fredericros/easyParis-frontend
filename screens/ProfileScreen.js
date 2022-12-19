@@ -55,6 +55,7 @@ export default function ProfileScreen({ navigation }) {
     /*----------------------------------- FIN IMAGE PICKER -----------------------------------*/
 
     const dispatch = useDispatch();
+    const user = useSelector((state) => state.user.value) 
 
 
     const Page = () => {
@@ -90,7 +91,7 @@ export default function ProfileScreen({ navigation }) {
 
                     <View style={styles.containerProfil}>
                         <Text style={styles.welcome}>Welcome,</Text>
-                        <Text style={styles.name}>user name</Text>
+                        <Text style={styles.name}>{user.username}</Text>
                         <View style={styles.logoutContainer}>
                             <Text onPress={() => { dispatch(logout()); navigation.navigate('Home'); console.log('ok') }} style={styles.logout}>Logout</Text>
                         </View>
