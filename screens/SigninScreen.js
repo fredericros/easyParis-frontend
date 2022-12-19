@@ -21,7 +21,7 @@ export default function SigninScreen({ navigation }) {
   const user = useSelector((state) => state.user.value);
 
   const signinSubmit = () => {
-    fetch("http://192.168.1.113:3000/users/signin", {
+    fetch("http://192.168.10.153:3000/users/signin", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username, password }),
