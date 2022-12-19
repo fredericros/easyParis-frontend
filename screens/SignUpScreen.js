@@ -1,38 +1,61 @@
-import { StatusBar } from 'expo-status-bar';
 import { TextInput, ImageBackground, StyleSheet, Image, Text, View, TouchableOpacity } from 'react-native';
-import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import React from "react";
-import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { useState } from "react";
 
-const Stack = createNativeStackNavigator();
-const Tab = createBottomTabNavigator();
+//Import SignUp
+import { useDispatch, useSelector } from 'react-redux';
+import { login } from '../reducers/user';
+
+//Constante pour définir la bonne écriture de l'adresse mail
+const EMAIL_REGEX = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+
 
 export default function SignUpScreen({ navigation }) {
+
+    const [email, setEmail] = useState('');
+    const [username, setUsername] = useState('');
+    const [password, setPassword] = useState('');
+
+    const dispatch = useDispatch();
+    const user = useSelector((state) => state.user.value);
+
+
+    const signupSubmit = () => {
+        fetch('http://192.168.10.177:3000/users/signup', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, email, password }),
+        }).then(response => response.json())
+            .then(data => {
+                if (data.result) {
+                    dispatch(login({ token: data.token, username, email }));
+                    navigation.navigate('Home', { screen: 'Profile' });
+                } else {
+                    dispatch(login({ signupError: data.error }))
+                }
+            });
+    };
+
+
     return (
-
-
         <View style={styles.container} >
-            <TouchableOpacity onPress={() => navigation.navigate('SignIn')} style={styles.back}>
-                <Text> Back to home</Text>
-            </TouchableOpacity>
 
             <Image style={styles.logo} source={require('../assets/logoeiffel1.jpg')} resizeMode="contain" />
 
-            <TextInput style={styles.buttonsignin} placeholder="Username" activeOpacity={0.8} />
+            <TextInput style={styles.buttonsignin} onChangeText={(value) => setUsername(value)} value={username} placeholder="Username" activeOpacity={0.8} />
 
-            <TextInput style={styles.buttonsignin} placeholder="Email" activeOpacity={0.8} />
+            <TextInput style={styles.buttonsignin} onChangeText={(value) => setEmail(value)} value={email} placeholder="Email" activeOpacity={0.8} />
 
-            <TextInput style={styles.buttonsignin} placeholder="Password" activeOpacity={0.8} />
+            <TextInput style={styles.buttonsignin} onChangeText={(value) => setPassword(value)} value={password} placeholder="Password" activeOpacity={0.8} />
 
-            <TouchableOpacity onPress={() => navigation.navigate('Home')} style={styles.button} activeOpacity={0.8}>
+            <TouchableOpacity onPress={() => signupSubmit()} style={styles.button} activeOpacity={0.8}>
                 <Text style={styles.signup}>Sign up</Text>
             </TouchableOpacity>
+            <Text style={styles.error}>{user.signupError}</Text>
+
         </View>
     );
 }
-
 const styles = StyleSheet.create({
     container: {
         flex: 1,
@@ -142,6 +165,9 @@ const styles = StyleSheet.create({
         color: "white",
         fontWeight: "bold",
         fontSize: 20
-    }
-
-}); 
+    },
+    error: {
+        marginTop: 10,
+        color: 'red',
+    },
+});

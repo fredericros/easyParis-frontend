@@ -4407,6 +4407,11 @@ dot-prop@^5.2.0:
   dependencies:
     is-obj "^2.0.0"
 
+dotenv@^16.0.3:
+  version "16.0.3"
+  resolved "https://registry.yarnpkg.com/dotenv/-/dotenv-16.0.3.tgz#115aec42bac5053db3c456db30cc243a5a836a07"
+  integrity sha512-7GO6HghkA5fYG9TYnNxi14/7K9f5occMlp3zXAuSxn7CKCxt9xbNWG7yF8hTCSUchlfWSe3uLmlPfigevRItzQ==
+
 duplexer@^0.1.1:
   version "0.1.2"
   resolved "https://registry.npmjs.org/duplexer/-/duplexer-0.1.2.tgz"
@@ -4755,6 +4760,19 @@ expo-font@~11.0.1:
   integrity sha512-LGAIluWZfru0J0n87dzb6pwAB6TVMTEiLcsd/ktozzbn4DlN7SeQy40+ruU6bvAKCOGrnRneYbKSIOGkrd7oNg==
   dependencies:
     fontfaceobserver "^2.1.0"
+
+expo-image-loader@~4.0.0:
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/expo-image-loader/-/expo-image-loader-4.0.0.tgz#a17e5f95a4c1671791168dd5dfc221bf2f88480c"
+  integrity sha512-hVMhXagsO1cSng5s70IEjuJAuHy2hX/inu5MM3T0ecJMf7L/7detKf22molQBRymerbk6Tzu+20h11eU0n/3jQ==
+
+expo-image-picker@~14.0.2:
+  version "14.0.2"
+  resolved "https://registry.yarnpkg.com/expo-image-picker/-/expo-image-picker-14.0.2.tgz#a611a43142be4c6f763ee39efd80e55f5a414ed7"
+  integrity sha512-dC0efykReusbjOtcvXYagABrVuwuOFwTfEx87VNjCZejig5aIPPj14UsViSV7xEQ+wkHvVnxyirox5xIbD196w==
+  dependencies:
+    expo-image-loader "~4.0.0"
+    uuid "7.0.2"
 
 expo-keep-awake@~11.0.1:
   version "11.0.1"
@@ -10851,6 +10869,11 @@ utils-merge@1.0.1:
   version "1.0.1"
   resolved "https://registry.npmjs.org/utils-merge/-/utils-merge-1.0.1.tgz"
   integrity sha512-pMZTvIkT1d+TFGvDOqodOclx0QWkkgi6Tdoa8gC8ffGAAqz9pzPTZWAybbsHHoED/ztMtkv/VoYTYyShUn81hA==
+
+uuid@7.0.2:
+  version "7.0.2"
+  resolved "https://registry.yarnpkg.com/uuid/-/uuid-7.0.2.tgz#7ff5c203467e91f5e0d85cfcbaaf7d2ebbca9be6"
+  integrity sha512-vy9V/+pKG+5ZTYKf+VcphF5Oc6EFiu3W8Nv3P3zIh0EqVI80ZxOzuPfe9EHjkFNvf8+xuTHVeei4Drydlx4zjw==
 
 uuid@^3.1.0, uuid@^3.3.2, uuid@^3.4.0:
   version "3.4.0"
