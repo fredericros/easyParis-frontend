@@ -285,7 +285,7 @@ const handleFilter = (filter) => {
                 <TouchableOpacity style={styles.goBtn}>
                   <FontAwesome name="location-arrow" size={40} color="blue" onPress={() => {
             navigation.navigate("DirectionMapScreen")
-            
+            handleClose()
         }}/>
                 </TouchableOpacity>
               </View>
@@ -381,13 +381,12 @@ const handleFilter = (filter) => {
                   onPress={() => handleClose()}
                   style={styles.closeBtnSlide2}
                 />
-              <View style={styles.inputContainer} ><TextInput
+              <View style={styles.inputContainer}>
+                <TextInput
         style={styles.input}
         placeholder="Add a review"
         placeholderTextColor="#66757F"
-        maxLength='100'
-
-      />
+        maxLength={100}/>
      
       </View>
       <TouchableOpacity style={styles.submitButtonReview}>

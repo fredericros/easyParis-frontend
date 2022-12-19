@@ -1,33 +1,52 @@
-import React, { useEffect, useState } from 'react';
-import MapViewDirections from 'react-native-maps-directions';
-import MapView, { Region } from 'react-native-maps';
-import { Dimensions } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, Dimensions } from 'react-native';
+import MapView, { MapViewDirections, Marker } from 'react-native-maps';
 
-const origin = { latitude: 37.3318456, longitude: -122.0296002 };
-const destination = { latitude: 37.771707, longitude: -122.4053769 };
-const GOOGLE_MAPS_APIKEY = 'AIzaSyBq886HaWXuK9TwHlP6Dc-Ze6Ur0KmdOtY';
+const screenWidth = Dimensions.get('window').width;
+const screenHeight = Dimensions.get('window').height;
 
-const DirectionMapScreen = () => {
-  const [region, setRegion] = useState<Region>({
-    latitude: origin.latitude,
-    longitude: origin.longitude,
-    latitudeDelta: 0.22,
-    longitudeDelta: 0.22 * (Dimensions.get('window').width / Dimensions.get('window').height),
-  });
+export default function DirectionMapScreen() {
+  const [coordinates] = useState([
+    {
+      latitude: 48.8587741,
+      longitude: 2.2069771,
+    },
+    {
+      latitude: 48.8323785,
+      longitude: 2.3361663,
+    },
+  ]);
 
   return (
-    <MapView initialRegion={region} style={{ flex: 1 }}>
-      <MapViewDirections
-        strokeColor="hotpink"
-        onStart={(params) => {
-          console.log(`Started routing between "${params.origin}" and "${params.destination}"`);
-        }}
-        origin={origin}
-        destination={destination}
-        apikey={GOOGLE_MAPS_APIKEY}
-      />
-    </MapView>
+    <View style={styles.container}>
+      <MapView
+        style={styles.maps}
+        initialRegion={{
+          latitude: coordinates[0].latitude,
+          longitude: coordinates[0].longitude,
+          latitudeDelta: 0.0622,
+          longitudeDelta: 0.0121,
+        }}>
+        <MapViewDirections
+          origin={coordinates[0]}
+          destination={coordinates[1]}
+          apikey={'AIzaSyBq886HaWXuK9TwHlP6Dc-Ze6Ur0KmdOtY'} // insert your API Key here
+          strokeWidth={4}
+          strokeColor="#111111"
+        />
+        <Marker coordinate={coordinates[0]} />
+        <Marker coordinate={coordinates[1]} />
+      </MapView>
+    </View>
   );
-};
+}
 
-export default DirectionMapScreen;
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  maps: {
+    width: screenWidth,
+    height: screenHeight,
+  },
+});
