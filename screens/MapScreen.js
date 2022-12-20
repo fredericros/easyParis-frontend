@@ -214,19 +214,19 @@ let cardTips;
 if (actualPlace) {
   cardHours = actualPlace.hours.map((data,i) => {
     return (
-      <Text key={i} style={styles.cardInfoText}>{data}</Text>
+      <Text key={i} adjustsFontSizeToFit={true} numberOfLines={2} style={styles.cardInfoText}>{data}</Text>
     )
   })
   
   cardPrices = actualPlace.priceRange.map((data,i) => {
     return (
-      <Text key={i} style={styles.cardInfoText}>{data}</Text>
+      <Text key={i} adjustsFontSizeToFit={true} numberOfLines={2} style={styles.cardInfoText}>{data}</Text>
     )
   })
   
   cardTips = actualPlace.tips.map((data,i) => {
     return (
-      <Text key={i} style={styles.cardInfoText}>{data}</Text>
+      <Text key={i} adjustsFontSizeToFit={true} numberOfLines={2} style={styles.cardInfoText}>{data}</Text>
     )
   })
 }
