@@ -23,6 +23,7 @@ import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { loadPlaces } from "../reducers/places";
 import { loadActualPlace } from "../reducers/actualPlaces";
+import DirectionMapScreen from '../screens/DirectionMapScreen'
 
 import {
   useFonts,
@@ -104,7 +105,7 @@ export default function MapScreen({ navigation }) {
 
     
     useEffect(() => {
-      fetch(`http:/192.168.1.5:3000/places/${filteredPlaces}`)
+      fetch(`http:/192.168.10.167:3000/places/${filteredPlaces}`)
       .then((response) => response.json())
       .then((data) => {
         data.result && dispatch(loadPlaces(data.places));
@@ -116,7 +117,7 @@ export default function MapScreen({ navigation }) {
       // === FETCH DE LA ROUTE BACKEND POUR RECUPERER LES PLACESFILTREES AU CLICK SUR UN BOUTON FILTRE ======================================= //
 
 const handleFilter = (filter) => {
-  fetch(`http://192.168.1.5:3000/places/${filter}`)
+  fetch(`http://192.168.10.167:3000/places/${filter}`)
   .then((response) => response.json())
   .then((data) => {
     data.result && dispatch(loadPlaces(data.places));
@@ -304,15 +305,16 @@ const cardTips = actualPlace.map((data,i) => {
                 <FontAwesome name="heart" size={30} color="black" />
               </TouchableOpacity>
               <TouchableOpacity style={styles.goBtn}>
-                <FontAwesome name="location-arrow" size={40} color="blue"  onPress={() => {
-        handleGoTo();
-      }} />
+                <FontAwesome name="location-arrow" size={40} color="blue"   onPress={() => {
+            navigation.navigate("DirectionMapScreen")
+            handleClose()
+        }}/>
               </TouchableOpacity>
             </View>
           </View>
         </SafeAreaView>
 
-        <View style={styles.slide2centeredView}>
+        <SafeAreaView style={styles.slide2centeredView}>
           <View style={styles.slide2modalView}>
             <View style={styles.cardInfoMaintTitleBLock}>
               <Text style={styles.cardInfoMaintTitle}>INFORMATION</Text>
@@ -353,18 +355,18 @@ const cardTips = actualPlace.map((data,i) => {
               <Text>GO TO WEBSITE</Text>
             </TouchableOpacity>
           </View>
-        </View>
+        </SafeAreaView>
         <KeyboardAvoidingView behavior='padding' style={styles.slide2centeredView}>
-          
-          <View style={styles.slide3modalView}>
-          
-            <View>
+     
+          <SafeAreaView style={styles.slide3modalView}>
+          <View>
+           
               <Text style={styles.slide3Tittle}>REVIEWS</Text>
             </View>
            
             <ScrollView vertical style={styles.scrollUsersReview}>
             <View styles={{height: '10%', backgroundColor: 'blue',}}>
-            <View >
+            <View>
               <View style={styles.slide3User}>
               <Text style={styles.slide3UserName}>USER1</Text>
               <Text  style={styles.slide3Date}>28/12/2022</Text>
@@ -420,8 +422,8 @@ const cardTips = actualPlace.map((data,i) => {
               </TouchableOpacity>
 </TouchableOpacity>
 
-          </View>
-          
+          </SafeAreaView>
+       
        
         </KeyboardAvoidingView>
     
@@ -688,7 +690,6 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     fontSize: 18,
     width: "85%",
-    paddingTop: 90,
     textAlign: "left",
   },
   heartBtn: {
@@ -854,26 +855,20 @@ fontSize: 20,
     
   },
 
-  reviewblock:{
 
-  },
 
   slide3modalView: {
-    ...Platform.select({
+   ...Platform.select({
       android: {
         height: screenHeight * 0.9,
         width: screenWidth * 0.9,
         backgroundColor: "white",
         borderRadius: 20,
-        marginTop: -10,
-        paddingRight: 15,
-        paddingLeft: 15,
         alignItems: "center",
         shadowColor: "#000",
         shadowOffset: {
           width: 0,
           height: 2,
-
         },
         shadowOpacity: 0.25,
         shadowRadius: 4,
@@ -884,9 +879,6 @@ fontSize: 20,
         width: screenWidth * 0.9,
         backgroundColor: "white",
         borderRadius: 20,
-        marginTop: -10,
-        paddingRight: 15,
-        paddingLeft: 15,
         alignItems: "center",
         shadowColor: "#000",
         shadowOffset: {
@@ -902,7 +894,9 @@ fontSize: 20,
 
   slide3UserName:{
     paddingTop: 15,
-    alignItems: 'flex-start',
+    paddingLeft: 15,
+    paddingRight: 15,
+    alignItems: 'baseline',
 paddingRight: 10,
 fontFamily: 'Poppins_600SemiBold',
 fontSize: 20,
@@ -910,7 +904,8 @@ fontSize: 20,
 
 
 slide3Date:{
-  paddingRight: 10,
+  paddingTop: 15,
+ alignItems: 'baseline',
 fontFamily: 'Poppins_400Regular',
 fontSize: 16,
 },
@@ -918,6 +913,8 @@ fontSize: 16,
 slide3Description:{
   fontSize: 16,
   alignItems: 'center',justifyContent: 'center',
+  paddingLeft: 15,
+  paddingRight: 15,
   
 },
 
@@ -929,7 +926,6 @@ input:{
   backgroundColor: '#e9f2ff',
   paddingBottom: 120,
     margin: 12,
-   
     padding: 20,
     borderRadius: 25,
 fontSize: 20,
@@ -977,6 +973,17 @@ closeBtnSlide2:{
     position: "absolute",
     bottom: screenHeight * 0.82,
     left: screenWidth * 0.77,
+},
+
+viewBlock:{
+  paddingLeft: 15,
+  paddingRight: 15,
+},
+
+slide3User: {
+  flexDirection: 'row',
+  alignItems: 'center',
+ 
 }
 
 });
