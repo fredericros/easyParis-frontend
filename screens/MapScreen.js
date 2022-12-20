@@ -82,10 +82,10 @@ export default function MapScreen({ navigation }) {
 
   const dispatch = useDispatch();
   const places = useSelector((state) => state.places.value);
-  const actualPlace = useSelector((state)=> state.actualPlaces.value)
+
   const [filteredPlaces, setFilteredPlaces] = useState("district");
   const [categoryVisible, setCategoryVisible] = useState(true);
-
+  const [actualPlace, setActualPlace] = useState(null)
 
   // === USEEFFECT D'INITIALISATION, DEMANDE DE l'AUTORISATION DE TRACAGE GPS ===================== //
 
@@ -104,7 +104,7 @@ export default function MapScreen({ navigation }) {
 
     
     useEffect(() => {
-      fetch(`http:/192.168.10.153:3000/places/${filteredPlaces}`)
+      fetch(`http://192.168.10.172:3000/places/${filteredPlaces}`)
       .then((response) => response.json())
       .then((data) => {
         data.result && dispatch(loadPlaces(data.places));
@@ -116,7 +116,7 @@ export default function MapScreen({ navigation }) {
       // === FETCH DE LA ROUTE BACKEND POUR RECUPERER LES PLACESFILTREES AU CLICK SUR UN BOUTON FILTRE ======================================= //
 
 const handleFilter = (filter) => {
-  fetch(`http://192.168.10.153:3000/places/${filter}`)
+  fetch(`http://192.168.10.172:3000/places/${filter}`)
   .then((response) => response.json())
   .then((data) => {
     data.result && dispatch(loadPlaces(data.places));
@@ -158,8 +158,8 @@ const handleFilter = (filter) => {
           key={i}
           coordinate={{ latitude: data.latitude, longitude: data.longitude }}
           onPress={() => {
+            setActualPlace(data)
             handleMarker();
-            dispatch(loadActualPlace(data))
           }}
         >
           <CustomMarker title={data.title} />
@@ -192,8 +192,8 @@ const handleFilter = (filter) => {
         key={i}
         coordinate={{ latitude: data.latitude, longitude: data.longitude }}
         onPress={() => {
+          setActualPlace(data)
           handleMarker();
-          dispatch(loadActualPlace(data))
         }}
       >
         <CustomImgMarker title={data.title} image={data.photo} />
@@ -206,6 +206,29 @@ const handleFilter = (filter) => {
   // === GESTION DES CARDS ===================================================================== //
 
 
+let cardHours;
+let cardPrices;
+let cardTips;
+
+if (actualPlace) {
+  cardHours = actualPlace.hours.map((data,i) => {
+    return (
+      <Text key={i} style={styles.cardInfoText}>{data}</Text>
+    )
+  })
+  
+  cardPrices = actualPlace.priceRange.map((data,i) => {
+    return (
+      <Text key={i} style={styles.cardInfoText}>{data}</Text>
+    )
+  })
+  
+  cardTips = actualPlace.tips.map((data,i) => {
+    return (
+      <Text key={i} style={styles.cardInfoText}>{data}</Text>
+    )
+  })
+}
 
 
   // === GESTION DES QUARTIERS ===================================================================== //
@@ -236,10 +259,10 @@ const handleFilter = (filter) => {
   })
 
 
-
   // === RETURN ================================================================================ //
 
   return (
+
     <View style={styles.container}>
         <Modal
       visible={modalVisible}
@@ -261,7 +284,7 @@ const handleFilter = (filter) => {
         <View style={styles.centeredView}>
           <View style={styles.modalView}>
             <ImageBackground
-              source={{uri: actualPlace.photo}}
+              source={actualPlace && {uri: actualPlace.photo}}
               style={styles.backgroundImage}
             ></ImageBackground>
 
@@ -276,10 +299,10 @@ const handleFilter = (filter) => {
                 style={styles.closeBtn}
               />
               {/* here we will need to add a map to add costom name */}
-              <Text style={styles.cardTittle}>{actualPlace.title}</Text>
+              <Text style={styles.cardTittle}>{actualPlace && actualPlace.title}</Text>
               {/* This is for the text about the place = alsi needs mao */}
               <Text style={styles.cardText}>
-              {actualPlace.description}
+              {actualPlace && actualPlace.description}
               </Text>
               <TouchableOpacity style={styles.heartBtn}>
                 <FontAwesome name="heart" size={30} color="black" />
@@ -308,25 +331,16 @@ const handleFilter = (filter) => {
                 />
             <View style={styles.cardInfoOpeningHours}>
               <Text style={styles.cardInfoTitle}>⏱ OPENING HOURS</Text>
-              <Text style={styles.cardInfoText}>• 9.30am to 10.45pm</Text>
-              <Text style={styles.cardInfoText}>• The stairs close at 6pm</Text>
+              {cardHours}
             </View>
             <View style={styles.cardInfoTickets}>
               <Text style={styles.cardInfoTitle}>🎟️ Tickets and Prices</Text>
-              <Text style={styles.cardInfoText}>• Lift to 2nd floor: from 4,30€ to 17,10€</Text>
-              <Text style={styles.cardInfoText}>• Lift to top: from 6,70€ to 26,80€</Text>
-              <Text style={styles.cardInfoText}>• Stairs 2nd floor: from 2,70€ to 10,70€</Text>
-              <Text style={styles.cardInfoText}>
-                • Stairs 2nd + Lift to top: from 5,10€ to 20,40€
-              </Text>
+              {cardPrices}
               <Text style={styles.cardInfoText}>• Ticket to top + Champagne: 45,80€</Text>
             </View>
-
             <View style={styles.cardInfoTips}>
               <Text style={styles.cardInfoTitle}>✅ Tips</Text>
-              <Text style={styles.cardInfoText}>• Buy your tickets in advance</Text>
-              <Text style={styles.cardInfoText}>• Be aware of the security checks</Text>
-              <Text style={styles.cardInfoText}>• Dress warmly if you go to the top</Text>
+              {cardTips}
             </View>
 
             <TouchableOpacity style={styles.cardInfoBtn}>

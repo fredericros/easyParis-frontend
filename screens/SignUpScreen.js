@@ -21,7 +21,7 @@ export default function SignUpScreen({ navigation }) {
 
 
     const signupSubmit = () => {
-        fetch('http://192.168.10.153:3000/users/signup', {
+        fetch('http://192.168.10.172:3000/users/signup', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ username, email, password }),
