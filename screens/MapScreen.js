@@ -9,7 +9,7 @@ import {
   Modal,
   KeyboardAvoidingView,
   TextInput,
-
+  SafeAreaView,
 } from "react-native";
 import FontAwesome from "react-native-vector-icons/FontAwesome";
 
@@ -23,6 +23,7 @@ import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { loadPlaces } from "../reducers/places";
 import { loadActualPlace } from "../reducers/actualPlaces";
+import DirectionMapScreen from '../screens/DirectionMapScreen'
 
 import {
   useFonts,
@@ -275,13 +276,13 @@ if (actualPlace) {
         style={styles.wrapper}
         paginationStyle={{ bottom: 0,
           left: 0,
-          top: screenHeight * 0.70,
+          top: screenHeight * 0.80,
           right: 0,}
          
         }
         containerStyle={{ height: 150, flex: 1 }}
       >
-        <View style={styles.centeredView}>
+        <SafeAreaView style={styles.centeredView}>
           <View style={styles.modalView}>
             <ImageBackground
               source={actualPlace && {uri: actualPlace.photo}}
@@ -308,15 +309,16 @@ if (actualPlace) {
                 <FontAwesome name="heart" size={30} color="black" />
               </TouchableOpacity>
               <TouchableOpacity style={styles.goBtn}>
-                <FontAwesome name="location-arrow" size={40} color="blue"  onPress={() => {
-        handleGoTo();
-      }} />
+                <FontAwesome name="location-arrow" size={40} color="blue"   onPress={() => {
+            navigation.navigate("DirectionMapScreen")
+            handleClose()
+        }}/>
               </TouchableOpacity>
             </View>
           </View>
-        </View>
+        </SafeAreaView>
 
-        <View style={styles.slide2centeredView}>
+        <SafeAreaView style={styles.slide2centeredView}>
           <View style={styles.slide2modalView}>
             <View style={styles.cardInfoMaintTitleBLock}>
               <Text style={styles.cardInfoMaintTitle}>INFORMATION</Text>
@@ -347,18 +349,18 @@ if (actualPlace) {
               <Text>GO TO WEBSITE</Text>
             </TouchableOpacity>
           </View>
-        </View>
+        </SafeAreaView>
         <KeyboardAvoidingView behavior='padding' style={styles.slide2centeredView}>
-          
-          <View style={styles.slide3modalView}>
-          
-            <View>
+     
+          <SafeAreaView style={styles.slide3modalView}>
+          <View>
+           
               <Text style={styles.slide3Tittle}>REVIEWS</Text>
             </View>
            
             <ScrollView vertical style={styles.scrollUsersReview}>
             <View styles={{height: '10%', backgroundColor: 'blue',}}>
-            <View >
+            <View>
               <View style={styles.slide3User}>
               <Text style={styles.slide3UserName}>USER1</Text>
               <Text  style={styles.slide3Date}>28/12/2022</Text>
@@ -414,8 +416,8 @@ if (actualPlace) {
               </TouchableOpacity>
 </TouchableOpacity>
 
-          </View>
-          
+          </SafeAreaView>
+       
        
         </KeyboardAvoidingView>
     
@@ -487,11 +489,11 @@ const styles = StyleSheet.create({
   modalView: {
     ...Platform.select({
       android: {
-        height: screenHeight * 0.8,
+        height: screenHeight * 0.9,
         width: screenWidth * 0.9,
         backgroundColor: "white",
         borderRadius: 20,
-        marginTop: -40,
+        marginTop: -10,
         alignItems: "center",
         shadowColor: "#000",
         shadowOffset: {
@@ -503,11 +505,11 @@ const styles = StyleSheet.create({
         elevation: 5,
       },
       ios: {
-        height: screenHeight * 0.8,
+        height: screenHeight * 0.9,
         width: screenWidth * 0.9,
         backgroundColor: "white",
         borderRadius: 20,
-        marginTop: -40,
+        marginTop: -10,
         alignItems: "center",
         shadowColor: "#000",
         shadowOffset: {
@@ -521,7 +523,7 @@ const styles = StyleSheet.create({
     })
   },
   backgroundImage: {
-    width: "100%",
+    width: screenWidth * 0.9,
     height: screenHeight * 0.5,
     borderRadius: 20,
     overflow: "hidden",
@@ -544,7 +546,7 @@ const styles = StyleSheet.create({
         alignItems: "center"
       },
       ios: {
-        top: screenHeight * 0.34,
+        top: screenHeight * 0.4,
         height: screenHeight * 0.4,
         backgroundColor: "white",
         position: "absolute",
@@ -561,7 +563,7 @@ const styles = StyleSheet.create({
   closeBtn: {
     width: "30%",
     position: "absolute",
-    bottom: screenHeight * 0.67,
+    bottom: screenHeight * 0.74,
     left: screenWidth * 0.77,
   },
   modal: {
@@ -682,7 +684,6 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     fontSize: 18,
     width: "85%",
-    paddingTop: 90,
     textAlign: "left",
   },
   heartBtn: {
@@ -738,28 +739,40 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   slide2modalView: {
-    height: screenHeight * 0.8,
-    width: screenWidth * 0.9,
-    backgroundColor: "white",
-    borderRadius: 20,
-    marginTop: -40,
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
-  },
-  cardInfoMaintTitle: {
-    marginTop: screenHeight * 0.05,
-    textAlign: "center",
-    fontSize: 30,    
-    fontWeight: "600",
-    fontFamily: "Poppins_700Bold",
-   
+    ...Platform.select({
+      android: {
+        height: screenHeight * 0.9,
+        width: screenWidth * 0.9,
+        backgroundColor: "white",
+        borderRadius: 20,
+        marginTop: -10,
+        alignItems: "center",
+        shadowColor: "#000",
+        shadowOffset: {
+          width: 0,
+          height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
+        elevation: 5,
+      },
+      ios: {
+        height: screenHeight * 0.9,
+        width: screenWidth * 0.9,
+        backgroundColor: "white",
+        borderRadius: 20,
+        marginTop: -10,
+        alignItems: "center",
+        shadowColor: "#000",
+        shadowOffset: {
+          width: 0,
+          height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
+        elevation: 5,
+      },
+    })
   },
 
   cardInfoTitle: {
@@ -776,10 +789,19 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
     fontFamily: "Poppins_400Regular",
-    width: 400,
+    width: 320,
     height: screenHeight * 0.04,
     textAlign: 'center',
     
+
+  },
+
+  cardInfoMaintTitle:{
+    marginTop: screenHeight * 0.05,
+    textAlign: "center",
+    fontSize: 30,    
+    fontWeight: "600",
+    fontFamily: "Poppins_700Bold",
   },
 
   cardInfoMaintTitleBLock:{
@@ -789,16 +811,16 @@ const styles = StyleSheet.create({
   },
 
   cardInfoOpeningHours:{
-    height: screenHeight * 0.13,
+    height: screenHeight * 0.14,
 
   },
 
   cardInfoTickets:{
-    height: screenHeight * 0.26,
+    height: screenHeight * 0.27,
   },
 
   cardInfoTips:{
-    height: screenHeight * 0.195,
+    height: screenHeight * 0.22,
     
     },
 
@@ -827,38 +849,48 @@ fontSize: 20,
     
   },
 
-  reviewblock:{
 
-  },
 
   slide3modalView: {
-    height: screenHeight * 0.8,
-    width: screenWidth * 0.9,
-    backgroundColor: "white",
-    borderRadius: 20,
-    marginTop: -40,
-    alignItems: "center",
-    paddingLeft: 20,
-    paddingRight: 10,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
-  },
-
-  slide3User:{
-    
-    flexDirection: 'row',
-
-    paddingTop: 10,
+   ...Platform.select({
+      android: {
+        height: screenHeight * 0.9,
+        width: screenWidth * 0.9,
+        backgroundColor: "white",
+        borderRadius: 20,
+        alignItems: "center",
+        shadowColor: "#000",
+        shadowOffset: {
+          width: 0,
+          height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
+        elevation: 5,
+      },
+      ios: {
+        height: screenHeight * 0.9,
+        width: screenWidth * 0.9,
+        backgroundColor: "white",
+        borderRadius: 20,
+        alignItems: "center",
+        shadowColor: "#000",
+        shadowOffset: {
+          width: 0,
+          height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
+        elevation: 5,
+      },
+    })
   },
 
   slide3UserName:{
-    alignItems: 'flex-start',
+    paddingTop: 15,
+    paddingLeft: 15,
+    paddingRight: 15,
+    alignItems: 'baseline',
 paddingRight: 10,
 fontFamily: 'Poppins_600SemiBold',
 fontSize: 20,
@@ -866,7 +898,8 @@ fontSize: 20,
 
 
 slide3Date:{
-  paddingRight: 10,
+  paddingTop: 15,
+ alignItems: 'baseline',
 fontFamily: 'Poppins_400Regular',
 fontSize: 16,
 },
@@ -874,6 +907,8 @@ fontSize: 16,
 slide3Description:{
   fontSize: 16,
   alignItems: 'center',justifyContent: 'center',
+  paddingLeft: 15,
+  paddingRight: 15,
   
 },
 
@@ -885,7 +920,6 @@ input:{
   backgroundColor: '#e9f2ff',
   paddingBottom: 120,
     margin: 12,
-   
     padding: 20,
     borderRadius: 25,
 fontSize: 20,
@@ -896,7 +930,7 @@ alignItems: 'flex-start',
 
 inputContainer:{
   position: 'absolute',
-  top: screenHeight * 0.46,
+  top: screenHeight * 0.50,
   bottom: 0,
   right: 0,
   left: 0,
@@ -914,7 +948,7 @@ justifyContent: 'center',
 alignItems: 'center',
 fontSize: 20,
 position: 'absolute',
-top: screenHeight * 0.69,
+top: screenHeight * 0.75,
 flexDirection: 'row',
 
 
@@ -931,8 +965,19 @@ textBtnSubnit:{
 closeBtnSlide2:{
   width: "30%",
     position: "absolute",
-    bottom: screenHeight * 0.72,
+    bottom: screenHeight * 0.82,
     left: screenWidth * 0.77,
+},
+
+viewBlock:{
+  paddingLeft: 15,
+  paddingRight: 15,
+},
+
+slide3User: {
+  flexDirection: 'row',
+  alignItems: 'center',
+ 
 }
 
 });
