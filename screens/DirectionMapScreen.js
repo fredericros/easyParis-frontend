@@ -8,16 +8,35 @@ const LONGITUDE_DELTA = LATITUDE_DELTA * (screenWidth / screenHeight);
 import { Dimensions } from 'react-native';
 import { useEffect } from 'react';
 import * as Location from "expo-location";
+import MapViewDirections from 'react-native-maps-directions';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 
 export default function DirectionMapScreen ({navigation}) {
+const [distance, setDistance] = useState('')
+const [duration, setDuration] = useState('')
+
+const formattedDistance = distance.slice(0, 13);
+const formattedDuration = duration.slice(0, 12);
+
 const [state, setState] = useState({
   pickUpCords :{
-    latitude: 0,
-    longitude: 0,
-    
-  }
+    latitude: 48.858370,
+    longitude: 2.294481,
+    latitudeDelta: LATITUDE_DELTA,
+    longitudeDelta: LONGITUDE_DELTA,
+
+  },
+dropLocationCors:{
+  latitude: 48.852968,
+    longitude: 2.349902,
+    latitudeDelta: LATITUDE_DELTA,
+    longitudeDelta: LONGITUDE_DELTA,
+}
 })
+
+const {pickUpCords, dropLocationCors} = state
+const GOOGLE_MAPS_APIKEY = 'AIzaSyBq886HaWXuK9TwHlP6Dc-Ze6Ur0KmdOtY'
   useEffect(() => {
     (async () => {
       const { status } = await Location.requestForegroundPermissionsAsync();
@@ -34,16 +53,38 @@ const [state, setState] = useState({
        <MapView
         provider={PROVIDER_GOOGLE}
         customMapStyle={mapStyle}
-        initialRegion={{
-          latitude: 48.8584685,
-          longitude: 2.3375905,
-          latitudeDelta: LATITUDE_DELTA,
-          longitudeDelta: LONGITUDE_DELTA,
-        }}
+        initialRegion={{ latitude: 48.858370, longitude: 2.294481,
+          latitudeDelta: 48.852968,
+          longitudeDelta: 2.349902,}}
         style={styles.map}
       >
-       
+        <Marker coordinate={{ latitude: 48.858370, longitude: 2.294481 }}></Marker>
+        <Marker coordinate={{ latitude: 48.852968, longitude: 2.349902 }}></Marker>
+        <MapViewDirections
+    origin={pickUpCords}
+    destination={dropLocationCors}
+    apikey={GOOGLE_MAPS_APIKEY}
+    strokeWidth={3}
+    strokeColor="red"
+    optimizeWaypoints={true}
+    mode='WALKING'
+    onStart={(params) => {
+      console.log(`Started routing between "${params.origin}" and "${params.destination}"`);
+    }}
+    onReady={result => {
+      setDistance(`Distance: ${result.distance} km`)
+      setDuration(`Duration: ${result.duration} min.`)
+    }}
+    onError={(errorMessage) => {
+      // console.log('GOT AN ERROR');
+    }}
+  />
       </MapView>
+      <View style={styles.textPart}>
+        <Text style={styles.textStyle}>{formattedDistance} km</Text>
+        <Text style={styles.textStyle}>{formattedDuration} min</Text>
+        </View>
+     
     </View>
 
   )
@@ -58,6 +99,27 @@ const styles = StyleSheet.create({
   map: {
     flex: 1,
   },
+
+  textPart:{
+    position: 'absolute',
+    top: 100,
+    left: 90,
+    right: 0,
+    bottom: 0,
+alignItems: 'center',
+borderRadius: 50,
+backgroundColor: 'white',
+width: 200,
+height: 100,
+justifyContent: 'center',
+
+
+  },
+
+  textStyle: {
+    fontSize: 20,
+
+  }
 })
 
 const mapStyle = [
