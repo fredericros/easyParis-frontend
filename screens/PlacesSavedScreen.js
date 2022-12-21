@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   View,
   SafeAreaView,
+  ScrollView
 } from "react-native";
 import FontAwesome from "react-native-vector-icons/FontAwesome";
 import { useDispatch, useSelector } from "react-redux";
@@ -26,19 +27,17 @@ const likedPlaces = allPlaces.map((data,i) => {
     if (data.likes.some(e => e.username === user.username)) {
         return (
             <View key={i} style={styles.bodyContainer}>
-            <View>
               <Image
                 source={{uri: data.photo}}
                 style={{ width: 100, height: 100, marginRight: 5, borderRadius:15 }}
               />
-            </View>
             <View style={styles.bodyTextContainer}>
-              <Text>{data.title}</Text>
-              <Text>{data.description}</Text>
+              <Text style={styles.titleCard}>{data.title}</Text>
+              <Text>{data.description.slice(0,120)+'...'}</Text>
             </View>
             <View style={styles.deleteBtnContainer}>
               <TouchableOpacity style={styles.deleteBtn}>
-                <FontAwesome name="trash" size={40} color="black" />
+                <FontAwesome name="trash" size={40} color="black" style={{marginLeft:10}} />
               </TouchableOpacity>
             </View>
           </View>
@@ -60,7 +59,12 @@ const likedPlaces = allPlaces.map((data,i) => {
         />
       </View>
 
+<View style={styles.scrollContainer}>
+<ScrollView style={styles.scrollView} stylevertical>
       {likedPlaces}
+</ScrollView>
+
+</View>
 
     </SafeAreaView>
   );
@@ -76,6 +80,11 @@ const styles = StyleSheet.create({
   title: {
     color: "black",
     fontSize: 25,
+  },
+  titleCard:{
+fontWeight:"bold",
+fontSize:18
+
   },
   back: {
     position: "absolute",
@@ -98,17 +107,20 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "flex-start",
     alignItems: "flex-start",
-    paddingLeft: 30,
-    paddingRight: 30,
+    paddingLeft: 20,
+    paddingRight: 60,
+    marginBottom:15,
+    paddingTop:20
   },
 
   bodyTextContainer: {
     height: 100,
-    width: "70%",
+    width: "65%",
     justifyContent: "center",
     borderBottomWidth: 1,
     borderStyle: "solid",
     marginBottom: 20,
+    paddingBottom:15,
   },
 
   deleteBtn: {},
@@ -117,4 +129,12 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     height: 100,
   },
+  scrollView:{
+    flexGrow:0.9
+
+  },
+  scrollContainer:{
+    flex:1,
+
+  }
 });

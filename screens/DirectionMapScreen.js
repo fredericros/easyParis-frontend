@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import MapView, { Polygon, Marker, Callout, CustomMarker, PROVIDER_GOOGLE } from "react-native-maps";
-import { View, Text, StyleSheet} from 'react-native';
+import { View, Text, StyleSheet, Button, TouchableOpacity} from 'react-native';
 const screenWidth = Dimensions.get('window').width;
 const screenHeight = Dimensions.get('window').height;
 const LATITUDE_DELTA = 0.22;
@@ -10,14 +10,23 @@ import { useEffect } from 'react';
 import * as Location from "expo-location";
 import MapViewDirections from 'react-native-maps-directions';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useDispatch, useSelector } from "react-redux";
+import { useIsFocused } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
+
 
 
 export default function DirectionMapScreen ({navigation}) {
+ 
+const isFocused = useIsFocused();
 const [distance, setDistance] = useState('')
 const [duration, setDuration] = useState('')
+const [currentPosition, setCurrentPosition] = useState(null);
+const actualPlace = useSelector((state) => state.actualPlaces.value);
 
 const formattedDistance = distance.slice(0, 13);
 const formattedDuration = duration.slice(0, 12);
+
 
 const [state, setState] = useState({
   pickUpCords :{
@@ -28,8 +37,8 @@ const [state, setState] = useState({
 
   },
 dropLocationCors:{
-  latitude: 48.852968,
-    longitude: 2.349902,
+  latitude: actualPlace.latitude,
+    longitude: actualPlace.longitude,
     latitudeDelta: LATITUDE_DELTA,
     longitudeDelta: LONGITUDE_DELTA,
 }
@@ -37,31 +46,46 @@ dropLocationCors:{
 
 const {pickUpCords, dropLocationCors} = state
 const GOOGLE_MAPS_APIKEY = 'AIzaSyBq886HaWXuK9TwHlP6Dc-Ze6Ur0KmdOtY'
-  useEffect(() => {
-    (async () => {
-      const { status } = await Location.requestForegroundPermissionsAsync();
+useEffect(() => {
+  (async () => {
+    const { status } = await Location.requestForegroundPermissionsAsync();
+// allow to acces to geo
+    if (status === 'granted') {
+      Location.watchPositionAsync({ distanceInterval: 200 },
+       // interval of geo
+        (location) => {
+          setCurrentPosition(location.coords); 
+          
+          // set the curent location new value
+        });
+    }
+  })();
+}, []);
 
-      if (status === "granted") {
-        const location = await Location.getCurrentPositionAsync({});
-      }
-    })();
-  }, []);
 
+if (!isFocused) {
+  return <View></View>;
+} 
 
   return (
     <View style={styles.container}>
        <MapView
-        provider={PROVIDER_GOOGLE}
-        customMapStyle={mapStyle}
-        initialRegion={{ latitude: 48.858370, longitude: 2.294481,
-          latitudeDelta: 48.852968,
-          longitudeDelta: 2.349902,}}
+       
+       
+        initialRegion={{
+          latitude: 48.8584685,
+          longitude: 2.3375905,
+          latitudeDelta: LATITUDE_DELTA,
+          longitudeDelta: LONGITUDE_DELTA,
+        }}
         style={styles.map}
+
+       
       >
-        <Marker coordinate={{ latitude: 48.858370, longitude: 2.294481 }}></Marker>
-        <Marker coordinate={{ latitude: 48.852968, longitude: 2.349902 }}></Marker>
+         {currentPosition && <Marker coordinate={currentPosition} title="My position" pinColor="#fecb2d" />}
+        <Marker coordinate={{ latitude: actualPlace.latitude, longitude: actualPlace.longitude }}></Marker>
         <MapViewDirections
-    origin={pickUpCords}
+    origin={currentPosition}
     destination={dropLocationCors}
     apikey={GOOGLE_MAPS_APIKEY}
     strokeWidth={3}
@@ -84,10 +108,18 @@ const GOOGLE_MAPS_APIKEY = 'AIzaSyBq886HaWXuK9TwHlP6Dc-Ze6Ur0KmdOtY'
         <Text style={styles.textStyle}>{formattedDistance} km</Text>
         <Text style={styles.textStyle}>{formattedDuration} min</Text>
         </View>
+        <View 
+       style={styles.styleBtn} >
+          <Text style={styles.textBtn} title='BACK' onPress={() => {
+            navigation.navigate('Home')
+           
+        }}>BACK</Text>
+          </View>
      
     </View>
 
   )
+
 }
 
 
@@ -97,28 +129,50 @@ const styles = StyleSheet.create({
    
   },
   map: {
-    flex: 1,
+  flex: 1,
   },
 
   textPart:{
     position: 'absolute',
-    top: 100,
-    left: 90,
+    top: 700,
+    left: 220,
     right: 0,
     bottom: 0,
 alignItems: 'center',
-borderRadius: 50,
-backgroundColor: 'white',
-width: 200,
-height: 100,
+borderRadius: 10,
+backgroundColor: 'black',
+width: 150,
+height: 80,
 justifyContent: 'center',
 
 
   },
 
   textStyle: {
-    fontSize: 20,
+    fontSize: 15,
+    fontWeight: '600',
+    color: 'white',
+  },
 
+  styleBtn:{
+    position: 'absolute',
+    top: 700,
+    left: 20,
+    right: 0,
+    bottom: 0,
+alignItems: 'center',
+borderRadius: 10,
+backgroundColor: 'black',
+width: 150,
+height: 80,
+justifyContent: 'center',
+
+  },
+
+  textBtn:{
+    fontSize: 15,
+    fontWeight: '600',
+    color: 'white',
   }
 })
 

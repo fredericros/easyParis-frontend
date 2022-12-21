@@ -10,22 +10,28 @@ import {
   KeyboardAvoidingView,
   TextInput,
   SafeAreaView,
-  Alert
+  Alert,
 } from "react-native";
 import FontAwesome from "react-native-vector-icons/FontAwesome";
 
 import { Flex, Box, Wrap } from "@react-native-material/core";
 import { Stack } from "@react-native-material/core";
-import MapView, { Polygon, Marker, Callout, CustomMarker, PROVIDER_GOOGLE } from "react-native-maps";
+import MapView, {
+  Polygon,
+  Marker,
+  Callout,
+  CustomMarker,
+  PROVIDER_GOOGLE,
+} from "react-native-maps";
 import * as Location from "expo-location";
-import { Dimensions } from 'react-native';
+import { Dimensions } from "react-native";
 
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { loadfilteredPlaces, likePlace } from "../reducers/filteredPlaces";
 import { loadActualPlace } from "../reducers/actualPlaces";
 import { loadAllPlaces } from "../reducers/allPlaces";
-import DirectionMapScreen from '../screens/DirectionMapScreen'
+import DirectionMapScreen from "../screens/DirectionMapScreen";
 
 import {
   useFonts,
@@ -56,11 +62,10 @@ import Swiper from "react-native-swiper";
 import App from "./test.js";
 import { ReloadInstructions } from "react-native/Libraries/NewAppScreen";
 
-const screenWidth = Dimensions.get('window').width;
-const screenHeight = Dimensions.get('window').height;
+const screenWidth = Dimensions.get("window").width;
+const screenHeight = Dimensions.get("window").height;
 const LATITUDE_DELTA = 0.22;
 const LONGITUDE_DELTA = LATITUDE_DELTA * (screenWidth / screenHeight);
-
 
 export default function MapScreen({ navigation }) {
   let [fontsLoaded] = useFonts({
@@ -86,12 +91,11 @@ export default function MapScreen({ navigation }) {
 
   const dispatch = useDispatch();
   const filteredPlaces = useSelector((state) => state.filteredPlaces.value);
-  const user = useSelector((state) => state.user.value)
-  const actualPlace = useSelector((state) => state.actualPlaces.value)
+  const user = useSelector((state) => state.user.value);
+  const actualPlace = useSelector((state) => state.actualPlaces.value);
 
   const [districtVisible, setdistrictVisible] = useState(true);
-  const [countLike, setCountLike] = useState(false)
-
+  const [countLike, setCountLike] = useState(false);
 
   // === USEEFFECT D'INITIALISATION, DEMANDE DE l'AUTORISATION DE TRACAGE GPS ===================== //
 
@@ -105,44 +109,38 @@ export default function MapScreen({ navigation }) {
     })();
   }, []);
 
+  // === FETCH DE LA ROUTE BACKEND POUR RECUPERER LES PLACES A L'INITILAISATION ======================================= //
 
-    // === FETCH DE LA ROUTE BACKEND POUR RECUPERER LES PLACES A L'INITILAISATION ======================================= //
-
-    
-    useEffect(() => {
-      fetch(`http://192.168.10.153:3000/places/district`)
+  useEffect(() => {
+    fetch(`http://192.168.10.153:3000/places/district`)
       .then((response) => response.json())
       .then((data) => {
         data.result && dispatch(loadfilteredPlaces(data.places));
       });
-    },[])
+  }, []);
 
-    useEffect(() => {
-      fetch(`http://192.168.10.153:3000/places`)
+  useEffect(() => {
+    fetch(`http://192.168.10.153:3000/places`)
       .then((response) => response.json())
       .then((data) => {
         data.result && dispatch(loadAllPlaces(data.places));
-        console.log("rerender")
+        console.log("rerender");
       });
-    },[countLike])
+  }, [countLike]);
 
+  // === FETCH DE LA ROUTE BACKEND POUR RECUPERER LES PLACESFILTREES AU CLICK SUR UN BOUTON FILTRE ======================================= //
 
-
-      // === FETCH DE LA ROUTE BACKEND POUR RECUPERER LES PLACESFILTREES AU CLICK SUR UN BOUTON FILTRE ======================================= //
-
-const handleFilter = (filter) => {
-  fetch(`http://192.168.10.153:3000/places/${filter}`)
-  .then((response) => response.json())
-  .then((data) => {
-    data.result && dispatch(loadfilteredPlaces(data.places));
-  });
-}
-
+  const handleFilter = (filter) => {
+    fetch(`http://192.168.10.153:3000/places/${filter}`)
+      .then((response) => response.json())
+      .then((data) => {
+        data.result && dispatch(loadfilteredPlaces(data.places));
+      });
+  };
 
   // === GESTION DES MARQUEURS ===================================================================== //
 
-
-// CUSTOM MARKER FOR DISTRICTS (NO PHOTO)
+  // CUSTOM MARKER FOR DISTRICTS (NO PHOTO)
 
   const CustomMarker = ({ title }) => (
     <View>
@@ -152,40 +150,35 @@ const handleFilter = (filter) => {
       <View style={styles.bubbleArrowBorder}></View>
     </View>
   );
-  
-    const categoryMarker = filteredPlaces.map((data, i) => {
-      return (
-        <Marker
-          key={i}
-          coordinate={{ latitude: data.latitude, longitude: data.longitude }}
-          onPress={() => {
-           dispatch(loadActualPlace(data))
-            handleMarker();
-          }}
-        >
-          <CustomMarker title={data.title} />
-        </Marker>
-      );
-    });
 
+  const categoryMarker = filteredPlaces.map((data, i) => {
+    return (
+      <Marker
+        key={i}
+        coordinate={{ latitude: data.latitude, longitude: data.longitude }}
+        onPress={() => {
+          dispatch(loadActualPlace(data));
+          handleMarker();
+        }}
+      >
+        <CustomMarker title={data.title} />
+      </Marker>
+    );
+  });
 
   // CUSTOM MARKER FOR PLACES (WITH PHOTO)
-  
-      const CustomImgMarker = ({ title, image }) => (
-      <View>
-        <View style = {styles.bubble}>
-          <Image
-          style = {styles.bubbleImage}
-          source={{uri:image}}
-          />
-          <View style={styles.textMarker}>
-          <Text style = {styles.bubbleTitle}>{title}</Text>
-          </View>
+
+  const CustomImgMarker = ({ title, image }) => (
+    <View>
+      <View style={styles.bubble}>
+        <Image style={styles.bubbleImage} source={{ uri: image }} />
+        <View style={styles.textMarker}>
+          <Text style={styles.bubbleTitle}>{title}</Text>
         </View>
-        <View style = {styles.bubbleArrowBorder}></View>
       </View>
-    );
-  
+      <View style={styles.bubbleArrowBorder}></View>
+    </View>
+  );
 
   const placeMarker = filteredPlaces.map((data, i) => {
     return (
@@ -193,7 +186,7 @@ const handleFilter = (filter) => {
         key={i}
         coordinate={{ latitude: data.latitude, longitude: data.longitude }}
         onPress={() => {
-          dispatch(loadActualPlace(data))
+          dispatch(loadActualPlace(data));
           handleMarker();
         }}
       >
@@ -202,49 +195,97 @@ const handleFilter = (filter) => {
     );
   });
 
-
-
   // === GESTION DES CARDS ===================================================================== //
 
+  let cardHours;
+  let cardPrices;
+  let cardTips;
 
-let cardHours;
-let cardPrices;
-let cardTips;
+  if (actualPlace) {
+    cardHours = actualPlace.hours.map((data, i) => {
+      return (
+        <Text
+          key={i}
+          adjustsFontSizeToFit={true}
+          numberOfLines={2}
+          style={styles.cardInfoText}
+        >
+          {data}
+        </Text>
+      );
+    });
 
-if (actualPlace) {
-  cardHours = actualPlace.hours.map((data,i) => {
-    return (
-      <Text key={i} adjustsFontSizeToFit={true} numberOfLines={2} style={styles.cardInfoText}>{data}</Text>
-    )
-  })
-  
-  cardPrices = actualPlace.priceRange.map((data,i) => {
-    return (
-      <Text key={i} adjustsFontSizeToFit={true} numberOfLines={2} style={styles.cardInfoText}>{data}</Text>
-    )
-  })
-  
-  cardTips = actualPlace.tips.map((data,i) => {
-    return (
-      <Text key={i} adjustsFontSizeToFit={true} numberOfLines={2} style={styles.cardInfoText}>{data}</Text>
-    )
-  })
+    cardPrices = actualPlace.priceRange.map((data, i) => {
+      return (
+        <Text
+          key={i}
+          adjustsFontSizeToFit={true}
+          numberOfLines={2}
+          style={styles.cardInfoText}
+        >
+          {data}
+        </Text>
+      );
+    });
 
-
-}
+    cardTips = actualPlace.tips.map((data, i) => {
+      return (
+        <Text
+          key={i}
+          adjustsFontSizeToFit={true}
+          numberOfLines={2}
+          style={styles.cardInfoText}
+        >
+          {data}
+        </Text>
+      );
+    });
+  }
   // === GESTION DES LIKES ===================================================================== //
 
-
   const handleLike = () => {
-    setCountLike(!countLike)
-    fetch('http://192.168.10.153:3000/places/like', {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+    setCountLike(!countLike);
+    fetch("http://192.168.10.153:3000/places/like", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ token: user.token, placeId: actualPlace._id }),
-    }).then(response => response.json())
-      .then(data => {
+    })
+      .then((response) => response.json())
+      .then((data) => {
         if (data.result) {
-          dispatch(likePlace({placeId: actualPlace._id, username: user.username}))
+          dispatch(
+            likePlace({ placeId: actualPlace._id, username: user.username })
+          );
+          if (actualPlace.likes.some((e) => e.username === user.username)) {
+            Alert.alert(
+      "Your place have been unsaved",
+      "",
+      [
+
+        {
+          text: "Ok",
+          onPress: () => {
+            setModalVisible(false);
+
+          },
+        },
+      ]
+    );
+          } else {
+            Alert.alert(
+              "Your place have been saved",
+              "",
+              [
+                {
+                  text: "Ok",
+                  onPress: () => {
+                    setModalVisible(false);
+                  },
+                },
+              ],
+            );
+
+          }
         } else {
           Alert.alert(
             "Want to save this place?",
@@ -253,39 +294,100 @@ if (actualPlace) {
               {
                 text: "Cancel",
               },
-              { text: "Sign In", 
-              onPress: () => {
-                setModalVisible(false)
-                navigation.navigate("Home", {screen:"Profile"}) 
-              }}
+              {
+                text: "Sign In",
+                onPress: () => {
+                  setModalVisible(false);
+                  navigation.navigate("Home", { screen: "Profile" })
+                },
+              },
             ]
           );
-        } 
+        }
       });
-  }
+  
+
+  };
 
   let likeStyle = {};
   if (actualPlace) {
-    if (actualPlace.likes.some(e => e.username === user.username)) {
+    if (actualPlace.likes.some((e) => e.username === user.username)) {
       likeStyle = { 'color': '#f91980' };
-    } 
+      // setLikeStyle({
+      //   color: "#f91980",
+      // });
+    }
   }
 
+  // SUR LE HANDLEMARKER
+  //1. RECUPERER LES INFOS DU MARKER EN QUESTION (MAP DEPUIS FILTERED _PLACES) > DISPATCH DANS ACTUALPLACE
+  //1. APPUI SUR LE LIKE  ET FETCH LA ROUTE LIKE ET DISPATCH DANS LE STORE
+  //2. TOUJOURS SUR LE LIKE, RE RECUPERER LES INFOS DU MARKER GRACE AU STORE ACTUALPLACE
 
   // === GESTION DES QUARTIERS ===================================================================== //
 
   const districtAreas = [
-    { coordinates: points, strokeWidth: 2, strokeColor: "grey", fillColor: "rgba(218, 144, 88, 0.1)" },
-    { coordinates: montmartre, strokeWidth: 2, strokeColor: "rgba(247, 37, 133, 0.4)", fillColor: "rgba(247, 37, 133, 0.3)" },
-    { coordinates: leMarais, strokeWidth: 2, strokeColor: "rgba(224, 10, 153, 0.4)", fillColor: "rgba(224, 10, 153, 0.3)" },
-    { coordinates: latin, strokeWidth: 2, strokeColor: "rgba(83, 193, 132, 0.4)", fillColor: "rgba(83, 193, 132, 0.3)" },
-    { coordinates: saintGermain, strokeWidth: 2, strokeColor: "rgba(224, 37, 49, 0.4)", fillColor: "rgba(224, 37, 49, 0.3)" },
-    { coordinates: champsElysée, strokeWidth: 2, strokeColor: "rgba(253, 218, 104, 0.4)", fillColor: "rgba(253, 218, 104, 0.3)" },
-    { coordinates: multicultural, strokeWidth: 2, strokeColor: "rgba(0, 0, 255, 0.4)", fillColor: "rgba(0, 0, 255, 0.3)" },
-    { coordinates: historic, strokeWidth: 2, strokeColor: "rgba(57, 91, 219, 0.4)", fillColor: "rgba(57, 91, 219, 0.3)" },
-    { coordinates: vieuxCentre, strokeWidth: 2, strokeColor: "rgba(239, 163, 16, 0.4)", fillColor: "rgba(239, 163, 16, 0.3)" },
-    { coordinates: riche, strokeWidth: 2, strokeColor: "rgba(234, 151, 116, 0.4)", fillColor: "rgba(234, 151, 116, 0.3)" },
-  ]
+    {
+      coordinates: points,
+      strokeWidth: 2,
+      strokeColor: "grey",
+      fillColor: "rgba(218, 144, 88, 0.1)",
+    },
+    {
+      coordinates: montmartre,
+      strokeWidth: 2,
+      strokeColor: "rgba(247, 37, 133, 0.4)",
+      fillColor: "rgba(247, 37, 133, 0.3)",
+    },
+    {
+      coordinates: leMarais,
+      strokeWidth: 2,
+      strokeColor: "rgba(224, 10, 153, 0.4)",
+      fillColor: "rgba(224, 10, 153, 0.3)",
+    },
+    {
+      coordinates: latin,
+      strokeWidth: 2,
+      strokeColor: "rgba(83, 193, 132, 0.4)",
+      fillColor: "rgba(83, 193, 132, 0.3)",
+    },
+    {
+      coordinates: saintGermain,
+      strokeWidth: 2,
+      strokeColor: "rgba(224, 37, 49, 0.4)",
+      fillColor: "rgba(224, 37, 49, 0.3)",
+    },
+    {
+      coordinates: champsElysée,
+      strokeWidth: 2,
+      strokeColor: "rgba(253, 218, 104, 0.4)",
+      fillColor: "rgba(253, 218, 104, 0.3)",
+    },
+    {
+      coordinates: multicultural,
+      strokeWidth: 2,
+      strokeColor: "rgba(0, 0, 255, 0.4)",
+      fillColor: "rgba(0, 0, 255, 0.3)",
+    },
+    {
+      coordinates: historic,
+      strokeWidth: 2,
+      strokeColor: "rgba(57, 91, 219, 0.4)",
+      fillColor: "rgba(57, 91, 219, 0.3)",
+    },
+    {
+      coordinates: vieuxCentre,
+      strokeWidth: 2,
+      strokeColor: "rgba(239, 163, 16, 0.4)",
+      fillColor: "rgba(239, 163, 16, 0.3)",
+    },
+    {
+      coordinates: riche,
+      strokeWidth: 2,
+      strokeColor: "rgba(234, 151, 116, 0.4)",
+      fillColor: "rgba(234, 151, 116, 0.3)",
+    },
+  ];
 
   const districtArea = districtAreas.map((data, i) => {
     return (
@@ -296,13 +398,13 @@ if (actualPlace) {
         strokeColor={data.strokeColor}
         fillColor={data.fillColor}
       />
-    )
-  })
+    );
+  });
 
   // === GESTION DE LA MODALE ====================================================================== //
 
   const [modalVisible, setModalVisible] = useState(false);
-  
+
   const handleMarker = () => {
     setModalVisible(true);
   };
@@ -313,69 +415,22 @@ if (actualPlace) {
 
   const modal = () => {
     if (districtVisible) {
-      return(
-        <Modal
-        visible={modalVisible}
-        animationType="slide"
-        transparent={true}
-        style={styles.modal}
-      >
-          <SafeAreaView style={styles.centeredView}>
-            <View style={styles.modalView}>
-              <ImageBackground
-                source={actualPlace && {uri: actualPlace.photo}}
-                style={styles.backgroundImage}
-              ></ImageBackground>
-  
-              <View style={styles.descriptionCard}>
-              <TouchableOpacity></TouchableOpacity>
-                <FontAwesome
-                  aria-hidden="true"
-                  name="times-circle-o"
-                  size={40}
-                  color="black"
-                  onPress={() => handleClose()}
-                  style={styles.closeBtn}
-                />
-                {/* here we will need to add a map to add costom name */}
-                <Text style={styles.cardTittle}>{actualPlace && actualPlace.title}</Text>
-                {/* This is for the text about the place = alsi needs mao */}
-                <Text style={styles.cardText}>
-                {actualPlace && actualPlace.description}
-                </Text>
-              </View>
-            </View>
-          </SafeAreaView>
-      </Modal>
-      )
-    } else {
       return (
         <Modal
-        visible={modalVisible}
-        animationType="slide"
-        transparent={true}
-        style={styles.modal}
-      >
-        <Swiper
-          loop={false}
-          style={styles.wrapper}
-          paginationStyle={{ bottom: 0,
-            left: 0,
-            top: screenHeight * 0.80,
-            right: 0,}
-           
-          }
-          containerStyle={{ height: 150, flex: 1 }}
+          visible={modalVisible}
+          animationType="slide"
+          transparent={true}
+          style={styles.modal}
         >
           <SafeAreaView style={styles.centeredView}>
             <View style={styles.modalView}>
               <ImageBackground
-                source={actualPlace && {uri: actualPlace.photo}}
+                source={actualPlace && { uri: actualPlace.photo }}
                 style={styles.backgroundImage}
               ></ImageBackground>
-  
+
               <View style={styles.descriptionCard}>
-              <TouchableOpacity></TouchableOpacity>
+                <TouchableOpacity></TouchableOpacity>
                 <FontAwesome
                   aria-hidden="true"
                   name="times-circle-o"
@@ -385,162 +440,247 @@ if (actualPlace) {
                   style={styles.closeBtn}
                 />
                 {/* here we will need to add a map to add costom name */}
-                <Text style={styles.cardTittle}>{actualPlace && actualPlace.title}</Text>
+                <Text style={styles.cardTittle}>
+                  {actualPlace && actualPlace.title}
+                </Text>
                 {/* This is for the text about the place = alsi needs mao */}
                 <Text style={styles.cardText}>
-                {actualPlace && actualPlace.description}
+                  {actualPlace && actualPlace.description}
                 </Text>
-                <TouchableOpacity style={styles.heartBtn}>
-                  <FontAwesome data={countLike} style={likeStyle} name="heart" size={30} onPress={() => handleLike()} />
-                </TouchableOpacity>
+              </View>
+            </View>
+          </SafeAreaView>
+        </Modal>
+      );
+    } else {
+      return (
+        <Modal
+          visible={modalVisible}
+          animationType="slide"
+          transparent={true}
+          style={styles.modal}
+        >
+          <Swiper
+            loop={false}
+            style={styles.wrapper}
+            paginationStyle={{
+              bottom: 0,
+              left: 0,
+              top: screenHeight * 0.8,
+              right: 0,
+            }}
+            containerStyle={{ height: 150, flex: 1 }}
+          >
+            <SafeAreaView style={styles.centeredView}>
+              <View style={styles.modalView}>
+                <ImageBackground
+                  source={actualPlace && { uri: actualPlace.photo }}
+                  style={styles.backgroundImage}
+                ></ImageBackground>
+
+                <View style={styles.descriptionCard}>
+                  <TouchableOpacity></TouchableOpacity>
+                  <FontAwesome
+                    aria-hidden="true"
+                    name="times-circle-o"
+                    size={40}
+                    color="black"
+                    onPress={() => handleClose()}
+                    style={styles.closeBtn}
+                  />
+                  {/* here we will need to add a map to add costom name */}
+                  <Text style={styles.cardTittle}>
+                    {actualPlace && actualPlace.title}
+                  </Text>
+                  {/* This is for the text about the place = alsi needs mao */}
+                  <Text style={styles.cardText}>
+                    {actualPlace && actualPlace.description}
+                  </Text>
+                  <TouchableOpacity style={styles.heartBtn}>
+                    <FontAwesome
+                      data={countLike}
+                      style={likeStyle}
+                      name="heart"
+                      size={30}
+                      onPress={() => handleLike()}
+                    />
+                  </TouchableOpacity>
                   <View style={styles.heartCounter}>
                     <Text style={styles.heartCounterText}>
-                     {actualPlace && actualPlace.likes.length}
-                     </Text>
-                    </View>
-                <TouchableOpacity style={styles.goBtn}>
-                  <FontAwesome name="location-arrow" size={40} color="#1E90FF" onPress={() => {
-              navigation.navigate("DirectionMapScreen")
-              handleClose()
-          }}/>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </SafeAreaView>
-  
-          <SafeAreaView style={styles.slide2centeredView}>
-            <View style={styles.slide2modalView}>
-              <View style={styles.cardInfoMaintTitleBLock}>
-                <Text style={styles.cardInfoMaintTitle}>INFORMATION</Text>
-              </View>
-              <FontAwesome
-                    aria-hidden="true"
-                    name="times-circle-o"
-                    size={40}
-                    color="black"
-                    onPress={() => handleClose()}
-                    style={styles.closeBtnSlide2}
-                  />
-              <View style={styles.cardInfoOpeningHours}>
-                <Text style={styles.cardInfoTitle}>⏱ OPENING HOURS</Text>
-                {cardHours}
-              </View>
-              <View style={styles.cardInfoTickets}>
-                <Text style={styles.cardInfoTitle}>🎟️ Tickets and Prices</Text>
-                {cardPrices}
-              </View>
-              <View style={styles.cardInfoTips}>
-                <Text style={styles.cardInfoTitle}>✅ Tips</Text>
-                {cardTips}
-              </View>
-  
-              <TouchableOpacity style={styles.cardInfoBtn}>
-                <Text>GO TO WEBSITE</Text>
-              </TouchableOpacity>
-            </View>
-          </SafeAreaView>
-          <KeyboardAvoidingView behavior='padding' style={styles.slide2centeredView}>
-       
-            <SafeAreaView style={styles.slide3modalView}>
-            <View>
-             
-                <Text style={styles.slide3Tittle}>REVIEWS</Text>
-              </View>
-             
-              <ScrollView vertical style={styles.scrollUsersReview}>
-              <View styles={{height: '10%', backgroundColor: 'blue',}}>
-              <View>
-                <View style={styles.slide3User}>
-                <Text style={styles.slide3UserName}>USER1</Text>
-                <Text  style={styles.slide3Date}>28/12/2022</Text>
+                      {actualPlace && actualPlace.likes.length}
+                    </Text>
+                  </View>
+                  <TouchableOpacity style={styles.goBtn}>
+                    <FontAwesome
+                      name="location-arrow"
+                      size={40}
+                      color="#1E90FF"
+                      onPress={() => {
+                        navigation.navigate("DirectionMapScreen");
+                        handleClose();
+                      }}
+                    />
+                  </TouchableOpacity>
                 </View>
-               <View>
-                
-                <Text style={styles.slide3Description}>The Eiffel Tower is an iconic landmark located in Paris, France. It was completed in 1889 and was the tallest man-made structure in the world at the time. The tower is made of iron and stands 324 meters tall, with three levels that can be accessed by elevator or stairs.</Text></View>
               </View>
-              <View >
-                <View style={styles.slide3User}>
-                <Text style={styles.slide3UserName}>USER1</Text>
-                <Text  style={styles.slide3Date}>28/12/2022</Text>
-                </View>
-               <View>
-                
-                <Text style={styles.slide3Description}>The Eiffel Tower is an iconic landmark located in Paris, France. It was completed in 1889 and was the tallest man-made structure in the world at the time. The tower is made of iron and stands 324 meters tall, with three levels that can be accessed by elevator or stairs.</Text></View>
-              </View>
-              <View >
-                <View style={styles.slide3User}>
-                <Text style={styles.slide3UserName}>USER1</Text>
-                <Text  style={styles.slide3Date}>28/12/2022</Text>
-                </View>
-               <View>
-                
-                <Text style={styles.slide3Description}>The Eiffel Tower is an iconic landmark located in Paris, France. It was completed in 1889 and was the tallest man-made structure in the world at the time. The tower is made of iron and stands 324 meters tall, with three levels that can be accessed by elevator or stairs.</Text></View>
-              
-              </View>
-              </View>
-              </ScrollView>
-              <FontAwesome
-                    aria-hidden="true"
-                    name="times-circle-o"
-                    size={40}
-                    color="black"
-                    onPress={() => handleClose()}
-                    style={styles.closeBtnSlide2}
-                  />
-             
-              <View style={styles.inputContainer} ><TextInput
-        style={styles.input}
-        placeholder="Add a review"
-        placeholderTextColor="#66757F"
-        maxLength={100}
-  
-      />
-     
-      </View>
-      <TouchableOpacity style={styles.submitButtonReview}>
-  
-  <Text style={styles.textBtnSubnit}>Post review</Text>
-  <TouchableOpacity style={styles.submittBtn}>
-                  <FontAwesome name="paper-plane" size={25} color="black" />
-                </TouchableOpacity>
-  </TouchableOpacity>
-  
             </SafeAreaView>
-         
-         
-          </KeyboardAvoidingView>
-      
-        </Swiper>
-      </Modal>
-      )
-    }
-  }
 
+            <SafeAreaView style={styles.slide2centeredView}>
+              <View style={styles.slide2modalView}>
+                <View style={styles.cardInfoMaintTitleBLock}>
+                  <Text style={styles.cardInfoMaintTitle}>INFORMATION</Text>
+                </View>
+                <FontAwesome
+                  aria-hidden="true"
+                  name="times-circle-o"
+                  size={40}
+                  color="black"
+                  onPress={() => handleClose()}
+                  style={styles.closeBtnSlide2}
+                />
+                <View style={styles.cardInfoOpeningHours}>
+                  <Text style={styles.cardInfoTitle}>⏱ OPENING HOURS</Text>
+                  {cardHours}
+                </View>
+                <View style={styles.cardInfoTickets}>
+                  <Text style={styles.cardInfoTitle}>
+                    🎟️ Tickets and Prices
+                  </Text>
+                  {cardPrices}
+                </View>
+                <View style={styles.cardInfoTips}>
+                  <Text style={styles.cardInfoTitle}>✅ Tips</Text>
+                  {cardTips}
+                </View>
+
+                <TouchableOpacity style={styles.cardInfoBtn}>
+                  <Text>GO TO WEBSITE</Text>
+                </TouchableOpacity>
+              </View>
+            </SafeAreaView>
+            <KeyboardAvoidingView
+              behavior="padding"
+              style={styles.slide2centeredView}
+            >
+              <SafeAreaView style={styles.slide3modalView}>
+                <View>
+                  <Text style={styles.slide3Tittle}>REVIEWS</Text>
+                </View>
+
+                <ScrollView vertical style={styles.scrollUsersReview}>
+                  <View styles={{ height: "10%", backgroundColor: "blue" }}>
+                    <View>
+                      <View style={styles.slide3User}>
+                        <Text style={styles.slide3UserName}>USER1</Text>
+                        <Text style={styles.slide3Date}>28/12/2022</Text>
+                      </View>
+                      <View>
+                        <Text style={styles.slide3Description}>
+                          The Eiffel Tower is an iconic landmark located in
+                          Paris, France. It was completed in 1889 and was the
+                          tallest man-made structure in the world at the time.
+                          The tower is made of iron and stands 324 meters tall,
+                          with three levels that can be accessed by elevator or
+                          stairs.
+                        </Text>
+                      </View>
+                    </View>
+                    <View>
+                      <View style={styles.slide3User}>
+                        <Text style={styles.slide3UserName}>USER1</Text>
+                        <Text style={styles.slide3Date}>28/12/2022</Text>
+                      </View>
+                      <View>
+                        <Text style={styles.slide3Description}>
+                          The Eiffel Tower is an iconic landmark located in
+                          Paris, France. It was completed in 1889 and was the
+                          tallest man-made structure in the world at the time.
+                          The tower is made of iron and stands 324 meters tall,
+                          with three levels that can be accessed by elevator or
+                          stairs.
+                        </Text>
+                      </View>
+                    </View>
+                    <View>
+                      <View style={styles.slide3User}>
+                        <Text style={styles.slide3UserName}>USER1</Text>
+                        <Text style={styles.slide3Date}>28/12/2022</Text>
+                      </View>
+                      <View>
+                        <Text style={styles.slide3Description}>
+                          The Eiffel Tower is an iconic landmark located in
+                          Paris, France. It was completed in 1889 and was the
+                          tallest man-made structure in the world at the time.
+                          The tower is made of iron and stands 324 meters tall,
+                          with three levels that can be accessed by elevator or
+                          stairs.
+                        </Text>
+                      </View>
+                    </View>
+                  </View>
+                </ScrollView>
+                <FontAwesome
+                  aria-hidden="true"
+                  name="times-circle-o"
+                  size={40}
+                  color="black"
+                  onPress={() => handleClose()}
+                  style={styles.closeBtnSlide2}
+                />
+
+                <View style={styles.inputContainer}>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Add a review"
+                    placeholderTextColor="#66757F"
+                    maxLength={100}
+                  />
+                </View>
+                <TouchableOpacity style={styles.submitButtonReview}>
+                  <Text style={styles.textBtnSubnit}>Post review</Text>
+                  <TouchableOpacity style={styles.submittBtn}>
+                    <FontAwesome name="paper-plane" size={25} color="black" />
+                  </TouchableOpacity>
+                </TouchableOpacity>
+              </SafeAreaView>
+            </KeyboardAvoidingView>
+          </Swiper>
+        </Modal>
+      );
+    }
+  };
 
   // === RETURN ================================================================================ //
 
   return (
     <View style={styles.container}>
-     {modal()}
+      {modal()}
 
       <View style={styles.filterContainer}>
         <ScrollView horizontal={true} style={styles.scrollView}>
-          <TouchableOpacity style={styles.filterBtn} 
-          onPress={()=> {
-            handleFilter("district") 
-            setdistrictVisible(true)}}>
+          <TouchableOpacity
+            style={styles.filterBtn}
+            onPress={() => {
+              handleFilter("district");
+              setdistrictVisible(true);
+            }}
+          >
             <Text style={styles.filterText}>🗺️ Disctricts</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.filterBtn} onPress={()=> {
-            handleFilter("monuments")
-            setdistrictVisible(false)}}>
+          <TouchableOpacity
+            style={styles.filterBtn}
+            onPress={() => {
+              handleFilter("monuments");
+              setdistrictVisible(false);
+            }}
+          >
             <Text style={styles.filterText}>🏰 Monuments</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.filterBtn}>
             <Text style={styles.filterText}>🕍 Churches</Text>
           </TouchableOpacity>
         </ScrollView>
-        </View>
+      </View>
 
       <MapView
         // provider={PROVIDER_GOOGLE}
@@ -554,7 +694,7 @@ if (actualPlace) {
         style={styles.map}
       >
         {districtArea}
-        {districtVisible? categoryMarker : placeMarker} 
+        {districtVisible ? categoryMarker : placeMarker}
       </MapView>
     </View>
   );
@@ -649,11 +789,21 @@ const styles = StyleSheet.create({
       },
     })
   },
-  closeBtn: {
+  closeBtn: { 
+    ...Platform.select({
+    android: {
+      width: "30%",
+      position: "absolute",
+      bottom: screenHeight * 0.67,
+      left: screenWidth * 0.77,
+    },
+    ios: {
     width: "30%",
     position: "absolute",
     bottom: screenHeight * 0.74,
     left: screenWidth * 0.77,
+    },
+  })
   },
   modal: {
     height:  10,
@@ -755,13 +905,11 @@ const styles = StyleSheet.create({
     fontWeight:"bold",
   },
   cardTittle: {
-    position: "absolute",
-    top: screenHeight * 0.01,
-    left: 30,
+   alignItems: 'flex-start',
     fontWeight: "600",
     fontSize: 30,
     lineHeight: 35,
-    paddingTop: 10,
+    paddingTop: 40,
     marginBottom: 10,
     fontFamily: "Poppins_600SemiBold",
     width: "80%",
@@ -815,14 +963,12 @@ const styles = StyleSheet.create({
     shadowRadius: 10.32,
 
     elevation: 16,
-
   },
 
   heartCounterText: {
-    fontSize:12,
-    fontWeight:"bold"
+    fontSize: 12,
+    fontWeight: "bold",
   },
-
   goBtn: {
     position: "absolute",
     bottom: screenHeight * 0.37,
@@ -1099,195 +1245,195 @@ slide3User: {
 
 const mapStyle = [
   {
-    "featureType": "administrative",
-    "stylers": [
+    featureType: "administrative",
+    stylers: [
       {
-        "visibility": "off"
-      }
-    ]
+        visibility: "off",
+      },
+    ],
   },
   {
-    "featureType": "landscape.man_made",
-    "stylers": [
+    featureType: "landscape.man_made",
+    stylers: [
       {
-        "visibility": "off"
-      }
-    ]
+        visibility: "off",
+      },
+    ],
   },
   {
-    "featureType": "landscape.natural",
-    "stylers": [
+    featureType: "landscape.natural",
+    stylers: [
       {
-        "visibility": "simplified"
-      }
-    ]
+        visibility: "simplified",
+      },
+    ],
   },
   {
-    "featureType": "landscape.natural.landcover",
-    "stylers": [
+    featureType: "landscape.natural.landcover",
+    stylers: [
       {
-        "visibility": "off"
-      }
-    ]
+        visibility: "off",
+      },
+    ],
   },
   {
-    "featureType": "poi.attraction",
-    "stylers": [
+    featureType: "poi.attraction",
+    stylers: [
       {
-        "visibility": "off"
-      }
-    ]
+        visibility: "off",
+      },
+    ],
   },
   {
-    "featureType": "poi.business",
-    "stylers": [
+    featureType: "poi.business",
+    stylers: [
       {
-        "visibility": "off"
-      }
-    ]
+        visibility: "off",
+      },
+    ],
   },
   {
-    "featureType": "poi.government",
-    "stylers": [
+    featureType: "poi.government",
+    stylers: [
       {
-        "visibility": "off"
-      }
-    ]
+        visibility: "off",
+      },
+    ],
   },
   {
-    "featureType": "poi.medical",
-    "stylers": [
+    featureType: "poi.medical",
+    stylers: [
       {
-        "visibility": "off"
-      }
-    ]
+        visibility: "off",
+      },
+    ],
   },
   {
-    "featureType": "poi.park",
-    "stylers": [
+    featureType: "poi.park",
+    stylers: [
       {
-        "color": "#b2d7bc"
-      }
-    ]
+        color: "#b2d7bc",
+      },
+    ],
   },
   {
-    "featureType": "poi.park",
-    "elementType": "geometry.fill",
-    "stylers": [
+    featureType: "poi.park",
+    elementType: "geometry.fill",
+    stylers: [
       {
-        "visibility": "simplified"
-      }
-    ]
+        visibility: "simplified",
+      },
+    ],
   },
   {
-    "featureType": "poi.park",
-    "elementType": "geometry.stroke",
-    "stylers": [
+    featureType: "poi.park",
+    elementType: "geometry.stroke",
+    stylers: [
       {
-        "visibility": "simplified"
-      }
-    ]
+        visibility: "simplified",
+      },
+    ],
   },
   {
-    "featureType": "poi.park",
-    "elementType": "labels.text",
-    "stylers": [
+    featureType: "poi.park",
+    elementType: "labels.text",
+    stylers: [
       {
-        "color": "#669372"
+        color: "#669372",
       },
       {
-        "visibility": "simplified"
-      }
-    ]
+        visibility: "simplified",
+      },
+    ],
   },
   {
-    "featureType": "poi.place_of_worship",
-    "stylers": [
+    featureType: "poi.place_of_worship",
+    stylers: [
       {
-        "visibility": "off"
-      }
-    ]
+        visibility: "off",
+      },
+    ],
   },
   {
-    "featureType": "poi.school",
-    "stylers": [
+    featureType: "poi.school",
+    stylers: [
       {
-        "visibility": "off"
-      }
-    ]
+        visibility: "off",
+      },
+    ],
   },
   {
-    "featureType": "poi.sports_complex",
-    "stylers": [
+    featureType: "poi.sports_complex",
+    stylers: [
       {
-        "visibility": "off"
-      }
-    ]
+        visibility: "off",
+      },
+    ],
   },
   {
-    "featureType": "road",
-    "elementType": "labels",
-    "stylers": [
+    featureType: "road",
+    elementType: "labels",
+    stylers: [
       {
-        "visibility": "off"
-      }
-    ]
+        visibility: "off",
+      },
+    ],
   },
   {
-    "featureType": "road.highway",
-    "stylers": [
+    featureType: "road.highway",
+    stylers: [
       {
-        "color": "#e1decc"
-      }
-    ]
+        color: "#e1decc",
+      },
+    ],
   },
   {
-    "featureType": "road.highway",
-    "elementType": "geometry.stroke",
-    "stylers": [
+    featureType: "road.highway",
+    elementType: "geometry.stroke",
+    stylers: [
       {
-        "color": "#b6b477"
-      }
-    ]
+        color: "#b6b477",
+      },
+    ],
   },
   {
-    "featureType": "transit",
-    "stylers": [
+    featureType: "transit",
+    stylers: [
       {
-        "visibility": "off"
-      }
-    ]
+        visibility: "off",
+      },
+    ],
   },
   {
-    "featureType": "transit",
-    "elementType": "geometry",
-    "stylers": [
+    featureType: "transit",
+    elementType: "geometry",
+    stylers: [
       {
-        "visibility": "off"
-      }
-    ]
+        visibility: "off",
+      },
+    ],
   },
   {
-    "featureType": "water",
-    "stylers": [
+    featureType: "water",
+    stylers: [
       {
-        "color": "#88bcdd"
+        color: "#88bcdd",
       },
       {
-        "visibility": "simplified"
-      }
-    ]
+        visibility: "simplified",
+      },
+    ],
   },
   {
-    "featureType": "water",
-    "elementType": "labels",
-    "stylers": [
+    featureType: "water",
+    elementType: "labels",
+    stylers: [
       {
-        "color": "#0f4d76"
-      }
-    ]
-  }
-]
+        color: "#0f4d76",
+      },
+    ],
+  },
+];
 
 const points = [
   { latitude: 48.834113, longitude: 2.272863 },
