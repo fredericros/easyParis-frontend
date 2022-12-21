@@ -10,6 +10,7 @@ import {
   KeyboardAvoidingView,
   TextInput,
   SafeAreaView,
+  Alert
 } from "react-native";
 import FontAwesome from "react-native-vector-icons/FontAwesome";
 
@@ -21,8 +22,9 @@ import { Dimensions } from 'react-native';
 
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { loadPlaces } from "../reducers/places";
+import { loadfilteredPlaces, likePlace } from "../reducers/filteredPlaces";
 import { loadActualPlace } from "../reducers/actualPlaces";
+import { loadAllPlaces } from "../reducers/allPlaces";
 import DirectionMapScreen from '../screens/DirectionMapScreen'
 
 import {
@@ -52,6 +54,7 @@ import AppLoading from "expo-app-loading";
 import Swiper from "react-native-swiper";
 
 import App from "./test.js";
+import { ReloadInstructions } from "react-native/Libraries/NewAppScreen";
 
 const screenWidth = Dimensions.get('window').width;
 const screenHeight = Dimensions.get('window').height;
@@ -82,11 +85,13 @@ export default function MapScreen({ navigation }) {
   });
 
   const dispatch = useDispatch();
-  const places = useSelector((state) => state.places.value);
+  const filteredPlaces = useSelector((state) => state.filteredPlaces.value);
+  const user = useSelector((state) => state.user.value)
+  const actualPlace = useSelector((state) => state.actualPlaces.value)
 
-  const [filteredPlaces, setFilteredPlaces] = useState("district");
-  const [categoryVisible, setCategoryVisible] = useState(true);
-  const [actualPlace, setActualPlace] = useState(null)
+  const [districtVisible, setdistrictVisible] = useState(true);
+  const [countLike, setCountLike] = useState(false)
+
 
   // === USEEFFECT D'INITIALISATION, DEMANDE DE l'AUTORISATION DE TRACAGE GPS ===================== //
 
@@ -105,39 +110,34 @@ export default function MapScreen({ navigation }) {
 
     
     useEffect(() => {
-      fetch(`http://192.168.108.153:3000/places/${filteredPlaces}`)
+      fetch(`http://192.168.10.153:3000/places/district`)
       .then((response) => response.json())
       .then((data) => {
-        data.result && dispatch(loadPlaces(data.places));
+        data.result && dispatch(loadfilteredPlaces(data.places));
       });
     },[])
+
+    useEffect(() => {
+      fetch(`http://192.168.10.153:3000/places`)
+      .then((response) => response.json())
+      .then((data) => {
+        data.result && dispatch(loadAllPlaces(data.places));
+        console.log("rerender")
+      });
+    },[countLike])
 
 
 
       // === FETCH DE LA ROUTE BACKEND POUR RECUPERER LES PLACESFILTREES AU CLICK SUR UN BOUTON FILTRE ======================================= //
 
 const handleFilter = (filter) => {
-  fetch(`http://192.168.108.153:3000/places/${filter}`)
+  fetch(`http://192.168.10.153:3000/places/${filter}`)
   .then((response) => response.json())
   .then((data) => {
-    data.result && dispatch(loadPlaces(data.places));
+    data.result && dispatch(loadfilteredPlaces(data.places));
   });
 }
 
-  // === GESTION DE LA MODALE ====================================================================== //
-
-  const [modalVisible, setModalVisible] = useState(false);
-  
-  const handleMarker = () => {
-    setModalVisible(true);
-  };
-
-  const handleClose = () => {
-    setModalVisible(false);
-  };
-
-
-  
 
   // === GESTION DES MARQUEURS ===================================================================== //
 
@@ -153,13 +153,13 @@ const handleFilter = (filter) => {
     </View>
   );
   
-    const categoryMarker = places.map((data, i) => {
+    const categoryMarker = filteredPlaces.map((data, i) => {
       return (
         <Marker
           key={i}
           coordinate={{ latitude: data.latitude, longitude: data.longitude }}
           onPress={() => {
-            setActualPlace(data)
+           dispatch(loadActualPlace(data))
             handleMarker();
           }}
         >
@@ -187,13 +187,13 @@ const handleFilter = (filter) => {
     );
   
 
-  const placeMarker = places.map((data, i) => {
+  const placeMarker = filteredPlaces.map((data, i) => {
     return (
       <Marker
         key={i}
         coordinate={{ latitude: data.latitude, longitude: data.longitude }}
         onPress={() => {
-          setActualPlace(data)
+          dispatch(loadActualPlace(data))
           handleMarker();
         }}
       >
@@ -229,7 +229,47 @@ if (actualPlace) {
       <Text key={i} adjustsFontSizeToFit={true} numberOfLines={2} style={styles.cardInfoText}>{data}</Text>
     )
   })
+
+
 }
+  // === GESTION DES LIKES ===================================================================== //
+
+
+  const handleLike = () => {
+    setCountLike(!countLike)
+    fetch('http://192.168.10.153:3000/places/like', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token: user.token, placeId: actualPlace._id }),
+    }).then(response => response.json())
+      .then(data => {
+        if (data.result) {
+          dispatch(likePlace({placeId: actualPlace._id, username: user.username}))
+        } else {
+          Alert.alert(
+            "Want to save this place?",
+            "Create your account or sign in!",
+            [
+              {
+                text: "Cancel",
+              },
+              { text: "Sign In", 
+              onPress: () => {
+                setModalVisible(false)
+                navigation.navigate("Home", {screen:"Profile"}) 
+              }}
+            ]
+          );
+        } 
+      });
+  }
+
+  let likeStyle = {};
+  if (actualPlace) {
+    if (actualPlace.likes.some(e => e.username === user.username)) {
+      likeStyle = { 'color': '#f91980' };
+    } 
+  }
 
 
   // === GESTION DES QUARTIERS ===================================================================== //
@@ -259,182 +299,241 @@ if (actualPlace) {
     )
   })
 
+  // === GESTION DE LA MODALE ====================================================================== //
+
+  const [modalVisible, setModalVisible] = useState(false);
+  
+  const handleMarker = () => {
+    setModalVisible(true);
+  };
+
+  const handleClose = () => {
+    setModalVisible(false);
+  };
+
+  const modal = () => {
+    if (districtVisible) {
+      return(
+        <Modal
+        visible={modalVisible}
+        animationType="slide"
+        transparent={true}
+        style={styles.modal}
+      >
+          <SafeAreaView style={styles.centeredView}>
+            <View style={styles.modalView}>
+              <ImageBackground
+                source={actualPlace && {uri: actualPlace.photo}}
+                style={styles.backgroundImage}
+              ></ImageBackground>
+  
+              <View style={styles.descriptionCard}>
+              <TouchableOpacity></TouchableOpacity>
+                <FontAwesome
+                  aria-hidden="true"
+                  name="times-circle-o"
+                  size={40}
+                  color="black"
+                  onPress={() => handleClose()}
+                  style={styles.closeBtn}
+                />
+                {/* here we will need to add a map to add costom name */}
+                <Text style={styles.cardTittle}>{actualPlace && actualPlace.title}</Text>
+                {/* This is for the text about the place = alsi needs mao */}
+                <Text style={styles.cardText}>
+                {actualPlace && actualPlace.description}
+                </Text>
+              </View>
+            </View>
+          </SafeAreaView>
+      </Modal>
+      )
+    } else {
+      return (
+        <Modal
+        visible={modalVisible}
+        animationType="slide"
+        transparent={true}
+        style={styles.modal}
+      >
+        <Swiper
+          loop={false}
+          style={styles.wrapper}
+          paginationStyle={{ bottom: 0,
+            left: 0,
+            top: screenHeight * 0.80,
+            right: 0,}
+           
+          }
+          containerStyle={{ height: 150, flex: 1 }}
+        >
+          <SafeAreaView style={styles.centeredView}>
+            <View style={styles.modalView}>
+              <ImageBackground
+                source={actualPlace && {uri: actualPlace.photo}}
+                style={styles.backgroundImage}
+              ></ImageBackground>
+  
+              <View style={styles.descriptionCard}>
+              <TouchableOpacity></TouchableOpacity>
+                <FontAwesome
+                  aria-hidden="true"
+                  name="times-circle-o"
+                  size={40}
+                  color="black"
+                  onPress={() => handleClose()}
+                  style={styles.closeBtn}
+                />
+                {/* here we will need to add a map to add costom name */}
+                <Text style={styles.cardTittle}>{actualPlace && actualPlace.title}</Text>
+                {/* This is for the text about the place = alsi needs mao */}
+                <Text style={styles.cardText}>
+                {actualPlace && actualPlace.description}
+                </Text>
+                <TouchableOpacity style={styles.heartBtn}>
+                  <FontAwesome data={countLike} style={likeStyle} name="heart" size={30} onPress={() => handleLike()} />
+                </TouchableOpacity>
+                  <View style={styles.heartCounter}>
+                    <Text style={styles.heartCounterText}>
+                     {actualPlace && actualPlace.likes.length}
+                     </Text>
+                    </View>
+                <TouchableOpacity style={styles.goBtn}>
+                  <FontAwesome name="location-arrow" size={40} color="#1E90FF" onPress={() => {
+              navigation.navigate("DirectionMapScreen")
+              handleClose()
+          }}/>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </SafeAreaView>
+  
+          <SafeAreaView style={styles.slide2centeredView}>
+            <View style={styles.slide2modalView}>
+              <View style={styles.cardInfoMaintTitleBLock}>
+                <Text style={styles.cardInfoMaintTitle}>INFORMATION</Text>
+              </View>
+              <FontAwesome
+                    aria-hidden="true"
+                    name="times-circle-o"
+                    size={40}
+                    color="black"
+                    onPress={() => handleClose()}
+                    style={styles.closeBtnSlide2}
+                  />
+              <View style={styles.cardInfoOpeningHours}>
+                <Text style={styles.cardInfoTitle}>⏱ OPENING HOURS</Text>
+                {cardHours}
+              </View>
+              <View style={styles.cardInfoTickets}>
+                <Text style={styles.cardInfoTitle}>🎟️ Tickets and Prices</Text>
+                {cardPrices}
+              </View>
+              <View style={styles.cardInfoTips}>
+                <Text style={styles.cardInfoTitle}>✅ Tips</Text>
+                {cardTips}
+              </View>
+  
+              <TouchableOpacity style={styles.cardInfoBtn}>
+                <Text>GO TO WEBSITE</Text>
+              </TouchableOpacity>
+            </View>
+          </SafeAreaView>
+          <KeyboardAvoidingView behavior='padding' style={styles.slide2centeredView}>
+       
+            <SafeAreaView style={styles.slide3modalView}>
+            <View>
+             
+                <Text style={styles.slide3Tittle}>REVIEWS</Text>
+              </View>
+             
+              <ScrollView vertical style={styles.scrollUsersReview}>
+              <View styles={{height: '10%', backgroundColor: 'blue',}}>
+              <View>
+                <View style={styles.slide3User}>
+                <Text style={styles.slide3UserName}>USER1</Text>
+                <Text  style={styles.slide3Date}>28/12/2022</Text>
+                </View>
+               <View>
+                
+                <Text style={styles.slide3Description}>The Eiffel Tower is an iconic landmark located in Paris, France. It was completed in 1889 and was the tallest man-made structure in the world at the time. The tower is made of iron and stands 324 meters tall, with three levels that can be accessed by elevator or stairs.</Text></View>
+              </View>
+              <View >
+                <View style={styles.slide3User}>
+                <Text style={styles.slide3UserName}>USER1</Text>
+                <Text  style={styles.slide3Date}>28/12/2022</Text>
+                </View>
+               <View>
+                
+                <Text style={styles.slide3Description}>The Eiffel Tower is an iconic landmark located in Paris, France. It was completed in 1889 and was the tallest man-made structure in the world at the time. The tower is made of iron and stands 324 meters tall, with three levels that can be accessed by elevator or stairs.</Text></View>
+              </View>
+              <View >
+                <View style={styles.slide3User}>
+                <Text style={styles.slide3UserName}>USER1</Text>
+                <Text  style={styles.slide3Date}>28/12/2022</Text>
+                </View>
+               <View>
+                
+                <Text style={styles.slide3Description}>The Eiffel Tower is an iconic landmark located in Paris, France. It was completed in 1889 and was the tallest man-made structure in the world at the time. The tower is made of iron and stands 324 meters tall, with three levels that can be accessed by elevator or stairs.</Text></View>
+              
+              </View>
+              </View>
+              </ScrollView>
+              <FontAwesome
+                    aria-hidden="true"
+                    name="times-circle-o"
+                    size={40}
+                    color="black"
+                    onPress={() => handleClose()}
+                    style={styles.closeBtnSlide2}
+                  />
+             
+              <View style={styles.inputContainer} ><TextInput
+        style={styles.input}
+        placeholder="Add a review"
+        placeholderTextColor="#66757F"
+        maxLength={100}
+  
+      />
+     
+      </View>
+      <TouchableOpacity style={styles.submitButtonReview}>
+  
+  <Text style={styles.textBtnSubnit}>Post review</Text>
+  <TouchableOpacity style={styles.submittBtn}>
+                  <FontAwesome name="paper-plane" size={25} color="black" />
+                </TouchableOpacity>
+  </TouchableOpacity>
+  
+            </SafeAreaView>
+         
+         
+          </KeyboardAvoidingView>
+      
+        </Swiper>
+      </Modal>
+      )
+    }
+  }
+
 
   // === RETURN ================================================================================ //
 
   return (
-
     <View style={styles.container}>
-        <Modal
-      visible={modalVisible}
-      animationType="slide"
-      transparent={true}
-      style={styles.modal}
-    >
-      <Swiper
-        loop={false}
-        style={styles.wrapper}
-        paginationStyle={{ bottom: 0,
-          left: 0,
-          top: screenHeight * 0.80,
-          right: 0,}
-         
-        }
-        containerStyle={{ height: 150, flex: 1 }}
-      >
-        <SafeAreaView style={styles.centeredView}>
-          <View style={styles.modalView}>
-            <ImageBackground
-              source={actualPlace && {uri: actualPlace.photo}}
-              style={styles.backgroundImage}
-            ></ImageBackground>
-
-            <View style={styles.descriptionCard}>
-            <TouchableOpacity></TouchableOpacity>
-              <FontAwesome
-                aria-hidden="true"
-                name="times-circle-o"
-                size={40}
-                color="black"
-                onPress={() => handleClose()}
-                style={styles.closeBtn}
-              />
-              {/* here we will need to add a map to add costom name */}
-              <Text style={styles.cardTittle}>{actualPlace && actualPlace.title}</Text>
-              {/* This is for the text about the place = alsi needs mao */}
-              <Text style={styles.cardText}>
-              {actualPlace && actualPlace.description}
-              </Text>
-              <TouchableOpacity style={styles.heartBtn}>
-                <FontAwesome name="heart" size={30} color="black" />
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.goBtn}>
-                <FontAwesome name="location-arrow" size={40} color="blue"   onPress={() => {
-            navigation.navigate("DirectionMapScreen")
-            handleClose()
-        }}/>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </SafeAreaView>
-
-        <SafeAreaView style={styles.slide2centeredView}>
-          <View style={styles.slide2modalView}>
-            <View style={styles.cardInfoMaintTitleBLock}>
-              <Text style={styles.cardInfoMaintTitle}>INFORMATION</Text>
-            </View>
-            <FontAwesome
-                  aria-hidden="true"
-                  name="times-circle-o"
-                  size={40}
-                  color="black"
-                  onPress={() => handleClose()}
-                  style={styles.closeBtnSlide2}
-                />
-            <View style={styles.cardInfoOpeningHours}>
-              <Text style={styles.cardInfoTitle}>⏱ OPENING HOURS</Text>
-              {cardHours}
-            </View>
-            <View style={styles.cardInfoTickets}>
-              <Text style={styles.cardInfoTitle}>🎟️ Tickets and Prices</Text>
-              {cardPrices}
-              <Text style={styles.cardInfoText}>• Ticket to top + Champagne: 45,80€</Text>
-            </View>
-            <View style={styles.cardInfoTips}>
-              <Text style={styles.cardInfoTitle}>✅ Tips</Text>
-              {cardTips}
-            </View>
-
-            <TouchableOpacity style={styles.cardInfoBtn}>
-              <Text>GO TO WEBSITE</Text>
-            </TouchableOpacity>
-          </View>
-        </SafeAreaView>
-        <KeyboardAvoidingView behavior='padding' style={styles.slide2centeredView}>
-     
-          <SafeAreaView style={styles.slide3modalView}>
-          <View>
-           
-              <Text style={styles.slide3Tittle}>REVIEWS</Text>
-            </View>
-           
-            <ScrollView vertical style={styles.scrollUsersReview}>
-            <View styles={{height: '10%', backgroundColor: 'blue',}}>
-            <View>
-              <View style={styles.slide3User}>
-              <Text style={styles.slide3UserName}>USER1</Text>
-              <Text  style={styles.slide3Date}>28/12/2022</Text>
-              </View>
-             <View>
-              
-              <Text style={styles.slide3Description}>The Eiffel Tower is an iconic landmark located in Paris, France. It was completed in 1889 and was the tallest man-made structure in the world at the time. The tower is made of iron and stands 324 meters tall, with three levels that can be accessed by elevator or stairs.</Text></View>
-            </View>
-            <View >
-              <View style={styles.slide3User}>
-              <Text style={styles.slide3UserName}>USER1</Text>
-              <Text  style={styles.slide3Date}>28/12/2022</Text>
-              </View>
-             <View>
-              
-              <Text style={styles.slide3Description}>The Eiffel Tower is an iconic landmark located in Paris, France. It was completed in 1889 and was the tallest man-made structure in the world at the time. The tower is made of iron and stands 324 meters tall, with three levels that can be accessed by elevator or stairs.</Text></View>
-            </View>
-            <View >
-              <View style={styles.slide3User}>
-              <Text style={styles.slide3UserName}>USER1</Text>
-              <Text  style={styles.slide3Date}>28/12/2022</Text>
-              </View>
-             <View>
-              
-              <Text style={styles.slide3Description}>The Eiffel Tower is an iconic landmark located in Paris, France. It was completed in 1889 and was the tallest man-made structure in the world at the time. The tower is made of iron and stands 324 meters tall, with three levels that can be accessed by elevator or stairs.</Text></View>
-            
-            </View>
-            </View>
-            </ScrollView>
-            <FontAwesome
-                  aria-hidden="true"
-                  name="times-circle-o"
-                  size={40}
-                  color="black"
-                  onPress={() => handleClose()}
-                  style={styles.closeBtnSlide2}
-                />
-           
-            <View style={styles.inputContainer} ><TextInput
-      style={styles.input}
-      placeholder="Add a review"
-      placeholderTextColor="#66757F"
-      maxLength={100}
-
-    />
-   
-    </View>
-    <TouchableOpacity style={styles.submitButtonReview}>
-
-<Text style={styles.textBtnSubnit}>Post review</Text>
-<TouchableOpacity style={styles.submittBtn}>
-                <FontAwesome name="paper-plane" size={25} color="black" />
-              </TouchableOpacity>
-</TouchableOpacity>
-
-          </SafeAreaView>
-       
-       
-        </KeyboardAvoidingView>
-    
-      </Swiper>
-    </Modal>
+     {modal()}
 
       <View style={styles.filterContainer}>
         <ScrollView horizontal={true} style={styles.scrollView}>
           <TouchableOpacity style={styles.filterBtn} 
           onPress={()=> {
             handleFilter("district") 
-            setCategoryVisible(true)}}>
+            setdistrictVisible(true)}}>
             <Text style={styles.filterText}>🗺️ Disctricts</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.filterBtn} onPress={()=> {
             handleFilter("monuments")
-            setCategoryVisible(false)}}>
+            setdistrictVisible(false)}}>
             <Text style={styles.filterText}>🏰 Monuments</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.filterBtn}>
@@ -443,18 +542,8 @@ if (actualPlace) {
         </ScrollView>
         </View>
 
-      {/* <Modal
-        visible={modalVisibleGoto}
-        animationType="slide"
-        transparent={true}
-        style={styles.modal}
-      >
-
-      </Modal> */}
-
-
       <MapView
-        provider={PROVIDER_GOOGLE}
+        // provider={PROVIDER_GOOGLE}
         customMapStyle={mapStyle}
         initialRegion={{
           latitude: 48.8584685,
@@ -465,7 +554,7 @@ if (actualPlace) {
         style={styles.map}
       >
         {districtArea}
-        {categoryVisible? categoryMarker : placeMarker} 
+        {districtVisible? categoryMarker : placeMarker} 
       </MapView>
     </View>
   );
@@ -706,6 +795,32 @@ const styles = StyleSheet.create({
 
     elevation: 16,
 
+  },
+  heartCounter: {
+    position: "absolute",
+    bottom: screenHeight * 0.355,
+    left: screenWidth * 0.79,
+    backgroundColor: "white",
+    height: 30,
+    width: 30,
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 50,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 8,
+    },
+    shadowOpacity: 0.44,
+    shadowRadius: 10.32,
+
+    elevation: 16,
+
+  },
+
+  heartCounterText: {
+    fontSize:12,
+    fontWeight:"bold"
   },
 
   goBtn: {

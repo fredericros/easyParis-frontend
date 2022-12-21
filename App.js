@@ -26,8 +26,9 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import reviews from "./reducers/reviews";
 import user from "./reducers/user";
 import like from "./reducers/like";
-import places from "./reducers/places";
+import filteredPlaces from "./reducers/filteredPlaces";
 import actualPlaces from "./reducers/actualPlaces";
+import allPlaces from "./reducers/allPlaces";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -47,7 +48,7 @@ const persistor = persistStore(store);
 ==================================================================== */
 
 const store = configureStore({
-  reducer: { user, reviews, like, places, actualPlaces },
+  reducer: { user, reviews, like, filteredPlaces, actualPlaces, allPlaces },
 });
 
 
