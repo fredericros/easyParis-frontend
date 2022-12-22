@@ -11,11 +11,10 @@ import {
   TextInput,
   SafeAreaView,
   Alert,
+  Linking,
+  Button
 } from "react-native";
 import FontAwesome from "react-native-vector-icons/FontAwesome";
-
-import { Flex, Box, Wrap } from "@react-native-material/core";
-import { Stack } from "@react-native-material/core";
 import MapView, {
   Polygon,
   Marker,
@@ -23,7 +22,6 @@ import MapView, {
   CustomMarker,
   PROVIDER_GOOGLE,
 } from "react-native-maps";
-import * as Location from "expo-location";
 import { Dimensions } from "react-native";
 
 import { useEffect, useState } from "react";
@@ -31,7 +29,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { loadfilteredPlaces, likePlace } from "../reducers/filteredPlaces";
 import { loadActualPlace } from "../reducers/actualPlaces";
 import { loadAllPlaces } from "../reducers/allPlaces";
-import DirectionMapScreen from "../screens/DirectionMapScreen";
+import{loadReview, addReview, deleteReview } from "../reducers/reviews";
 
 import {
   useFonts,
@@ -59,8 +57,6 @@ import AppLoading from "expo-app-loading";
 // adding the import for the swiper
 import Swiper from "react-native-swiper";
 
-import App from "./test.js";
-import { ReloadInstructions } from "react-native/Libraries/NewAppScreen";
 
 const screenWidth = Dimensions.get("window").width;
 const screenHeight = Dimensions.get("window").height;
@@ -99,6 +95,7 @@ export default function MapScreen({ navigation }) {
 
   // === USEEFFECT D'INITIALISATION, DEMANDE DE l'AUTORISATION DE TRACAGE GPS ===================== //
 
+  /*
   useEffect(() => {
     (async () => {
       const { status } = await Location.requestForegroundPermissionsAsync();
@@ -108,30 +105,23 @@ export default function MapScreen({ navigation }) {
       }
     })();
   }, []);
+  */
 
   // === FETCH DE LA ROUTE BACKEND POUR RECUPERER LES PLACES A L'INITILAISATION ======================================= //
 
   useEffect(() => {
-    fetch(`http://192.168.10.153:3000/places/district`)
+    fetch(`http://192.168.10.168:3000/places/district`)
       .then((response) => response.json())
       .then((data) => {
         data.result && dispatch(loadfilteredPlaces(data.places));
       });
   }, []);
 
-  useEffect(() => {
-    fetch(`http://192.168.10.153:3000/places`)
-      .then((response) => response.json())
-      .then((data) => {
-        data.result && dispatch(loadAllPlaces(data.places));
-        console.log("rerender");
-      });
-  }, [countLike]);
 
   // === FETCH DE LA ROUTE BACKEND POUR RECUPERER LES PLACESFILTREES AU CLICK SUR UN BOUTON FILTRE ======================================= //
 
   const handleFilter = (filter) => {
-    fetch(`http://192.168.10.153:3000/places/${filter}`)
+    fetch(`http://192.168.10.168:3000/places/${filter}`)
       .then((response) => response.json())
       .then((data) => {
         data.result && dispatch(loadfilteredPlaces(data.places));
@@ -206,7 +196,6 @@ export default function MapScreen({ navigation }) {
       return (
         <Text
           key={i}
-          adjustsFontSizeToFit={true}
           numberOfLines={2}
           style={styles.cardInfoText}
         >
@@ -219,7 +208,6 @@ export default function MapScreen({ navigation }) {
       return (
         <Text
           key={i}
-          adjustsFontSizeToFit={true}
           numberOfLines={2}
           style={styles.cardInfoText}
         >
@@ -232,7 +220,6 @@ export default function MapScreen({ navigation }) {
       return (
         <Text
           key={i}
-          adjustsFontSizeToFit={true}
           numberOfLines={2}
           style={styles.cardInfoText}
         >
@@ -245,7 +232,7 @@ export default function MapScreen({ navigation }) {
 
   const handleLike = () => {
     setCountLike(!countLike);
-    fetch("http://192.168.10.153:3000/places/like", {
+    fetch("http://192.168.10.168:3000/places/like", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ token: user.token, placeId: actualPlace._id }),
@@ -257,34 +244,23 @@ export default function MapScreen({ navigation }) {
             likePlace({ placeId: actualPlace._id, username: user.username })
           );
           if (actualPlace.likes.some((e) => e.username === user.username)) {
-            Alert.alert(
-      "Your place have been unsaved",
-      "",
-      [
-
-        {
-          text: "Ok",
-          onPress: () => {
-            setModalVisible(false);
-
-          },
-        },
-      ]
-    );
-          } else {
-            Alert.alert(
-              "Your place have been saved",
-              "",
-              [
-                {
-                  text: "Ok",
-                  onPress: () => {
-                    setModalVisible(false);
-                  },
+            Alert.alert("Your place have been unsaved", "", [
+              {
+                text: "Ok",
+                onPress: () => {
+                  setModalVisible(false);
                 },
-              ],
-            );
-
+              },
+            ]);
+          } else {
+            Alert.alert("Your place have been saved", "", [
+              {
+                text: "Ok",
+                onPress: () => {
+                  setModalVisible(false);
+                },
+              },
+            ]);
           }
         } else {
           Alert.alert(
@@ -298,21 +274,19 @@ export default function MapScreen({ navigation }) {
                 text: "Sign In",
                 onPress: () => {
                   setModalVisible(false);
-                  navigation.navigate("Home", { screen: "Profile" })
+                  navigation.navigate("Home", { screen: "Profile" });
                 },
               },
             ]
           );
         }
       });
-  
-
   };
 
   let likeStyle = {};
   if (actualPlace) {
     if (actualPlace.likes.some((e) => e.username === user.username)) {
-      likeStyle = { 'color': '#f91980' };
+      likeStyle = { color: "#f91980" };
       // setLikeStyle({
       //   color: "#f91980",
       // });
@@ -401,6 +375,51 @@ export default function MapScreen({ navigation }) {
     );
   });
 
+
+
+//============================================================================================================
+
+
+//   const dataReview = useSelector((state) => state.reviews.value);
+
+// const displayRewiewsPlace=()=>{
+
+//   fetch('http://192.168.10.168:3000/reviews/639743938100638d05ebf3dc')
+//     .then(response => response.json())
+//     .then(data => {
+//       if (data.result) {
+//         dispatch(loadReview({ reviews: data.review }));
+
+//       }})
+//   //const [reviewsPlace, setReviewsPlace]=useState('');
+//   } 
+
+
+//   const reviewsPlaces = dataReview.reviews.map((data, i) => {
+//       return (
+//         <View>
+//         <View key={i} style={styles.slide3User}>
+//           <Text style={styles.slide3UserName}>{data.author.username}</Text>
+//           <Text style={styles.slide3Date}>{data.createdAt}</Text>
+//         </View>
+//         <View>
+//           <Text style={styles.slide3Description}>
+//             {data.content}
+//           </Text>
+//         </View>
+//       </View>
+        
+//       );
+//   }); 
+
+
+  
+
+//   const displayStore = () => {
+//     console.log(dataReview.reviews)
+//   }
+
+
   // === GESTION DE LA MODALE ====================================================================== //
 
   const [modalVisible, setModalVisible] = useState(false);
@@ -466,7 +485,7 @@ export default function MapScreen({ navigation }) {
             paginationStyle={{
               bottom: 0,
               left: 0,
-              top: screenHeight * 0.8,
+              top: screenHeight * 0.86,
               right: 0,
             }}
             containerStyle={{ height: 150, flex: 1 }}
@@ -488,21 +507,18 @@ export default function MapScreen({ navigation }) {
                     onPress={() => handleClose()}
                     style={styles.closeBtn}
                   />
-                  {/* here we will need to add a map to add costom name */}
                   <Text style={styles.cardTittle}>
                     {actualPlace && actualPlace.title}
                   </Text>
-                  {/* This is for the text about the place = alsi needs mao */}
                   <Text style={styles.cardText}>
                     {actualPlace && actualPlace.description}
                   </Text>
-                  <TouchableOpacity style={styles.heartBtn}>
+                  <TouchableOpacity onPress={() => handleLike()} style={styles.heartBtn}>
                     <FontAwesome
                       data={countLike}
                       style={likeStyle}
                       name="heart"
                       size={30}
-                      onPress={() => handleLike()}
                     />
                   </TouchableOpacity>
                   <View style={styles.heartCounter}>
@@ -539,7 +555,7 @@ export default function MapScreen({ navigation }) {
                   style={styles.closeBtnSlide2}
                 />
                 <View style={styles.cardInfoOpeningHours}>
-                  <Text style={styles.cardInfoTitle}>⏱ OPENING HOURS</Text>
+                  <Text style={styles.cardInfoTitle}>⏱ Opening Hours</Text>
                   {cardHours}
                 </View>
                 <View style={styles.cardInfoTickets}>
@@ -553,7 +569,12 @@ export default function MapScreen({ navigation }) {
                   {cardTips}
                 </View>
 
-                <TouchableOpacity style={styles.cardInfoBtn}>
+                <TouchableOpacity 
+                style={styles.cardInfoBtn}
+                onPress={()=> {
+                  {actualPlace && Linking.openURL(actualPlace.website);}
+                  
+                }}>
                   <Text>GO TO WEBSITE</Text>
                 </TouchableOpacity>
               </View>
@@ -571,40 +592,34 @@ export default function MapScreen({ navigation }) {
                   <View styles={{ height: "10%", backgroundColor: "blue" }}>
                     <View>
                       <View style={styles.slide3User}>
-                        <Text style={styles.slide3UserName}>USER1</Text>
-                        <Text style={styles.slide3Date}>28/12/2022</Text>
+                        <Text style={styles.slide3UserName}>John</Text>
+                        <Text style={styles.slide3Date}>18/12/2022</Text>
                       </View>
                       <View>
                         <Text style={styles.slide3Description}>
-                          The Eiffel Tower is an iconic landmark located in
-                          Paris, France. It was completed in 1889 and was the
-                          tallest man-made structure in the world at the time.
-                          The tower is made of iron and stands 324 meters tall,
-                          with three levels that can be accessed by elevator or
-                          stairs.
+                        One of the most notable features of Sacré-Cœur is its location atop the Montmartre hill. From the basilica's steps, visitors can enjoy stunning views of Paris, including the Eiffel Tower and the Panthéon. The basilica is also surrounded by a beautiful garden and is a popular spot for picnics and relaxation.
+
+
                         </Text>
                       </View>
                     </View>
                     <View>
                       <View style={styles.slide3User}>
-                        <Text style={styles.slide3UserName}>USER1</Text>
-                        <Text style={styles.slide3Date}>28/12/2022</Text>
+                        <Text style={styles.slide3UserName}>Kim </Text>
+                        <Text style={styles.slide3Date}>23/12/2022</Text>
                       </View>
                       <View>
                         <Text style={styles.slide3Description}>
-                          The Eiffel Tower is an iconic landmark located in
-                          Paris, France. It was completed in 1889 and was the
-                          tallest man-made structure in the world at the time.
-                          The tower is made of iron and stands 324 meters tall,
-                          with three levels that can be accessed by elevator or
-                          stairs.
+                        Constructed in the late 19th century, the basilica is made of white stone and is topped with a large, white dome. Its design is a mix of Romanesque and Byzantine styles, with intricate mosaics and frescoes decorating the interior. The basilica also houses a large organ and has a rich history of musical performances.
+
+
                         </Text>
                       </View>
                     </View>
                     <View>
                       <View style={styles.slide3User}>
-                        <Text style={styles.slide3UserName}>USER1</Text>
-                        <Text style={styles.slide3Date}>28/12/2022</Text>
+                        <Text style={styles.slide3UserName}>Pedro</Text>
+                        <Text style={styles.slide3Date}>05/12/2022</Text>
                       </View>
                       <View>
                         <Text style={styles.slide3Description}>
@@ -636,7 +651,7 @@ export default function MapScreen({ navigation }) {
                     maxLength={100}
                   />
                 </View>
-                <TouchableOpacity style={styles.submitButtonReview}>
+                <TouchableOpacity style={styles.submitButtonReview} onPress={() => {displayRewiewsPlace()}}>
                   <Text style={styles.textBtnSubnit}>Post review</Text>
                   <TouchableOpacity style={styles.submittBtn}>
                     <FontAwesome name="paper-plane" size={25} color="black" />
@@ -649,6 +664,7 @@ export default function MapScreen({ navigation }) {
       );
     }
   };
+
 
   // === RETURN ================================================================================ //
 
@@ -713,7 +729,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-   
   },
   modalView: {
     ...Platform.select({
@@ -749,7 +764,7 @@ const styles = StyleSheet.create({
         shadowRadius: 4,
         elevation: 5,
       },
-    })
+    }),
   },
   backgroundImage: {
     width: screenWidth * 0.9,
@@ -771,8 +786,7 @@ const styles = StyleSheet.create({
         borderTopRightRadius: 40,
         borderBottomLeftRadius: 20,
         borderBottomRightRadius: 20,
-        justifyContent: "center",
-        alignItems: "center"
+        alignItems: "center",
       },
       ios: {
         top: screenHeight * 0.4,
@@ -784,29 +798,28 @@ const styles = StyleSheet.create({
         borderTopRightRadius: 40,
         borderBottomLeftRadius: 20,
         borderBottomRightRadius: 20,
-        justifyContent: "center",
-        alignItems: "center"
+        alignItems: "center",
       },
-    })
+    }),
   },
-  closeBtn: { 
+  closeBtn: {
     ...Platform.select({
-    android: {
-      width: "30%",
-      position: "absolute",
-      bottom: screenHeight * 0.67,
-      left: screenWidth * 0.77,
-    },
-    ios: {
-    width: "30%",
-    position: "absolute",
-    bottom: screenHeight * 0.74,
-    left: screenWidth * 0.77,
-    },
-  })
+      android: {
+        width: "30%",
+        position: "absolute",
+        bottom: screenHeight * 0.67,
+        left: screenWidth * 0.77,
+      },
+      ios: {
+        width: "30%",
+        position: "absolute",
+        bottom: screenHeight * 0.74,
+        left: screenWidth * 0.77,
+      },
+    }),
   },
   modal: {
-    height:  10,
+    height: 10,
   },
 
   bubbleCategory: {
@@ -848,10 +861,10 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 5,
   },
-  textMarker:{
-    width:'55%',
-    justifyContent:'center',
-    alignItems:"center"
+  textMarker: {
+    width: "55%",
+    justifyContent: "center",
+    alignItems: "center",
   },
   bubbleTitle: {
     fontSize: 14,
@@ -877,48 +890,46 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   bubbleImage: {
-    alignSelf:"center",
-    height:60,
-    width:60,
-    borderRadius:10,
-    marginRight:10
+    alignSelf: "center",
+    height: 60,
+    width: 60,
+    borderRadius: 10,
+    marginRight: 10,
   },
 
   filterContainer: {
     flex: 0.2,
   },
   scrollView: {
-    backgroundColor: 'pink',
+    backgroundColor: "pink",
   },
   filterBtn: {
-    alignItems:"center",
-    justifyContent:"center",
-    backgroundColor:"#EA9774",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#EA9774",
     width: 150,
     height: 60,
-    top:50,
-    borderRadius:20,
-    margin:15,
+    top: 50,
+    borderRadius: 20,
+    margin: 15,
   },
-  filterText:{
-    color:"white",
-    fontWeight:"bold",
+  filterText: {
+    color: "white",
+    fontWeight: "bold",
   },
   cardTittle: {
-   alignItems: 'flex-start',
-    fontWeight: "600",
     fontSize: 30,
     lineHeight: 35,
     paddingTop: 40,
     marginBottom: 10,
     fontFamily: "Poppins_600SemiBold",
-    width: "80%",
+    width: "85%",
   },
 
   cardText: {
     fontWeight: "300",
     fontFamily: "Poppins_400Regular",
-    lineHeight: 20,
+    lineHeight: 24,
     fontSize: 18,
     width: "85%",
     textAlign: "left",
@@ -926,7 +937,7 @@ const styles = StyleSheet.create({
   heartBtn: {
     position: "absolute",
     bottom: screenHeight * 0.37,
-    left: screenWidth * 0.70,
+    left: screenWidth * 0.7,
     backgroundColor: "white",
     height: 60,
     width: 60,
@@ -942,7 +953,6 @@ const styles = StyleSheet.create({
     shadowRadius: 10.32,
 
     elevation: 16,
-
   },
   heartCounter: {
     position: "absolute",
@@ -1033,87 +1043,79 @@ const styles = StyleSheet.create({
         shadowRadius: 4,
         elevation: 5,
       },
-    })
+    }),
   },
 
   cardInfoTitle: {
+    flex:1,
+    flexWrap:"wrap",
     lineHeight: 33,
     fontSize: 25,
-    fontWeight: "600",
-    fontFamily: "Poppins_400Regular",
+    fontWeight: "bold",
     textAlign: "center",
     paddingTop: 20,
-   
   },
 
   cardInfoText: {
+    flex:1,
+    flexWrap:"wrap",
     fontSize: 16,
-    fontWeight: "600",
     fontFamily: "Poppins_400Regular",
-    width: 320,
+    width: 330,
     height: screenHeight * 0.04,
-    textAlign: 'center',
-    
-
+    textAlign: "center",
+    justifyContent:"space-evenly"
   },
 
-  cardInfoMaintTitle:{
+  cardInfoMaintTitle: {
     marginTop: screenHeight * 0.05,
     textAlign: "center",
-    fontSize: 30,    
+    fontSize: 30,
     fontWeight: "600",
     fontFamily: "Poppins_700Bold",
   },
 
-  cardInfoMaintTitleBLock:{
-    borderBottomColor: 'red',
+  cardInfoMaintTitleBLock: {
+    borderBottomColor: "red",
     borderBottomWidth: 2,
-    height: '13%',
+    height: "13%",
   },
 
-  cardInfoOpeningHours:{
-    height: screenHeight * 0.14,
-
+  cardInfoOpeningHours: {
+    height: screenHeight * 0.2,
   },
 
-  cardInfoTickets:{
-    height: screenHeight * 0.27,
+  cardInfoTickets: {
+    height: screenHeight * 0.2,
   },
 
-  cardInfoTips:{
-    height: screenHeight * 0.22,
-    
-    },
+  cardInfoTips: {
+    height: screenHeight * 0.25,
+  },
 
-  cardInfoBtn:{
-    
-    borderBottomColor: 'black',
+  cardInfoBtn: {
+    borderBottomColor: "black",
     borderWidth: 2,
     borderRadius: 20,
     width: screenWidth * 0.6,
     height: screenHeight * 0.06,
     padding: 10,
-justifyContent: 'center',
-alignItems: 'center',
-fontSize: 20,
+    marginTop:15,
+    justifyContent: "center",
+    alignItems: "center",
+    fontSize: 20,
   },
-
-
 
   slide3Tittle: {
     marginTop: screenHeight * 0.05,
-   alignContent: 'center',
-    fontSize: 30,    
+    alignContent: "center",
+    fontSize: 30,
     fontWeight: "600",
     fontFamily: "Poppins_700Bold",
-   
-    
   },
 
-
-
   slide3modalView: {
-   ...Platform.select({
+    ...Platform.select({
       android: {
         height: screenHeight * 0.9,
         width: screenWidth * 0.9,
@@ -1144,103 +1146,94 @@ fontSize: 20,
         shadowRadius: 4,
         elevation: 5,
       },
-    })
+    }),
   },
 
-  slide3UserName:{
+  slide3UserName: {
     paddingTop: 15,
     paddingLeft: 15,
     paddingRight: 15,
-    alignItems: 'baseline',
-paddingRight: 10,
-fontFamily: 'Poppins_600SemiBold',
-fontSize: 20,
+    alignItems: "baseline",
+    paddingRight: 10,
+    fontFamily: "Poppins_600SemiBold",
+    fontSize: 20,
   },
 
+  slide3Date: {
+    paddingTop: 15,
+    alignItems: "baseline",
+    fontFamily: "Poppins_400Regular",
+    fontSize: 16,
+  },
 
-slide3Date:{
-  paddingTop: 15,
- alignItems: 'baseline',
-fontFamily: 'Poppins_400Regular',
-fontSize: 16,
-},
+  slide3Description: {
+    fontSize: 16,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingLeft: 15,
+    paddingRight: 15,
+  },
 
-slide3Description:{
-  fontSize: 16,
-  alignItems: 'center',justifyContent: 'center',
-  paddingLeft: 15,
-  paddingRight: 15,
-  
-},
+  scrollUsersReview: {
+    flexGrow: 0.5,
+  },
 
-scrollUsersReview:{
-  flexGrow: 0.5,
-},
-
-input:{
-  backgroundColor: '#e9f2ff',
-  paddingBottom: 120,
+  input: {
+    backgroundColor: "#e9f2ff",
+    paddingBottom: 120,
     margin: 12,
     padding: 20,
     borderRadius: 25,
-fontSize: 20,
-justifyContent: 'flex-start',
-alignItems: 'flex-start',
+    fontSize: 20,
+    justifyContent: "flex-start",
+    alignItems: "flex-start",
+  },
 
-},
-
-inputContainer:{
-  position: 'absolute',
-  top: screenHeight * 0.50,
-  bottom: 0,
-  right: 0,
-  left: 0,
-  height: '50%',
-},
-submitButtonReview:{
-
-  borderBottomColor: 'black',
+  inputContainer: {
+    position: "absolute",
+    top: screenHeight * 0.5,
+    bottom: 0,
+    right: 0,
+    left: 0,
+    height: "50%",
+  },
+  submitButtonReview: {
+    borderBottomColor: "black",
     borderWidth: 2,
     borderRadius: 20,
     width: screenWidth * 0.6,
     height: screenHeight * 0.06,
     padding: 10,
-justifyContent: 'center',
-alignItems: 'center',
-fontSize: 20,
-position: 'absolute',
-top: screenHeight * 0.75,
-flexDirection: 'row',
+    justifyContent: "center",
+    alignItems: "center",
+    fontSize: 20,
+    position: "absolute",
+    top: screenHeight * 0.75,
+    flexDirection: "row",
+  },
 
-
-
-  
-},
-
-textBtnSubnit:{
-  justifyContent: 'center',
-  alignItems: 'center',
-  fontSize: 20,
-  paddingRight: 20,
-},
-closeBtnSlide2:{
-  width: "30%",
+  textBtnSubnit: {
+    justifyContent: "center",
+    alignItems: "center",
+    fontSize: 20,
+    paddingRight: 20,
+  },
+  closeBtnSlide2: {
+    width: "30%",
     position: "absolute",
     bottom: screenHeight * 0.82,
     left: screenWidth * 0.77,
-},
+  },
 
-viewBlock:{
-  paddingLeft: 15,
-  paddingRight: 15,
-},
+  viewBlock: {
+    paddingLeft: 15,
+    paddingRight: 15,
+  },
 
-slide3User: {
-  flexDirection: 'row',
-  alignItems: 'center',
- 
-}
-
+  slide3User: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
 });
 
 const mapStyle = [
