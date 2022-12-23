@@ -12,7 +12,6 @@ import {
   SafeAreaView,
   Alert,
   Linking,
-  Button
 } from "react-native";
 import FontAwesome from "react-native-vector-icons/FontAwesome";
 import MapView, {
@@ -25,11 +24,12 @@ import MapView, {
 import { Dimensions } from "react-native";
 
 import { useEffect, useState } from "react";
+import { useFocusEffect } from '@react-navigation/native';
 import { useDispatch, useSelector } from "react-redux";
-import { loadfilteredPlaces, likePlace } from "../reducers/filteredPlaces";
 import { loadActualPlace } from "../reducers/actualPlaces";
-import { loadAllPlaces } from "../reducers/allPlaces";
+import { loadAllPlaces, likePlace } from "../reducers/allPlaces";
 import{loadReview, addReview, deleteReview } from "../reducers/reviews";
+import React from "react";
 
 import {
   useFonts,
@@ -53,10 +53,7 @@ import {
   Poppins_900Black_Italic,
 } from "@expo-google-fonts/poppins";
 
-import AppLoading from "expo-app-loading";
-// adding the import for the swiper
 import Swiper from "react-native-swiper";
-
 
 const screenWidth = Dimensions.get("window").width;
 const screenHeight = Dimensions.get("window").height;
@@ -86,11 +83,13 @@ export default function MapScreen({ navigation }) {
   });
 
   const dispatch = useDispatch();
-  const filteredPlaces = useSelector((state) => state.filteredPlaces.value);
-  const user = useSelector((state) => state.user.value);
-  const actualPlace = useSelector((state) => state.actualPlaces.value);
 
-  const [districtVisible, setdistrictVisible] = useState(true);
+  const user = useSelector((state) => state.user.value);
+  const allPlaces = useSelector((state) => state.allPlaces.value);
+  const actualPlace = useSelector((state) => state.actualPlaces.value);
+  const dataReview = useSelector((state) => state.reviews.value);
+
+  const [districtVisible, setDistrictVisible] = useState(true);
   const [countLike, setCountLike] = useState(false);
 
   // === USEEFFECT D'INITIALISATION, DEMANDE DE l'AUTORISATION DE TRACAGE GPS ===================== //
@@ -109,13 +108,23 @@ export default function MapScreen({ navigation }) {
 
   // === FETCH DE LA ROUTE BACKEND POUR RECUPERER LES PLACES A L'INITILAISATION ======================================= //
 
-  useEffect(() => {
-    fetch(`http://192.168.10.168:3000/places/district`)
+  useFocusEffect(
+    React.useCallback(() => {
+      fetch(`http://192.168.10.168:3000/places/district`)
       .then((response) => response.json())
       .then((data) => {
-        data.result && dispatch(loadfilteredPlaces(data.places));
+        data.result && dispatch(loadAllPlaces(data.places));
+        console.log("rerender");
       });
-  }, []);
+      fetch('http://192.168.10.168:3000/reviews')
+      .then(response => response.json())
+      .then(data => {
+        if (data.result) {
+          dispatch(loadReview(data.reviews));
+        }})
+      setDistrictVisible(true)
+  }, [])
+  );
 
 
   // === FETCH DE LA ROUTE BACKEND POUR RECUPERER LES PLACESFILTREES AU CLICK SUR UN BOUTON FILTRE ======================================= //
@@ -124,7 +133,7 @@ export default function MapScreen({ navigation }) {
     fetch(`http://192.168.10.168:3000/places/${filter}`)
       .then((response) => response.json())
       .then((data) => {
-        data.result && dispatch(loadfilteredPlaces(data.places));
+        data.result && dispatch(loadAllPlaces(data.places));
       });
   };
 
@@ -141,7 +150,7 @@ export default function MapScreen({ navigation }) {
     </View>
   );
 
-  const categoryMarker = filteredPlaces.map((data, i) => {
+  const districtMarker = allPlaces.map((data, i) => {
     return (
       <Marker
         key={i}
@@ -170,7 +179,7 @@ export default function MapScreen({ navigation }) {
     </View>
   );
 
-  const placeMarker = filteredPlaces.map((data, i) => {
+  const placeMarker = allPlaces.map((data, i) => {
     return (
       <Marker
         key={i}
@@ -380,38 +389,23 @@ export default function MapScreen({ navigation }) {
 //============================================================================================================
 
 
-//   const dataReview = useSelector((state) => state.reviews.value);
 
-// const displayRewiewsPlace=()=>{
-
-//   fetch('http://192.168.10.168:3000/reviews/639743938100638d05ebf3dc')
-//     .then(response => response.json())
-//     .then(data => {
-//       if (data.result) {
-//         dispatch(loadReview({ reviews: data.review }));
-
-//       }})
-//   //const [reviewsPlace, setReviewsPlace]=useState('');
-//   } 
-
-
-//   const reviewsPlaces = dataReview.reviews.map((data, i) => {
-//       return (
-//         <View>
-//         <View key={i} style={styles.slide3User}>
-//           <Text style={styles.slide3UserName}>{data.author.username}</Text>
-//           <Text style={styles.slide3Date}>{data.createdAt}</Text>
-//         </View>
-//         <View>
-//           <Text style={styles.slide3Description}>
-//             {data.content}
-//           </Text>
-//         </View>
-//       </View>
+  // const reviewsPlaces = dataReview.map((data, i) => {
+  //     return (
+  //       <View>
+  //       <View key={i} style={styles.slide3User}>
+  //         <Text style={styles.slide3UserName}>{data.author.username}</Text>
+  //         <Text style={styles.slide3Date}>{data.createdAt}</Text>
+  //       </View>
+  //       <View>
+  //         <Text style={styles.slide3Description}>
+  //           {data.content}
+  //         </Text>
+  //       </View>
+  //     </View>
         
-//       );
-//   }); 
-
+  //     );
+  // }); 
 
   
 
@@ -526,15 +520,16 @@ export default function MapScreen({ navigation }) {
                       {actualPlace && actualPlace.likes.length}
                     </Text>
                   </View>
-                  <TouchableOpacity style={styles.goBtn}>
+                  <TouchableOpacity 
+                  style={styles.goBtn}
+                  onPress={() => {
+                    navigation.navigate("DirectionMapScreen");
+                    handleClose();
+                  }}>
                     <FontAwesome
                       name="location-arrow"
                       size={40}
                       color="#1E90FF"
-                      onPress={() => {
-                        navigation.navigate("DirectionMapScreen");
-                        handleClose();
-                      }}
                     />
                   </TouchableOpacity>
                 </View>
@@ -651,7 +646,7 @@ export default function MapScreen({ navigation }) {
                     maxLength={100}
                   />
                 </View>
-                <TouchableOpacity style={styles.submitButtonReview} onPress={() => {displayRewiewsPlace()}}>
+                <TouchableOpacity style={styles.submitButtonReview}>
                   <Text style={styles.textBtnSubnit}>Post review</Text>
                   <TouchableOpacity style={styles.submittBtn}>
                     <FontAwesome name="paper-plane" size={25} color="black" />
@@ -678,7 +673,8 @@ export default function MapScreen({ navigation }) {
             style={styles.filterBtn}
             onPress={() => {
               handleFilter("district");
-              setdistrictVisible(true);
+              setDistrictVisible(true);
+              console.log(dataReview)
             }}
           >
             <Text style={styles.filterText}>🗺️ Disctricts</Text>
@@ -687,7 +683,7 @@ export default function MapScreen({ navigation }) {
             style={styles.filterBtn}
             onPress={() => {
               handleFilter("monuments");
-              setdistrictVisible(false);
+              setDistrictVisible(false);
             }}
           >
             <Text style={styles.filterText}>🏰 Monuments</Text>
@@ -710,7 +706,7 @@ export default function MapScreen({ navigation }) {
         style={styles.map}
       >
         {districtArea}
-        {districtVisible ? categoryMarker : placeMarker}
+        {districtVisible ? districtMarker : placeMarker}
       </MapView>
     </View>
   );

@@ -13,14 +13,12 @@ import { useDispatch, useSelector } from "react-redux";
 import { useEffect, useState } from "react";
 import { loadAllPlaces } from "../reducers/allPlaces";
 import { useFocusEffect } from '@react-navigation/native';
-import { likePlace } from "../reducers/filteredPlaces";
+import { likePlace } from "../reducers/allPlaces";
 import React from "react";
 
 
 export default function PlacesSavedScreen({ navigation }) {
   const dispatch=useDispatch()
-  const [countLike, setCountLike] = useState(false)
-  const actualPlace = useSelector((state) => state.actualPlaces.value);
   
   useFocusEffect(
     React.useCallback(() => {
@@ -28,28 +26,26 @@ export default function PlacesSavedScreen({ navigation }) {
       .then((response) => response.json())
       .then((data) => {
         data.result && dispatch(loadAllPlaces(data.places));
-        console.log("rerender");
       });
   
   }, [])
   );
 
-  // const handleLike = () => {
-  //   setCountLike(!countLike);
-  //   fetch("http://192.168.10.168:3000/places/like", {
-  //     method: "PUT",
-  //     headers: { "Content-Type": "application/json" },
-  //     body: JSON.stringify({ token: user.token, placeId: actualPlace._id }),
-  //   })
-  //     .then((response) => response.json())
-  //     .then((data) => {
-  //       if (data.result) {
-  //         dispatch(
-  //           likePlace({ placeId: actualPlace._id, username: user.username })
-  //         )
-  //       } 
-  //     })
-  // }
+  const handleLike = (placeId) => {
+    fetch("http://192.168.10.168:3000/places/like", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token: user.token, placeId: placeId }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.result) {
+          dispatch(
+            likePlace({ placeId: placeId, username: user.username })
+          )
+        } 
+      })
+  }
 
 const allPlaces = useSelector((state) => state.allPlaces.value)
 const user = useSelector((state) => state.user.value)
@@ -70,7 +66,7 @@ const likedPlaces = allPlaces.map((data,i) => {
             </View>
             <View style={styles.deleteBtnContainer}>
               <TouchableOpacity style={styles.deleteBtn}>
-                <FontAwesome name="trash-o" size={35} color="black" style={{marginLeft:10}} onPress={() => {handleLike()}} />
+                <FontAwesome name="trash-o" size={35} color="black" style={{marginLeft:10}} onPress={() => {handleLike(data._id)}} />
               </TouchableOpacity>
             </View>
           </View>
