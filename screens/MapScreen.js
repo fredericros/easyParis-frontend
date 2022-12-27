@@ -24,11 +24,11 @@ import MapView, {
 import { Dimensions } from "react-native";
 
 import { useEffect, useState } from "react";
-import { useFocusEffect } from '@react-navigation/native';
+import { useFocusEffect } from "@react-navigation/native";
 import { useDispatch, useSelector } from "react-redux";
-import { loadActualPlace } from "../reducers/actualPlaces";
-import { loadAllPlaces, likePlace } from "../reducers/allPlaces";
-import{loadReview, addReview, deleteReview } from "../reducers/reviews";
+import { loadActualPlace, likeActualPlace, reviewActualPlace } from "../reducers/actualPlaces";
+import { loadAllPlaces, likePlace, reviewPlace } from "../reducers/allPlaces";
+import { loadReview, addReview, deleteReview } from "../reducers/reviews";
 import React from "react";
 
 import {
@@ -87,50 +87,28 @@ export default function MapScreen({ navigation }) {
   const user = useSelector((state) => state.user.value);
   const allPlaces = useSelector((state) => state.allPlaces.value);
   const actualPlace = useSelector((state) => state.actualPlaces.value);
-  const dataReview = useSelector((state) => state.reviews.value);
+  const reviews = useSelector((state) => state.reviews.value);
 
   const [districtVisible, setDistrictVisible] = useState(true);
-  const [countLike, setCountLike] = useState(false);
-
-  // === USEEFFECT D'INITIALISATION, DEMANDE DE l'AUTORISATION DE TRACAGE GPS ===================== //
-
-  /*
-  useEffect(() => {
-    (async () => {
-      const { status } = await Location.requestForegroundPermissionsAsync();
-
-      if (status === "granted") {
-        const location = await Location.getCurrentPositionAsync({});
-      }
-    })();
-  }, []);
-  */
+  const [postReview, setPostReview] = useState("");
 
   // === FETCH DE LA ROUTE BACKEND POUR RECUPERER LES PLACES A L'INITILAISATION ======================================= //
 
   useFocusEffect(
     React.useCallback(() => {
-      fetch(`http://192.168.10.168:3000/places/district`)
-      .then((response) => response.json())
-      .then((data) => {
-        data.result && dispatch(loadAllPlaces(data.places));
-        console.log("rerender");
-      });
-      fetch('http://192.168.10.168:3000/reviews')
-      .then(response => response.json())
-      .then(data => {
-        if (data.result) {
-          dispatch(loadReview(data.reviews));
-        }})
-      setDistrictVisible(true)
-  }, [])
+      fetch(`http://192.168.1.78:3000/places/district`)
+        .then((response) => response.json())
+        .then((data) => {
+          data.result && dispatch(loadAllPlaces(data.places));
+        });
+      setDistrictVisible(true);
+    }, [])
   );
-
 
   // === FETCH DE LA ROUTE BACKEND POUR RECUPERER LES PLACESFILTREES AU CLICK SUR UN BOUTON FILTRE ======================================= //
 
   const handleFilter = (filter) => {
-    fetch(`http://192.168.10.168:3000/places/${filter}`)
+    fetch(`http://192.168.1.78:3000/places/${filter}`)
       .then((response) => response.json())
       .then((data) => {
         data.result && dispatch(loadAllPlaces(data.places));
@@ -186,6 +164,13 @@ export default function MapScreen({ navigation }) {
         coordinate={{ latitude: data.latitude, longitude: data.longitude }}
         onPress={() => {
           dispatch(loadActualPlace(data));
+          fetch(`http://192.168.1.78:3000/reviews/${data._id}`)
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.result) {
+                dispatch(loadReview(data.reviews));
+              }
+            });
           handleMarker();
         }}
       >
@@ -199,15 +184,12 @@ export default function MapScreen({ navigation }) {
   let cardHours;
   let cardPrices;
   let cardTips;
+  let reviewsPlace;
 
   if (actualPlace) {
     cardHours = actualPlace.hours.map((data, i) => {
       return (
-        <Text
-          key={i}
-          numberOfLines={2}
-          style={styles.cardInfoText}
-        >
+        <Text key={i} numberOfLines={2} style={styles.cardInfoText}>
           {data}
         </Text>
       );
@@ -215,11 +197,7 @@ export default function MapScreen({ navigation }) {
 
     cardPrices = actualPlace.priceRange.map((data, i) => {
       return (
-        <Text
-          key={i}
-          numberOfLines={2}
-          style={styles.cardInfoText}
-        >
+        <Text key={i} numberOfLines={2} style={styles.cardInfoText}>
           {data}
         </Text>
       );
@@ -227,21 +205,164 @@ export default function MapScreen({ navigation }) {
 
     cardTips = actualPlace.tips.map((data, i) => {
       return (
-        <Text
-          key={i}
-          numberOfLines={2}
-          style={styles.cardInfoText}
-        >
+        <Text key={i} numberOfLines={2} style={styles.cardInfoText}>
           {data}
         </Text>
       );
     });
   }
+
+  if (reviews) {
+    reviewsPlace = reviews.map((data, i) => {
+      let date = new Date(data.createdAt);
+      let formattedDate =
+        date.toLocaleDateString() +
+        " " +
+        date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+      return (
+        <View key={i}>
+          <View style={styles.slide3User}>
+            <Text style={styles.slide3UserName}>{data.author.username}</Text>
+            <Text style={styles.slide3Date}>{formattedDate}</Text>
+          </View>
+          <View>
+            <Text style={styles.slide3Description}>{data.content}</Text>
+          </View>
+        </View>
+      );
+    });
+  }
+
+  // === GESTION DES REVIEWS ===================================================================== //
+
+  const handleSubmitReview = () => {
+    if (user.token) {
+      fetch("http://192.168.1.78:3000/reviews", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          token: user.token,
+          placeId: actualPlace._id,
+          content: postReview,
+        }),
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.result) {
+            console.log(data)
+            dispatch(addReview(data.newReview));
+            dispatch(reviewPlace({placeId: actualPlace._id, username: user.username}))
+            dispatch(reviewActualPlace({username: user.username}))
+            setPostReview("");
+          } else {
+            console.log(data.error);
+          }
+        });
+    } else {
+      Alert.alert(
+        "Want to review this place?",
+        "Create your account or sign in!",
+        [
+          {
+            text: "Cancel",
+          },
+          {
+            text: "Sign In",
+            onPress: () => {
+              setModalVisible(false);
+              navigation.navigate("Home", { screen: "Profile" });
+            },
+          },
+        ]
+      );
+      setPostReview("");
+    }
+  };
+
+
+  const handleDeleteReview = () => {
+    fetch("http://192.168.1.78:3000/reviews/delete", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        token: user.token,
+        placeId: actualPlace._id,
+      }),
+    })
+    .then (response => response.json())
+    .then (data => {
+      if (data.result) {
+        dispatch(deleteReview(user.username))
+        dispatch(reviewPlace({placeId: actualPlace._id, username: user.username}))
+        dispatch(reviewActualPlace({ username: user.username }))
+      }
+    })
+    console.log(reviews)
+
+  }
+
+  const addNewReview =  (
+    <View style={styles.inputContainer} >
+    <View>
+      <TextInput
+        style={styles.input}
+        placeholder="Add a review"
+        placeholderTextColor="#66757F"
+        maxLength={150}
+        multiline = {true}
+        onChangeText={(value) => setPostReview(value)}
+        value={postReview}
+      />
+    </View>
+    <TouchableOpacity
+      style={styles.submitButtonReview}
+      onPress={() => handleSubmitReview()}
+    >
+      <Text style={styles.textBtnSubnit}>Post review</Text>
+        <FontAwesome name="paper-plane" size={25} color="black" />
+    </TouchableOpacity>
+    </View>
+  )
+
+
+  const postedReview = (props) => {
+    return(
+  <View style={styles.inputContainer} >
+      <Text style={styles.slide3UserName}>My Review</Text>
+    <View style={styles.myReviewContainer}>
+      <Text>TEST</Text>
+    </View>
+    <TouchableOpacity style={styles.editBtn}>
+      <FontAwesome name="edit" size={25} />
+    </TouchableOpacity>
+    <TouchableOpacity style={styles.deleteBtn} onPress = {() => handleDeleteReview()}>
+      <FontAwesome name="trash-o" size={25} />
+    </TouchableOpacity>
+    </View>
+    )
+  }
+  
+
+  let submitReview = () => {
+    if (user.token && actualPlace.reviews.some(e => e.username === user.username)) {
+      const myReview = reviews.find(e => e.author.username === user.username)
+      return (
+        postedReview(myReview)
+      )
+    } else {
+      return (
+        addNewReview
+      )
+    }
+  }
+
+
+
   // === GESTION DES LIKES ===================================================================== //
 
+
   const handleLike = () => {
-    setCountLike(!countLike);
-    fetch("http://192.168.10.168:3000/places/like", {
+    fetch("http://192.168.1.78:3000/places/like", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ token: user.token, placeId: actualPlace._id }),
@@ -252,25 +373,7 @@ export default function MapScreen({ navigation }) {
           dispatch(
             likePlace({ placeId: actualPlace._id, username: user.username })
           );
-          if (actualPlace.likes.some((e) => e.username === user.username)) {
-            Alert.alert("Your place have been unsaved", "", [
-              {
-                text: "Ok",
-                onPress: () => {
-                  setModalVisible(false);
-                },
-              },
-            ]);
-          } else {
-            Alert.alert("Your place have been saved", "", [
-              {
-                text: "Ok",
-                onPress: () => {
-                  setModalVisible(false);
-                },
-              },
-            ]);
-          }
+          dispatch(likeActualPlace({ username: user.username }));
         } else {
           Alert.alert(
             "Want to save this place?",
@@ -293,19 +396,13 @@ export default function MapScreen({ navigation }) {
   };
 
   let likeStyle = {};
-  if (actualPlace) {
-    if (actualPlace.likes.some((e) => e.username === user.username)) {
-      likeStyle = { color: "#f91980" };
-      // setLikeStyle({
-      //   color: "#f91980",
-      // });
-    }
+  if (
+    actualPlace &&
+    actualPlace.likes.some((e) => e.username === user.username)
+  ) {
+    likeStyle = { color: "#f91980" };
   }
 
-  // SUR LE HANDLEMARKER
-  //1. RECUPERER LES INFOS DU MARKER EN QUESTION (MAP DEPUIS FILTERED _PLACES) > DISPATCH DANS ACTUALPLACE
-  //1. APPUI SUR LE LIKE  ET FETCH LA ROUTE LIKE ET DISPATCH DANS LE STORE
-  //2. TOUJOURS SUR LE LIKE, RE RECUPERER LES INFOS DU MARKER GRACE AU STORE ACTUALPLACE
 
   // === GESTION DES QUARTIERS ===================================================================== //
 
@@ -384,36 +481,6 @@ export default function MapScreen({ navigation }) {
     );
   });
 
-
-
-//============================================================================================================
-
-
-
-  // const reviewsPlaces = dataReview.map((data, i) => {
-  //     return (
-  //       <View>
-  //       <View key={i} style={styles.slide3User}>
-  //         <Text style={styles.slide3UserName}>{data.author.username}</Text>
-  //         <Text style={styles.slide3Date}>{data.createdAt}</Text>
-  //       </View>
-  //       <View>
-  //         <Text style={styles.slide3Description}>
-  //           {data.content}
-  //         </Text>
-  //       </View>
-  //     </View>
-        
-  //     );
-  // }); 
-
-  
-
-//   const displayStore = () => {
-//     console.log(dataReview.reviews)
-//   }
-
-
   // === GESTION DE LA MODALE ====================================================================== //
 
   const [modalVisible, setModalVisible] = useState(false);
@@ -434,6 +501,9 @@ export default function MapScreen({ navigation }) {
           animationType="slide"
           transparent={true}
           style={styles.modal}
+          // coverScreen={false}
+          // backdropOpacity={0.6}
+          // onBackdropPress={() => setModalVisible(false)}
         >
           <SafeAreaView style={styles.centeredView}>
             <View style={styles.modalView}>
@@ -507,25 +577,24 @@ export default function MapScreen({ navigation }) {
                   <Text style={styles.cardText}>
                     {actualPlace && actualPlace.description}
                   </Text>
-                  <TouchableOpacity onPress={() => handleLike()} style={styles.heartBtn}>
-                    <FontAwesome
-                      data={countLike}
-                      style={likeStyle}
-                      name="heart"
-                      size={30}
-                    />
+                  <TouchableOpacity
+                    onPress={() => handleLike()}
+                    style={styles.heartBtn}
+                  >
+                    <FontAwesome style={likeStyle} name="heart" size={30} />
                   </TouchableOpacity>
                   <View style={styles.heartCounter}>
                     <Text style={styles.heartCounterText}>
                       {actualPlace && actualPlace.likes.length}
                     </Text>
                   </View>
-                  <TouchableOpacity 
-                  style={styles.goBtn}
-                  onPress={() => {
-                    navigation.navigate("DirectionMapScreen");
-                    handleClose();
-                  }}>
+                  <TouchableOpacity
+                    style={styles.goBtn}
+                    onPress={() => {
+                      navigation.navigate("DirectionMapScreen");
+                      handleClose();
+                    }}
+                  >
                     <FontAwesome
                       name="location-arrow"
                       size={40}
@@ -564,12 +633,14 @@ export default function MapScreen({ navigation }) {
                   {cardTips}
                 </View>
 
-                <TouchableOpacity 
-                style={styles.cardInfoBtn}
-                onPress={()=> {
-                  {actualPlace && Linking.openURL(actualPlace.website);}
-                  
-                }}>
+                <TouchableOpacity
+                  style={styles.cardInfoBtn}
+                  onPress={() => {
+                    {
+                      actualPlace && Linking.openURL(actualPlace.website);
+                    }
+                  }}
+                >
                   <Text>GO TO WEBSITE</Text>
                 </TouchableOpacity>
               </View>
@@ -584,50 +655,7 @@ export default function MapScreen({ navigation }) {
                 </View>
 
                 <ScrollView vertical style={styles.scrollUsersReview}>
-                  <View styles={{ height: "10%", backgroundColor: "blue" }}>
-                    <View>
-                      <View style={styles.slide3User}>
-                        <Text style={styles.slide3UserName}>John</Text>
-                        <Text style={styles.slide3Date}>18/12/2022</Text>
-                      </View>
-                      <View>
-                        <Text style={styles.slide3Description}>
-                        One of the most notable features of Sacré-Cœur is its location atop the Montmartre hill. From the basilica's steps, visitors can enjoy stunning views of Paris, including the Eiffel Tower and the Panthéon. The basilica is also surrounded by a beautiful garden and is a popular spot for picnics and relaxation.
-
-
-                        </Text>
-                      </View>
-                    </View>
-                    <View>
-                      <View style={styles.slide3User}>
-                        <Text style={styles.slide3UserName}>Kim </Text>
-                        <Text style={styles.slide3Date}>23/12/2022</Text>
-                      </View>
-                      <View>
-                        <Text style={styles.slide3Description}>
-                        Constructed in the late 19th century, the basilica is made of white stone and is topped with a large, white dome. Its design is a mix of Romanesque and Byzantine styles, with intricate mosaics and frescoes decorating the interior. The basilica also houses a large organ and has a rich history of musical performances.
-
-
-                        </Text>
-                      </View>
-                    </View>
-                    <View>
-                      <View style={styles.slide3User}>
-                        <Text style={styles.slide3UserName}>Pedro</Text>
-                        <Text style={styles.slide3Date}>05/12/2022</Text>
-                      </View>
-                      <View>
-                        <Text style={styles.slide3Description}>
-                          The Eiffel Tower is an iconic landmark located in
-                          Paris, France. It was completed in 1889 and was the
-                          tallest man-made structure in the world at the time.
-                          The tower is made of iron and stands 324 meters tall,
-                          with three levels that can be accessed by elevator or
-                          stairs.
-                        </Text>
-                      </View>
-                    </View>
-                  </View>
+                  {reviewsPlace}
                 </ScrollView>
                 <FontAwesome
                   aria-hidden="true"
@@ -637,21 +665,7 @@ export default function MapScreen({ navigation }) {
                   onPress={() => handleClose()}
                   style={styles.closeBtnSlide2}
                 />
-
-                <View style={styles.inputContainer}>
-                  <TextInput
-                    style={styles.input}
-                    placeholder="Add a review"
-                    placeholderTextColor="#66757F"
-                    maxLength={100}
-                  />
-                </View>
-                <TouchableOpacity style={styles.submitButtonReview}>
-                  <Text style={styles.textBtnSubnit}>Post review</Text>
-                  <TouchableOpacity style={styles.submittBtn}>
-                    <FontAwesome name="paper-plane" size={25} color="black" />
-                  </TouchableOpacity>
-                </TouchableOpacity>
+                {submitReview()}
               </SafeAreaView>
             </KeyboardAvoidingView>
           </Swiper>
@@ -659,7 +673,6 @@ export default function MapScreen({ navigation }) {
       );
     }
   };
-
 
   // === RETURN ================================================================================ //
 
@@ -674,7 +687,6 @@ export default function MapScreen({ navigation }) {
             onPress={() => {
               handleFilter("district");
               setDistrictVisible(true);
-              console.log(dataReview)
             }}
           >
             <Text style={styles.filterText}>🗺️ Disctricts</Text>
@@ -688,8 +700,18 @@ export default function MapScreen({ navigation }) {
           >
             <Text style={styles.filterText}>🏰 Monuments</Text>
           </TouchableOpacity>
+          <TouchableOpacity style={styles.filterBtn}
+          onPress={() => {
+            handleFilter("gardens");
+            setDistrictVisible(false);
+          }}>
+            <Text style={styles.filterText}>🌺 Gardens</Text>
+          </TouchableOpacity>
           <TouchableOpacity style={styles.filterBtn}>
             <Text style={styles.filterText}>🕍 Churches</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.filterBtn}>
+            <Text style={styles.filterText}>👽 Secret places</Text>
           </TouchableOpacity>
         </ScrollView>
       </View>
@@ -1043,8 +1065,8 @@ const styles = StyleSheet.create({
   },
 
   cardInfoTitle: {
-    flex:1,
-    flexWrap:"wrap",
+    flex: 1,
+    flexWrap: "wrap",
     lineHeight: 33,
     fontSize: 25,
     fontWeight: "bold",
@@ -1053,14 +1075,14 @@ const styles = StyleSheet.create({
   },
 
   cardInfoText: {
-    flex:1,
-    flexWrap:"wrap",
+    flex: 1,
+    flexWrap: "wrap",
     fontSize: 16,
     fontFamily: "Poppins_400Regular",
     width: 330,
     height: screenHeight * 0.04,
     textAlign: "center",
-    justifyContent:"space-evenly"
+    justifyContent: "space-evenly",
   },
 
   cardInfoMaintTitle: {
@@ -1096,7 +1118,7 @@ const styles = StyleSheet.create({
     width: screenWidth * 0.6,
     height: screenHeight * 0.06,
     padding: 10,
-    marginTop:15,
+    marginTop: 15,
     justifyContent: "center",
     alignItems: "center",
     fontSize: 20,
@@ -1171,13 +1193,15 @@ const styles = StyleSheet.create({
   },
 
   scrollUsersReview: {
-    flexGrow: 0.5,
+    flexGrow: 0.6,
   },
 
   input: {
     backgroundColor: "#e9f2ff",
-    paddingBottom: 120,
-    margin: 12,
+    paddingBottom: 10,
+    height:110,
+    width: 300,
+    margin: 32,
     padding: 20,
     borderRadius: 25,
     fontSize: 20,
@@ -1187,11 +1211,12 @@ const styles = StyleSheet.create({
 
   inputContainer: {
     position: "absolute",
-    top: screenHeight * 0.5,
+    top: screenHeight * 0.6,
     bottom: 0,
     right: 0,
     left: 0,
-    height: "50%",
+    height: "25%",
+    alignItems:'center',
   },
   submitButtonReview: {
     borderBottomColor: "black",
@@ -1204,8 +1229,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     fontSize: 20,
     position: "absolute",
-    top: screenHeight * 0.75,
-    flexDirection: "row",
+    top: screenHeight * 0.19,
+
   },
 
   textBtnSubnit: {
@@ -1214,6 +1239,61 @@ const styles = StyleSheet.create({
     fontSize: 20,
     paddingRight: 20,
   },
+  
+  myReviewContainer:{
+    backgroundColor: "#e9f2ff",
+    paddingBottom: 10,
+    height:110,
+    width: 300,
+    padding: 20,
+    borderRadius: 25,
+    fontSize: 20,
+    justifyContent: "flex-start",
+    alignItems: "flex-start",
+
+  },
+  editBtn: {
+    position: "absolute",
+    bottom: screenHeight * 0.02,
+    left: screenWidth * 0.55,
+    backgroundColor: "white",
+    height: 50,
+    width: 50,
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 50,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 8,
+    },
+    shadowOpacity: 0.44,
+    shadowRadius: 10.32,
+
+    elevation: 16,
+  },
+
+  deleteBtn: {
+    position: "absolute",
+    bottom: screenHeight * 0.02,
+    left: screenWidth * 0.7,
+    backgroundColor: "white",
+    height: 50,
+    width: 50,
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 50,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 8,
+    },
+    shadowOpacity: 0.44,
+    shadowRadius: 10.32,
+
+    elevation: 16,
+  },
+
   closeBtnSlide2: {
     width: "30%",
     position: "absolute",
