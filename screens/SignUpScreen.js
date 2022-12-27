@@ -28,7 +28,7 @@ export default function SignUpScreen({ navigation }) {
   const user = useSelector((state) => state.user.value);
 
   const signupSubmit = () => {
-    fetch("http://192.168.10.168:3000/users/signup", {
+    fetch("http://192.168.1.78:3000/users/signup", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username, email, password }),
@@ -71,6 +71,7 @@ export default function SignUpScreen({ navigation }) {
       <TextInput
         style={styles.buttonsignin}
         onChangeText={(value) => setPassword(value)}
+        secureTextEntry={true}
         value={password}
         placeholder="Password"
         activeOpacity={0.8}

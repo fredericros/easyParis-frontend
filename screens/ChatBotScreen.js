@@ -3,15 +3,17 @@ import { View, ScrollView, Text, Button, StyleSheet, SafeAreaView } from 'react-
 import { Bubble, GiftedChat, Send } from 'react-native-gifted-chat';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
+import { useDispatch, useSelector } from 'react-redux';
 
 const ChatScreen = () => {
     const [messages, setMessages] = useState([]);
+    const user = useSelector((state) => state.user.value) 
 
     useEffect(() => {
         setMessages([
             {
                 _id: 1,
-                text: "Hello, I am the Easy Paris Chatbot. I'm here to answer your questions, don't hesitate",
+                text: `Hello ${user.username}, I am the Easy Paris Chatbot. I'm here to answer your questions, don't hesitate`,
                 createdAt: new Date(),
                 user: {
                     _id: 2,
@@ -103,7 +105,7 @@ const ChatScreen = () => {
                 return questions[i].answer;
             }
         }
-        return "Je ne connais pas la réponse à cette question. Veuillez reformuler votre question s'il vous plaît";
+        return `Tu me fais chier ${user.username}` ;
     }
 
     const onSend = useCallback((messages = []) => {

@@ -28,7 +28,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import { useDispatch, useSelector } from "react-redux";
 import { loadActualPlace, likeActualPlace, reviewActualPlace } from "../reducers/actualPlaces";
 import { loadAllPlaces, likePlace, reviewPlace } from "../reducers/allPlaces";
-import { loadReview, addReview, deleteReview } from "../reducers/reviews";
+import { loadReviews, deleteReview, loadMyReview, deleteMyReview } from "../reducers/reviews";
 import React from "react";
 
 import {
@@ -87,7 +87,8 @@ export default function MapScreen({ navigation }) {
   const user = useSelector((state) => state.user.value);
   const allPlaces = useSelector((state) => state.allPlaces.value);
   const actualPlace = useSelector((state) => state.actualPlaces.value);
-  const reviews = useSelector((state) => state.reviews.value);
+  const allReviews = useSelector((state) => state.reviews.value.allReviews);
+  const myReview = useSelector((state) => state.reviews.value.myReview);
 
   const [districtVisible, setDistrictVisible] = useState(true);
   const [postReview, setPostReview] = useState("");
@@ -168,8 +169,10 @@ export default function MapScreen({ navigation }) {
             .then((response) => response.json())
             .then((data) => {
               if (data.result) {
-                dispatch(loadReview(data.reviews));
-              }
+                dispatch(loadReviews(data.reviews));
+                const index = data.reviews.findIndex(e => e.author.username === user.username);
+                dispatch(loadMyReview(data.reviews[index]))
+              } 
             });
           handleMarker();
         }}
@@ -212,8 +215,8 @@ export default function MapScreen({ navigation }) {
     });
   }
 
-  if (reviews) {
-    reviewsPlace = reviews.map((data, i) => {
+  if (allReviews) {
+    reviewsPlace = allReviews.map((data, i) => {
       let date = new Date(data.createdAt);
       let formattedDate =
         date.toLocaleDateString() +
@@ -249,10 +252,9 @@ export default function MapScreen({ navigation }) {
         .then((response) => response.json())
         .then((data) => {
           if (data.result) {
-            console.log(data)
-            dispatch(addReview(data.newReview));
-            dispatch(reviewPlace({placeId: actualPlace._id, username: user.username}))
+            dispatch(loadMyReview(data.newReview));
             dispatch(reviewActualPlace({username: user.username}))
+            dispatch(reviewPlace({placeId: actualPlace._id, username: user.username}))
             setPostReview("");
           } else {
             console.log(data.error);
@@ -293,11 +295,11 @@ export default function MapScreen({ navigation }) {
     .then (data => {
       if (data.result) {
         dispatch(deleteReview(user.username))
+        dispatch(deleteMyReview())
+        dispatch(reviewActualPlace({username: user.username}))
         dispatch(reviewPlace({placeId: actualPlace._id, username: user.username}))
-        dispatch(reviewActualPlace({ username: user.username }))
       }
     })
-    console.log(reviews)
 
   }
 
@@ -325,12 +327,11 @@ export default function MapScreen({ navigation }) {
   )
 
 
-  const postedReview = (props) => {
-    return(
+  const postedReview = (
   <View style={styles.inputContainer} >
       <Text style={styles.slide3UserName}>My Review</Text>
     <View style={styles.myReviewContainer}>
-      <Text>TEST</Text>
+      <Text>{myReview && myReview.content}</Text>
     </View>
     <TouchableOpacity style={styles.editBtn}>
       <FontAwesome name="edit" size={25} />
@@ -340,14 +341,14 @@ export default function MapScreen({ navigation }) {
     </TouchableOpacity>
     </View>
     )
-  }
+  
   
 
   let submitReview = () => {
-    if (user.token && actualPlace.reviews.some(e => e.username === user.username)) {
-      const myReview = reviews.find(e => e.author.username === user.username)
+    if (actualPlace && user.token && actualPlace.reviews.some(e => e.username === user.username)) {
+      console.log(actualPlace)
       return (
-        postedReview(myReview)
+        postedReview
       )
     } else {
       return (

@@ -25,17 +25,15 @@ import { PersistGate } from "redux-persist/integration/react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import reviews from "./reducers/reviews";
 import user from "./reducers/user";
-import like from "./reducers/like";
 import actualPlaces from "./reducers/actualPlaces";
 import allPlaces from "./reducers/allPlaces";
-import filteredPlaces from "./reducers/allPlaces";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
 /* ============ MISE EN PLACE DU PERSIST STORE ====================
 
-const reducers = combineReducers({ user, reviews, like });
+const reducers = combineReducers({ user, reviews, like, filteredPlaces, actualPlaces, allPlaces});
 const persistConfig = { key: 'easyParis', storage: AsyncStorage };
 
 const store = configureStore({
@@ -48,7 +46,7 @@ const persistor = persistStore(store);
 ==================================================================== */
 
 const store = configureStore({
-  reducer: { user, reviews, like, filteredPlaces, actualPlaces, allPlaces },
+  reducer: { user, reviews, actualPlaces, allPlaces },
 });
 
 

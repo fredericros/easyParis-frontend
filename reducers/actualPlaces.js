@@ -10,9 +10,25 @@ export const actualPlacesSlice = createSlice({
   reducers: {
     loadActualPlace: (state, action) => {
       state.value = action.payload;
+    }, 
+    likeActualPlace: (state, action) => {
+      const isLiked = state.value.likes.some(e => e.username === action.payload.username);
+      if (isLiked) {
+        state.value.likes = state.value.likes.filter(e => e.username !== action.payload.username);
+      } else {
+        state.value.likes.push({ username: action.payload.username });
+      }
     },
+    reviewActualPlace: (state, action) => {
+      const isReviewed = state.value.reviews.some(e => e.username === action.payload.username);
+      if (isReviewed) {
+        state.value.reviews = state.value.reviews.filter(e => e.username !== action.payload.username);
+      } else {
+        state.value.reviews.push({ username: action.payload.username });
+      }
+    }
   },
 });
 
-export const { loadActualPlace } = actualPlacesSlice.actions;
+export const { loadActualPlace, likeActualPlace, reviewActualPlace } = actualPlacesSlice.actions;
 export default actualPlacesSlice.reducer;
