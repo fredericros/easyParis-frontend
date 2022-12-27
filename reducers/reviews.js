@@ -15,7 +15,7 @@ export const reviewsSlice = createSlice({
             state.value.unshift(action.payload);
         },
         deleteReview: (state, action) => {
-            state.value = state.value.filter(review => review._id !== action.payload);
+            state.value = state.value.filter(review => review.author.username !== action.payload);
         },
     },
 });
