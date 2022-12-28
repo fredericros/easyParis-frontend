@@ -9,20 +9,23 @@ const ChatScreen = () => {
     const [messages, setMessages] = useState([]);
     const user = useSelector((state) => state.user.value) 
 
-    useEffect(() => {
-        setMessages([
-            {
-                _id: 1,
-                text: `Hello ${user.username}, I am the Easy Paris Chatbot. I'm here to answer your questions, don't hesitate`,
-                createdAt: new Date(),
-                user: {
-                    _id: 2,
-                    name: 'React Native',
-                    avatar: 'https://res.cloudinary.com/dkay1mnds/image/upload/v1671659823/easyParis/Eiffel-Tower-in-Paris-at-sunset_pmagjn.jpg',
+    const username = user.token? user.username : 'there'
+
+        useEffect(() => {
+            setMessages([
+                {
+                    _id: 1,
+                    text: `Hello ${username}, I am the Easy Paris Chatbot. I'm here to answer your questions, don't hesitate`,
+                    createdAt: new Date(),
+                    user: {
+                        _id: 2,
+                        name: 'React Native',
+                        avatar: 'https://res.cloudinary.com/dkay1mnds/image/upload/v1671659823/easyParis/Eiffel-Tower-in-Paris-at-sunset_pmagjn.jpg',
+                    },
                 },
-            },
-        ]);
-    }, []);
+            ]);
+        }, [user]);
+   
 
     // Définissez un tableau de questions prédéfinies et de leurs réponses correspondantes
     const questions = [
