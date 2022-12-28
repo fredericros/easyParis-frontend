@@ -97,7 +97,7 @@ export default function MapScreen({ navigation }) {
 
   useFocusEffect(
     React.useCallback(() => {
-      fetch(`http://192.168.1.78:3000/places/district`)
+      fetch(`http://192.168.1.113:3000/places/district`)
         .then((response) => response.json())
         .then((data) => {
           data.result && dispatch(loadAllPlaces(data.places));
@@ -109,7 +109,7 @@ export default function MapScreen({ navigation }) {
   // === FETCH DE LA ROUTE BACKEND POUR RECUPERER LES PLACESFILTREES AU CLICK SUR UN BOUTON FILTRE ======================================= //
 
   const handleFilter = (filter) => {
-    fetch(`http://192.168.1.78:3000/places/${filter}`)
+    fetch(`http://192.168.1.113:3000/places/${filter}`)
       .then((response) => response.json())
       .then((data) => {
         data.result && dispatch(loadAllPlaces(data.places));
@@ -165,7 +165,7 @@ export default function MapScreen({ navigation }) {
         coordinate={{ latitude: data.latitude, longitude: data.longitude }}
         onPress={() => {
           dispatch(loadActualPlace(data));
-          fetch(`http://192.168.1.78:3000/reviews/${data._id}`)
+          fetch(`http://192.168.1.113:3000/reviews/${data._id}`)
             .then((response) => response.json())
             .then((data) => {
               if (data.result) {
@@ -240,7 +240,7 @@ export default function MapScreen({ navigation }) {
 
   const handleSubmitReview = () => {
     if (user.token) {
-      fetch("http://192.168.1.78:3000/reviews", {
+      fetch("http://192.168.1.113:3000/reviews", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -283,7 +283,7 @@ export default function MapScreen({ navigation }) {
 
 
   const handleDeleteReview = () => {
-    fetch("http://192.168.1.78:3000/reviews/delete", {
+    fetch("http://192.168.1.113:3000/reviews/delete", {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -363,7 +363,7 @@ export default function MapScreen({ navigation }) {
 
 
   const handleLike = () => {
-    fetch("http://192.168.1.78:3000/places/like", {
+    fetch("http://192.168.1.113:3000/places/like", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ token: user.token, placeId: actualPlace._id }),

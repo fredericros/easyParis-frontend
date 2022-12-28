@@ -28,7 +28,7 @@ export default function SignUpScreen({ navigation }) {
   const user = useSelector((state) => state.user.value);
 
   const signupSubmit = () => {
-    fetch("http://192.168.1.78:3000/users/signup", {
+    fetch("http://192.168.1.113:3000/users/signup", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username, email, password }),

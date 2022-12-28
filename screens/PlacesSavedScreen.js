@@ -22,7 +22,7 @@ export default function PlacesSavedScreen({ navigation }) {
   
   useFocusEffect(
     React.useCallback(() => {
-      fetch(`http://192.168.1.78:3000/places`)
+      fetch(`http://192.168.1.113:3000/places`)
       .then((response) => response.json())
       .then((data) => {
         data.result && dispatch(loadAllPlaces(data.places));
@@ -32,7 +32,7 @@ export default function PlacesSavedScreen({ navigation }) {
   );
 
   const handleLike = (placeId) => {
-    fetch("http://192.168.1.78:3000/places/like", {
+    fetch("http://192.168.1.113:3000/places/like", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ token: user.token, placeId: placeId }),
