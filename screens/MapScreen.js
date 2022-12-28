@@ -252,9 +252,9 @@ export default function MapScreen({ navigation }) {
         .then((response) => response.json())
         .then((data) => {
           if (data.result) {
-            dispatch(loadMyReview(data.newReview));
-            dispatch(reviewActualPlace({username: user.username}))
-            dispatch(reviewPlace({placeId: actualPlace._id, username: user.username}))
+            dispatch(loadMyReview(data.newReview)); // Dispatch the review in reviews => My review (to display it in the My review field)
+            dispatch(reviewActualPlace({username: user.username})) // Dispatch the username in the "reviews" array of actualPlace (in order to display the edit view (rather than the input view) in the reviews tile of the place Card, when a review has been submitted)
+            dispatch(reviewPlace({placeId: actualPlace._id, username: user.username})) // Dispatch the username in the "reviews" array of the concerned place in AllPlaces (in order to display the edit view (rather than the input view) in the reviews tile, after closing and reopening the place Card)
             setPostReview("");
           } else {
             console.log(data.error);
@@ -294,10 +294,10 @@ export default function MapScreen({ navigation }) {
     .then (response => response.json())
     .then (data => {
       if (data.result) {
-        dispatch(deleteReview(user.username))
-        dispatch(deleteMyReview())
-        dispatch(reviewActualPlace({username: user.username}))
-        dispatch(reviewPlace({placeId: actualPlace._id, username: user.username}))
+        dispatch(deleteReview(user.username)) // Delete the review in the reviews => allReviews store (in order to delete it from the main container that displays all the reviews)
+        dispatch(deleteMyReview()) // Delete the review in the reviews => myReview store (in order to delete it from the "My review" container)
+        dispatch(reviewActualPlace({username: user.username})) // Delete the username in the "reviews" array of actualPlace (in order to display the input view (rather than the edit view) in the reviews tile of the place Card, when a review has been deleted)
+        dispatch(reviewPlace({placeId: actualPlace._id, username: user.username})) // Delete the username in the "reviews" array of the concerned place in AllPlaces (in order to display the input view (rather than the edit view) in the reviews tile, after closing and reopening the place Card)
       }
     })
 
