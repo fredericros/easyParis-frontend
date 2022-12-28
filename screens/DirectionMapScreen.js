@@ -1,19 +1,17 @@
 import React, { useState } from 'react';
-import MapView, { Polygon, Marker, Callout, CustomMarker, PROVIDER_GOOGLE } from "react-native-maps";
-import { View, Text, StyleSheet, Button, TouchableOpacity} from 'react-native';
-const screenWidth = Dimensions.get('window').width;
-const screenHeight = Dimensions.get('window').height;
-const LATITUDE_DELTA = 0.22;
-const LONGITUDE_DELTA = LATITUDE_DELTA * (screenWidth / screenHeight);
+import MapView, { Marker, Callout, CustomMarker, PROVIDER_GOOGLE } from "react-native-maps";
+import { View, Text, StyleSheet } from 'react-native';
 import { Dimensions } from 'react-native';
 import { useEffect } from 'react';
 import * as Location from "expo-location";
 import MapViewDirections from 'react-native-maps-directions';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import { useIsFocused } from '@react-navigation/native';
-import { useNavigation } from '@react-navigation/native';
 
+const screenWidth = Dimensions.get('window').width;
+const screenHeight = Dimensions.get('window').height;
+const LATITUDE_DELTA = 0.22;
+const LONGITUDE_DELTA = LATITUDE_DELTA * (screenWidth / screenHeight);
 
 
 export default function DirectionMapScreen ({navigation}) {

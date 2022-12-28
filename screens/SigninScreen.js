@@ -1,9 +1,10 @@
+//////////////////////////////////////    IMPORTS    ////////////////////////////////////////////
+
 import {
   TextInput,
   StyleSheet,
   Image,
   Text,
-  View,
   TouchableOpacity,
   KeyboardAvoidingView
 } from "react-native";
@@ -13,6 +14,9 @@ import { login, logout} from "../reducers/user";
 
 //Import SignIn
 import { useDispatch, useSelector } from "react-redux";
+
+
+////////////////////////////////    SIGNINSCREEN FUNCTION    ////////////////////////////////////  
 
 export default function SigninScreen({ navigation }) {
   const [username, setUsername] = useState("");
@@ -87,6 +91,9 @@ export default function SigninScreen({ navigation }) {
     </KeyboardAvoidingView>
   );
 }
+
+
+//////////////////////////////////////    STYLE    /////////////////////////////////////////////
 
 const styles = StyleSheet.create({
   container: {

@@ -1,3 +1,5 @@
+//////////////////////////////////////    IMPORTS    ///////////////////////////////////////////  
+import React from "react";
 import {
   Image,
   Platform,
@@ -10,12 +12,12 @@ import {
 } from "react-native";
 import FontAwesome from "react-native-vector-icons/FontAwesome";
 import { useDispatch, useSelector } from "react-redux";
-import { useEffect, useState } from "react";
 import { loadAllPlaces } from "../reducers/allPlaces";
 import { useFocusEffect } from '@react-navigation/native';
 import { likePlace } from "../reducers/allPlaces";
-import React from "react";
 
+
+//////////////////////////////    PLACESSAVEDSCREEN FUNCTION    ////////////////////////////////  
 
 export default function PlacesSavedScreen({ navigation }) {
   const dispatch=useDispatch()
@@ -49,7 +51,6 @@ export default function PlacesSavedScreen({ navigation }) {
 
 const allPlaces = useSelector((state) => state.allPlaces.value)
 const user = useSelector((state) => state.user.value)
-
 
 
 const likedPlaces = allPlaces.map((data,i) => {
@@ -127,6 +128,9 @@ if(user.token) {
   </SafeAreaView>
   );
 }
+
+
+//////////////////////////////////////    STYLE    /////////////////////////////////////////////
 
 const styles = StyleSheet.create({
   container: {

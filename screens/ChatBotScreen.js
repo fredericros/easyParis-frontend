@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, ScrollView, Text, Button, StyleSheet, SafeAreaView } from 'react-native';
+import { View, StyleSheet, SafeAreaView } from 'react-native';
 import { Bubble, GiftedChat, Send } from 'react-native-gifted-chat';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 
 const ChatScreen = () => {
     const [messages, setMessages] = useState([]);
@@ -21,16 +21,6 @@ const ChatScreen = () => {
                     avatar: 'https://res.cloudinary.com/dkay1mnds/image/upload/v1671659823/easyParis/Eiffel-Tower-in-Paris-at-sunset_pmagjn.jpg',
                 },
             },
-            // {
-            //     _id: 2,
-            //     text: 'Hello world',
-            //     createdAt: new Date(),
-            //     user: {
-            //         _id: 1,
-            //         name: 'React Native',
-            //         avatar: 'https://placeimg.com/140/140/any',
-            //     },
-            // },
         ]);
     }, []);
 

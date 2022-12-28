@@ -1,3 +1,8 @@
+//////////////////////////////////////    IMPORTS    //////////////////////////////////////////
+
+import React, { useState } from "react";
+import { useFocusEffect } from "@react-navigation/native";
+
 import {
   StyleSheet,
   Image,
@@ -12,25 +17,36 @@ import {
   SafeAreaView,
   Alert,
   Linking,
+  Dimensions
 } from "react-native";
-import FontAwesome from "react-native-vector-icons/FontAwesome";
+
 import MapView, {
   Polygon,
   Marker,
-  Callout,
-  CustomMarker,
-  PROVIDER_GOOGLE,
+  // Callout,
+  // CustomMarker,
+  // PROVIDER_GOOGLE,
 } from "react-native-maps";
-import { Dimensions } from "react-native";
 
-import { useEffect, useState } from "react";
-import { useFocusEffect } from "@react-navigation/native";
 import { useDispatch, useSelector } from "react-redux";
-import { loadActualPlace, likeActualPlace, reviewActualPlace } from "../reducers/actualPlaces";
-import { loadAllPlaces, likePlace, reviewPlace } from "../reducers/allPlaces";
-import { loadReviews, deleteReview, loadMyReview, deleteMyReview } from "../reducers/reviews";
-import React from "react";
+import {
+  loadActualPlace,
+  likeActualPlace,
+  reviewActualPlace,
+} from "../reducers/actualPlaces";
+import { 
+  loadAllPlaces, 
+  likePlace, 
+  reviewPlace } from "../reducers/allPlaces";
+import {
+  loadReviews,
+  deleteReview,
+  loadMyReview,
+  deleteMyReview,
+} from "../reducers/reviews";
 
+import FontAwesome from "react-native-vector-icons/FontAwesome";
+import Swiper from "react-native-swiper";
 import {
   useFonts,
   Poppins_100Thin,
@@ -53,12 +69,13 @@ import {
   Poppins_900Black_Italic,
 } from "@expo-google-fonts/poppins";
 
-import Swiper from "react-native-swiper";
-
 const screenWidth = Dimensions.get("window").width;
 const screenHeight = Dimensions.get("window").height;
 const LATITUDE_DELTA = 0.22;
 const LONGITUDE_DELTA = LATITUDE_DELTA * (screenWidth / screenHeight);
+
+
+///////////////////////////////////   MAPSCREEN FUNCTION   /////////////////////////////////////
 
 export default function MapScreen({ navigation }) {
   let [fontsLoaded] = useFonts({
@@ -93,7 +110,7 @@ export default function MapScreen({ navigation }) {
   const [districtVisible, setDistrictVisible] = useState(true);
   const [postReview, setPostReview] = useState("");
 
-  // === FETCH DE LA ROUTE BACKEND POUR RECUPERER LES PLACES A L'INITILAISATION ======================================= //
+  // === FETCH DE LA ROUTE BACKEND POUR RECUPERER LES PLACES A L'INITILAISATION =========================================================== //
 
   useFocusEffect(
     React.useCallback(() => {
@@ -103,6 +120,11 @@ export default function MapScreen({ navigation }) {
           data.result && dispatch(loadAllPlaces(data.places));
         });
       setDistrictVisible(true);
+      fetch(`http://192.168.1.113:3000/reviews`)
+      .then((response) => response.json())
+      .then((data) => {
+        data.result && dispatch(loadReviews(data.reviews));
+      });
     }, [])
   );
 
@@ -116,7 +138,7 @@ export default function MapScreen({ navigation }) {
       });
   };
 
-  // === GESTION DES MARQUEURS ===================================================================== //
+  // === GESTION DES MARQUEURS ============================================================================================================ //
 
   // CUSTOM MARKER FOR DISTRICTS (NO PHOTO)
 
@@ -169,10 +191,11 @@ export default function MapScreen({ navigation }) {
             .then((response) => response.json())
             .then((data) => {
               if (data.result) {
-                dispatch(loadReviews(data.reviews));
-                const index = data.reviews.findIndex(e => e.author.username === user.username);
-                dispatch(loadMyReview(data.reviews[index]))
-              } 
+                const index = data.reviews.findIndex(
+                  (e) => e.author.username === user.username
+                );
+                dispatch(loadMyReview(data.reviews[index]));
+              }
             });
           handleMarker();
         }}
@@ -182,307 +205,7 @@ export default function MapScreen({ navigation }) {
     );
   });
 
-  // === GESTION DES CARDS ===================================================================== //
-
-  let cardHours;
-  let cardPrices;
-  let cardTips;
-  let reviewsPlace;
-
-  if (actualPlace) {
-    cardHours = actualPlace.hours.map((data, i) => {
-      return (
-        <Text key={i} numberOfLines={2} style={styles.cardInfoText}>
-          {data}
-        </Text>
-      );
-    });
-
-    cardPrices = actualPlace.priceRange.map((data, i) => {
-      return (
-        <Text key={i} numberOfLines={2} style={styles.cardInfoText}>
-          {data}
-        </Text>
-      );
-    });
-
-    cardTips = actualPlace.tips.map((data, i) => {
-      return (
-        <Text key={i} numberOfLines={2} style={styles.cardInfoText}>
-          {data}
-        </Text>
-      );
-    });
-  }
-
-  if (allReviews) {
-    reviewsPlace = allReviews.map((data, i) => {
-      let date = new Date(data.createdAt);
-      let formattedDate =
-        date.toLocaleDateString() +
-        " " +
-        date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-      return (
-        <View key={i}>
-          <View style={styles.slide3User}>
-            <Text style={styles.slide3UserName}>{data.author.username}</Text>
-            <Text style={styles.slide3Date}>{formattedDate}</Text>
-          </View>
-          <View>
-            <Text style={styles.slide3Description}>{data.content}</Text>
-          </View>
-        </View>
-      );
-    });
-  }
-
-  // === GESTION DES REVIEWS ===================================================================== //
-
-  const handleSubmitReview = () => {
-    if (user.token) {
-      fetch("http://192.168.1.113:3000/reviews", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          token: user.token,
-          placeId: actualPlace._id,
-          content: postReview,
-        }),
-      })
-        .then((response) => response.json())
-        .then((data) => {
-          if (data.result) {
-            dispatch(loadMyReview(data.newReview)); // Dispatch the review in reviews => My review (to display it in the My review field)
-            dispatch(reviewActualPlace({username: user.username})) // Dispatch the username in the "reviews" array of actualPlace (in order to display the edit view (rather than the input view) in the reviews tile of the place Card, when a review has been submitted)
-            dispatch(reviewPlace({placeId: actualPlace._id, username: user.username})) // Dispatch the username in the "reviews" array of the concerned place in AllPlaces (in order to display the edit view (rather than the input view) in the reviews tile, after closing and reopening the place Card)
-            setPostReview("");
-          } else {
-            console.log(data.error);
-          }
-        });
-    } else {
-      Alert.alert(
-        "Want to review this place?",
-        "Create your account or sign in!",
-        [
-          {
-            text: "Cancel",
-          },
-          {
-            text: "Sign In",
-            onPress: () => {
-              setModalVisible(false);
-              navigation.navigate("Home", { screen: "Profile" });
-            },
-          },
-        ]
-      );
-      setPostReview("");
-    }
-  };
-
-
-  const handleDeleteReview = () => {
-    fetch("http://192.168.1.113:3000/reviews/delete", {
-      method: "DELETE",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        token: user.token,
-        placeId: actualPlace._id,
-      }),
-    })
-    .then (response => response.json())
-    .then (data => {
-      if (data.result) {
-        dispatch(deleteReview(user.username)) // Delete the review in the reviews => allReviews store (in order to delete it from the main container that displays all the reviews)
-        dispatch(deleteMyReview()) // Delete the review in the reviews => myReview store (in order to delete it from the "My review" container)
-        dispatch(reviewActualPlace({username: user.username})) // Delete the username in the "reviews" array of actualPlace (in order to display the input view (rather than the edit view) in the reviews tile of the place Card, when a review has been deleted)
-        dispatch(reviewPlace({placeId: actualPlace._id, username: user.username})) // Delete the username in the "reviews" array of the concerned place in AllPlaces (in order to display the input view (rather than the edit view) in the reviews tile, after closing and reopening the place Card)
-      }
-    })
-
-  }
-
-  const addNewReview =  (
-    <View style={styles.inputContainer} >
-    <View>
-      <TextInput
-        style={styles.input}
-        placeholder="Add a review"
-        placeholderTextColor="#66757F"
-        maxLength={150}
-        multiline = {true}
-        onChangeText={(value) => setPostReview(value)}
-        value={postReview}
-      />
-    </View>
-    <TouchableOpacity
-      style={styles.submitButtonReview}
-      onPress={() => handleSubmitReview()}
-    >
-      <Text style={styles.textBtnSubnit}>Post review</Text>
-        <FontAwesome name="paper-plane" size={25} color="black" />
-    </TouchableOpacity>
-    </View>
-  )
-
-
-  const postedReview = (
-  <View style={styles.inputContainer} >
-      <Text style={styles.slide3UserName}>My Review</Text>
-    <View style={styles.myReviewContainer}>
-      <Text>{myReview && myReview.content}</Text>
-    </View>
-    <TouchableOpacity style={styles.editBtn}>
-      <FontAwesome name="edit" size={25} />
-    </TouchableOpacity>
-    <TouchableOpacity style={styles.deleteBtn} onPress = {() => handleDeleteReview()}>
-      <FontAwesome name="trash-o" size={25} />
-    </TouchableOpacity>
-    </View>
-    )
-  
-  
-
-  let submitReview = () => {
-    if (actualPlace && user.token && actualPlace.reviews.some(e => e.username === user.username)) {
-      console.log(actualPlace)
-      return (
-        postedReview
-      )
-    } else {
-      return (
-        addNewReview
-      )
-    }
-  }
-
-
-
-  // === GESTION DES LIKES ===================================================================== //
-
-
-  const handleLike = () => {
-    fetch("http://192.168.1.113:3000/places/like", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ token: user.token, placeId: actualPlace._id }),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.result) {
-          dispatch(
-            likePlace({ placeId: actualPlace._id, username: user.username })
-          );
-          dispatch(likeActualPlace({ username: user.username }));
-        } else {
-          Alert.alert(
-            "Want to save this place?",
-            "Create your account or sign in!",
-            [
-              {
-                text: "Cancel",
-              },
-              {
-                text: "Sign In",
-                onPress: () => {
-                  setModalVisible(false);
-                  navigation.navigate("Home", { screen: "Profile" });
-                },
-              },
-            ]
-          );
-        }
-      });
-  };
-
-  let likeStyle = {};
-  if (
-    actualPlace &&
-    actualPlace.likes.some((e) => e.username === user.username)
-  ) {
-    likeStyle = { color: "#f91980" };
-  }
-
-
-  // === GESTION DES QUARTIERS ===================================================================== //
-
-  const districtAreas = [
-    {
-      coordinates: points,
-      strokeWidth: 2,
-      strokeColor: "grey",
-      fillColor: "rgba(218, 144, 88, 0.1)",
-    },
-    {
-      coordinates: montmartre,
-      strokeWidth: 2,
-      strokeColor: "rgba(247, 37, 133, 0.4)",
-      fillColor: "rgba(247, 37, 133, 0.3)",
-    },
-    {
-      coordinates: leMarais,
-      strokeWidth: 2,
-      strokeColor: "rgba(224, 10, 153, 0.4)",
-      fillColor: "rgba(224, 10, 153, 0.3)",
-    },
-    {
-      coordinates: latin,
-      strokeWidth: 2,
-      strokeColor: "rgba(83, 193, 132, 0.4)",
-      fillColor: "rgba(83, 193, 132, 0.3)",
-    },
-    {
-      coordinates: saintGermain,
-      strokeWidth: 2,
-      strokeColor: "rgba(224, 37, 49, 0.4)",
-      fillColor: "rgba(224, 37, 49, 0.3)",
-    },
-    {
-      coordinates: champsElysée,
-      strokeWidth: 2,
-      strokeColor: "rgba(253, 218, 104, 0.4)",
-      fillColor: "rgba(253, 218, 104, 0.3)",
-    },
-    {
-      coordinates: multicultural,
-      strokeWidth: 2,
-      strokeColor: "rgba(0, 0, 255, 0.4)",
-      fillColor: "rgba(0, 0, 255, 0.3)",
-    },
-    {
-      coordinates: historic,
-      strokeWidth: 2,
-      strokeColor: "rgba(57, 91, 219, 0.4)",
-      fillColor: "rgba(57, 91, 219, 0.3)",
-    },
-    {
-      coordinates: vieuxCentre,
-      strokeWidth: 2,
-      strokeColor: "rgba(239, 163, 16, 0.4)",
-      fillColor: "rgba(239, 163, 16, 0.3)",
-    },
-    {
-      coordinates: riche,
-      strokeWidth: 2,
-      strokeColor: "rgba(234, 151, 116, 0.4)",
-      fillColor: "rgba(234, 151, 116, 0.3)",
-    },
-  ];
-
-  const districtArea = districtAreas.map((data, i) => {
-    return (
-      <Polygon
-        key={i}
-        coordinates={data.coordinates}
-        strokeWidth={data.strokeWidth}
-        strokeColor={data.strokeColor}
-        fillColor={data.fillColor}
-      />
-    );
-  });
-
-  // === GESTION DE LA MODALE ====================================================================== //
+  // === GESTION DE LA MODALE ========================================================================================================= //
 
   const [modalVisible, setModalVisible] = useState(false);
 
@@ -675,7 +398,321 @@ export default function MapScreen({ navigation }) {
     }
   };
 
-  // === RETURN ================================================================================ //
+  // === GESTION DES LIKES =========================================================================================================== //
+
+   // LIKER UN LIEU //
+
+  const handleLike = () => {
+    fetch("http://192.168.1.113:3000/places/like", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token: user.token, placeId: actualPlace._id }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.result) {
+          dispatch(
+            likePlace({ placeId: actualPlace._id, username: user.username })
+          );
+          dispatch(likeActualPlace({ username: user.username }));
+        } else {
+          Alert.alert(
+            "Want to save this place?",
+            "Create your account or sign in!",
+            [
+              {
+                text: "Cancel",
+              },
+              {
+                text: "Sign In",
+                onPress: () => {
+                  setModalVisible(false);
+                  navigation.navigate("Home", { screen: "Profile" });
+                },
+              },
+            ]
+          );
+        }
+      });
+  };
+
+
+  // CHANGER LE STYLE DE L'ICONE EN FONCTION DU LIKE //
+
+  let likeStyle = {};
+  if (
+    actualPlace &&
+    actualPlace.likes.some((e) => e.username === user.username)
+  ) {
+    likeStyle = { color: "#f91980" };
+  }
+
+  // === GESTION DES REVIEWS ============================================================================================================= //
+
+  // POSTER UNE REVIEW //
+
+  const handleSubmitReview = () => {
+    if (user.token) {
+      fetch("http://192.168.1.113:3000/reviews", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          token: user.token,
+          placeId: actualPlace._id,
+          content: postReview,
+        }),
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.result) {
+            dispatch(loadMyReview(data.newReview)); // Dispatch the review in reviews => My review (to display it in the My review field)
+            dispatch(reviewActualPlace({ username: user.username })); // Dispatch the username in the "reviews" array of actualPlace (in order to display the edit view (rather than the input view) in the reviews tile of the place Card, when a review has been submitted)
+            dispatch(
+              reviewPlace({ placeId: actualPlace._id, username: user.username })
+            ); // Dispatch the username in the "reviews" array of the concerned place in AllPlaces (in order to display the edit view (rather than the input view) in the reviews tile, after closing and reopening the place Card)
+            setPostReview("");
+          } else {
+            console.log(data.error);
+          }
+        });
+    } else {
+      Alert.alert(
+        "Want to review this place?",
+        "Create your account or sign in!",
+        [
+          {
+            text: "Cancel",
+          },
+          {
+            text: "Sign In",
+            onPress: () => {
+              setModalVisible(false);
+              navigation.navigate("Home", { screen: "Profile" });
+            },
+          },
+        ]
+      );
+      setPostReview("");
+    }
+  };
+
+  // SUPPRIMER UNE REVIEW //
+
+  const handleDeleteReview = () => {
+    fetch("http://192.168.1.113:3000/reviews/delete", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        token: user.token,
+        placeId: actualPlace._id,
+      }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.result) {
+          dispatch(deleteReview({ placeId: actualPlace._id, username: user.username })); // Delete the review in the reviews => allReviews store (in order to delete it from the main container that displays all the reviews)
+          dispatch(deleteMyReview()); // Delete the review in the reviews => myReview store (in order to delete it from the "My review" container)
+          dispatch(reviewActualPlace({ username: user.username })); // Delete the username in the "reviews" array of actualPlace (in order to display the input view (rather than the edit view) in the reviews tile of the place Card, when a review has been deleted)
+          dispatch(
+            reviewPlace({ placeId: actualPlace._id, username: user.username })
+          ); // Delete the username in the "reviews" array of the concerned place in AllPlaces (in order to display the input view (rather than the edit view) in the reviews tile, after closing and reopening the place Card)
+        }
+      });
+  };
+
+  // AFFICHAGE LORSQUE AUCUNE REVIEW N'A ETE POSTEE (CHAMPS INPUT DE SAISIE) //
+
+  const addNewReview = (
+    <View style={styles.inputContainer}>
+      <View>
+        <TextInput
+          style={styles.input}
+          placeholder="Add a review"
+          placeholderTextColor="#66757F"
+          maxLength={150}
+          multiline={true}
+          onChangeText={(value) => setPostReview(value)}
+          value={postReview}
+        />
+      </View>
+      <TouchableOpacity
+        style={styles.submitButtonReview}
+        onPress={() => handleSubmitReview()}
+      >
+        <Text style={styles.textBtnSubnit}>Post review</Text>
+        <FontAwesome name="paper-plane" size={25} color="black" />
+      </TouchableOpacity>
+    </View>
+  );
+
+  // AFFICHAGE LORSQU'UNE REVIEW A ETE POSTEE (CHAMPS D'AFFICHAGE + BOUTON EDIT ET DELETE) //
+
+  const postedReview = (
+    <View style={styles.inputContainer}>
+      <Text style={styles.slide3UserName}>My Review</Text>
+      <View style={styles.myReviewContainer}>
+        <Text>{myReview && myReview.content}</Text>
+      </View>
+      <TouchableOpacity style={styles.editBtn}>
+        <FontAwesome name="edit" size={25} />
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={styles.deleteBtn}
+        onPress={() => handleDeleteReview()}
+      >
+        <FontAwesome name="trash-o" size={25} />
+      </TouchableOpacity>
+    </View>
+  );
+
+  // FONCTION POUR CONDITIONNER L'AFFICHAGE //
+
+  let submitReview = () => {
+    if (
+      actualPlace &&
+      user.token &&
+      actualPlace.reviews.some((e) => e.username === user.username)
+    ) {
+      return postedReview;
+    } else {
+      return addNewReview;
+    }
+  };
+
+  // === GESTION DES INFOS (TABLEAUX) DE LA MODALE ============================================================================================ //
+
+  let cardHours;
+  let cardPrices;
+  let cardTips;
+  let reviewsPlace;
+
+  if (actualPlace) {
+    cardHours = actualPlace.hours.map((data, i) => {
+      return (
+        <Text key={i} numberOfLines={2} style={styles.cardInfoText}>
+          {data}
+        </Text>
+      );
+    });
+
+    cardPrices = actualPlace.priceRange.map((data, i) => {
+      return (
+        <Text key={i} numberOfLines={2} style={styles.cardInfoText}>
+          {data}
+        </Text>
+      );
+    });
+
+    cardTips = actualPlace.tips.map((data, i) => {
+      return (
+        <Text key={i} numberOfLines={2} style={styles.cardInfoText}>
+          {data}
+        </Text>
+      );
+    });
+  }
+
+  if (allReviews && actualPlace) {
+    reviewsPlace = allReviews.map((data, i) => {
+      if (data.place.title === actualPlace.title) {
+        let date = new Date(data.createdAt);
+        let formattedDate =
+          date.toLocaleDateString() +
+          " " +
+          date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+        return (
+          <View key={i}>
+            <View style={styles.slide3User}>
+              <Text style={styles.slide3UserName}>{data.author.username}</Text>
+              <Text style={styles.slide3Date}>{formattedDate}</Text>
+            </View>
+            <View>
+              <Text style={styles.slide3Description}>{data.content}</Text>
+            </View>
+          </View>
+        );
+      }
+    });
+  }
+
+  // === GESTION DES QUARTIERS ===================================================================== //
+
+  const districtAreas = [
+    {
+      coordinates: points,
+      strokeWidth: 2,
+      strokeColor: "grey",
+      fillColor: "rgba(218, 144, 88, 0.1)",
+    },
+    {
+      coordinates: montmartre,
+      strokeWidth: 2,
+      strokeColor: "rgba(247, 37, 133, 0.4)",
+      fillColor: "rgba(247, 37, 133, 0.3)",
+    },
+    {
+      coordinates: leMarais,
+      strokeWidth: 2,
+      strokeColor: "rgba(224, 10, 153, 0.4)",
+      fillColor: "rgba(224, 10, 153, 0.3)",
+    },
+    {
+      coordinates: latin,
+      strokeWidth: 2,
+      strokeColor: "rgba(83, 193, 132, 0.4)",
+      fillColor: "rgba(83, 193, 132, 0.3)",
+    },
+    {
+      coordinates: saintGermain,
+      strokeWidth: 2,
+      strokeColor: "rgba(224, 37, 49, 0.4)",
+      fillColor: "rgba(224, 37, 49, 0.3)",
+    },
+    {
+      coordinates: champsElysée,
+      strokeWidth: 2,
+      strokeColor: "rgba(253, 218, 104, 0.4)",
+      fillColor: "rgba(253, 218, 104, 0.3)",
+    },
+    {
+      coordinates: multicultural,
+      strokeWidth: 2,
+      strokeColor: "rgba(0, 0, 255, 0.4)",
+      fillColor: "rgba(0, 0, 255, 0.3)",
+    },
+    {
+      coordinates: historic,
+      strokeWidth: 2,
+      strokeColor: "rgba(57, 91, 219, 0.4)",
+      fillColor: "rgba(57, 91, 219, 0.3)",
+    },
+    {
+      coordinates: vieuxCentre,
+      strokeWidth: 2,
+      strokeColor: "rgba(239, 163, 16, 0.4)",
+      fillColor: "rgba(239, 163, 16, 0.3)",
+    },
+    {
+      coordinates: riche,
+      strokeWidth: 2,
+      strokeColor: "rgba(234, 151, 116, 0.4)",
+      fillColor: "rgba(234, 151, 116, 0.3)",
+    },
+  ];
+
+  const districtArea = districtAreas.map((data, i) => {
+    return (
+      <Polygon
+        key={i}
+        coordinates={data.coordinates}
+        strokeWidth={data.strokeWidth}
+        strokeColor={data.strokeColor}
+        fillColor={data.fillColor}
+      />
+    );
+  });
+
+  // === RETURN =========================================================================================================================== //
 
   return (
     <View style={styles.container}>
@@ -701,11 +738,13 @@ export default function MapScreen({ navigation }) {
           >
             <Text style={styles.filterText}>🏰 Monuments</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.filterBtn}
-          onPress={() => {
-            handleFilter("gardens");
-            setDistrictVisible(false);
-          }}>
+          <TouchableOpacity
+            style={styles.filterBtn}
+            onPress={() => {
+              handleFilter("gardens");
+              setDistrictVisible(false);
+            }}
+          >
             <Text style={styles.filterText}>🌺 Gardens</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.filterBtn}>
@@ -735,7 +774,7 @@ export default function MapScreen({ navigation }) {
   );
 }
 
-// === STYLE ================================================================================= //
+//////////////////////////////////////    STYLE    /////////////////////////////////////////////
 
 const styles = StyleSheet.create({
   container: {
@@ -1200,7 +1239,7 @@ const styles = StyleSheet.create({
   input: {
     backgroundColor: "#e9f2ff",
     paddingBottom: 10,
-    height:110,
+    height: 110,
     width: 300,
     margin: 32,
     padding: 20,
@@ -1217,7 +1256,7 @@ const styles = StyleSheet.create({
     right: 0,
     left: 0,
     height: "25%",
-    alignItems:'center',
+    alignItems: "center",
   },
   submitButtonReview: {
     borderBottomColor: "black",
@@ -1231,7 +1270,6 @@ const styles = StyleSheet.create({
     fontSize: 20,
     position: "absolute",
     top: screenHeight * 0.19,
-
   },
 
   textBtnSubnit: {
@@ -1240,18 +1278,17 @@ const styles = StyleSheet.create({
     fontSize: 20,
     paddingRight: 20,
   },
-  
-  myReviewContainer:{
+
+  myReviewContainer: {
     backgroundColor: "#e9f2ff",
     paddingBottom: 10,
-    height:110,
+    height: 110,
     width: 300,
     padding: 20,
     borderRadius: 25,
     fontSize: 20,
     justifyContent: "flex-start",
     alignItems: "flex-start",
-
   },
   editBtn: {
     position: "absolute",

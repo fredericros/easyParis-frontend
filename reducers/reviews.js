@@ -12,7 +12,7 @@ export const reviewsSlice = createSlice({
             state.value.allReviews = action.payload;
         },
         deleteReview: (state, action) => {
-            state.value.allReviews = state.value.allReviews.filter(review => review.author.username !== action.payload);
+            state.value.allReviews = state.value.allReviews.filter(review => !(review.place._id === action.payload.placeId && review.author.username === action.payload.username));
         },
         loadMyReview: (state, action) => {
             state.value.myReview = action.payload;

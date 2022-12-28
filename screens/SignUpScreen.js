@@ -1,10 +1,10 @@
+//////////////////////////////////////    IMPORTS    ////////////////////////////////////////////
+
 import {
   TextInput,
-  ImageBackground,
   StyleSheet,
   Image,
   Text,
-  View,
   TouchableOpacity,
   KeyboardAvoidingView,
 } from "react-native";
@@ -18,6 +18,9 @@ import { login } from "../reducers/user";
 //Constante pour définir la bonne écriture de l'adresse mail
 const EMAIL_REGEX =
   /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+
+
+//////////////////////////////////   SIGNUPSCREEN FUNCTION    ///////////////////////////////////  
 
 export default function SignUpScreen({ navigation }) {
   const [email, setEmail] = useState("");
@@ -88,6 +91,9 @@ export default function SignUpScreen({ navigation }) {
     </KeyboardAvoidingView>
   );
 }
+
+
+//////////////////////////////////////    STYLE    /////////////////////////////////////////////
 const styles = StyleSheet.create({
   container: {
     flex: 1,
