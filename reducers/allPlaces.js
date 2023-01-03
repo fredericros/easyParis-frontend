@@ -23,13 +23,13 @@ export const allPlacesSlice = createSlice({
     },
     reviewPlace: (state, action) => {
       const index = state.value.findIndex(place => place._id === action.payload.placeId);
-      const isReviewed = state.value[index].reviews.some(e => e.username === action.payload.username);
+      const isReviewed = state.value[index].reviews.some(e => e.author.username === action.payload.username);
 
       if (isReviewed) {
-        state.value[index].reviews = state.value[index].reviews.filter(e => e.username !== action.payload.username);
+        state.value[index].reviews = state.value[index].reviews.filter(e => e.author.username !== action.payload.username);
       } else {
-        state.value[index].reviews.push({ username: action.payload.username });
-      }
+        state.value[index].reviews.push({ author: {username: action.payload.username}, content: action.payload.content, createdAt: action.payload.createdAt });
+      } 
     }
   
   },

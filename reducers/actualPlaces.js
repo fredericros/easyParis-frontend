@@ -20,11 +20,12 @@ export const actualPlacesSlice = createSlice({
       }
     },
     reviewActualPlace: (state, action) => {
-      const isReviewed = state.value.reviews.some(e => e.username === action.payload.username);
+      const isReviewed = state.value.reviews.some(e => e.author.username === action.payload.username);
       if (isReviewed) {
-        state.value.reviews = state.value.reviews.filter(e => e.username !== action.payload.username);
+        state.value.reviews = state.value.reviews.filter(e => e.author.username !== action.payload.username);
       } else {
-        state.value.reviews.push({ username: action.payload.username });
+        state.value.reviews.push({ 
+          author: {username: action.payload.username}, content: action.payload.content, createdAt: action.payload.createdAt });
       }
     }
   },

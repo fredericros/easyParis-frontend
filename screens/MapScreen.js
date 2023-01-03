@@ -120,11 +120,6 @@ export default function MapScreen({ navigation }) {
           data.result && dispatch(loadAllPlaces(data.places));
         });
       setDistrictVisible(true);
-      fetch(`http://192.168.1.113:3000/reviews`)
-      .then((response) => response.json())
-      .then((data) => {
-        data.result && dispatch(loadReviews(data.reviews));
-      });
     }, [])
   );
 
@@ -186,17 +181,9 @@ export default function MapScreen({ navigation }) {
         key={i}
         coordinate={{ latitude: data.latitude, longitude: data.longitude }}
         onPress={() => {
-          dispatch(loadActualPlace(data));
-          fetch(`http://192.168.1.113:3000/reviews/${data._id}`)
-            .then((response) => response.json())
-            .then((data) => {
-              if (data.result) {
-                const index = data.reviews.findIndex(
-                  (e) => e.author.username === user.username
-                );
-                dispatch(loadMyReview(data.reviews[index]));
-              }
-            });
+          dispatch(loadActualPlace(data))
+          const index = data.reviews.findIndex((e) => e.author.username === user.username);
+          dispatch(loadMyReview(data.reviews[index]));
           handleMarker();
         }}
       >
@@ -466,9 +453,9 @@ export default function MapScreen({ navigation }) {
         .then((data) => {
           if (data.result) {
             dispatch(loadMyReview(data.newReview)); // Dispatch the review in reviews => My review (to display it in the My review field)
-            dispatch(reviewActualPlace({ username: user.username })); // Dispatch the username in the "reviews" array of actualPlace (in order to display the edit view (rather than the input view) in the reviews tile of the place Card, when a review has been submitted)
+            dispatch(reviewActualPlace({ username: user.username, content: data.newReview.content, createdAt: data.newReview.createdAt })); // Dispatch the username in the "reviews" array of actualPlace (in order to display the edit view (rather than the input view) in the reviews tile of the place Card, when a review has been submitted)
             dispatch(
-              reviewPlace({ placeId: actualPlace._id, username: user.username })
+              reviewPlace({ placeId: actualPlace._id, username: user.username, content: data.newReview.content, createdAt: data.newReview.createdAt })
             ); // Dispatch the username in the "reviews" array of the concerned place in AllPlaces (in order to display the edit view (rather than the input view) in the reviews tile, after closing and reopening the place Card)
             setPostReview("");
           } else {
@@ -571,7 +558,7 @@ export default function MapScreen({ navigation }) {
     if (
       actualPlace &&
       user.token &&
-      actualPlace.reviews.some((e) => e.username === user.username)
+      actualPlace.reviews.some((e) => e.author.username === user.username)
     ) {
       return postedReview;
     } else {
@@ -610,11 +597,8 @@ export default function MapScreen({ navigation }) {
         </Text>
       );
     });
-  }
 
-  if (allReviews && actualPlace) {
-    reviewsPlace = allReviews.map((data, i) => {
-      if (data.place.title === actualPlace.title) {
+    reviewsPlace = actualPlace.reviews.map((data, i) => {
         let date = new Date(data.createdAt);
         let formattedDate =
           date.toLocaleDateString() +
@@ -631,9 +615,9 @@ export default function MapScreen({ navigation }) {
             </View>
           </View>
         );
-      }
-    });
-  }
+  
+    });}
+  
 
   // === GESTION DES QUARTIERS ===================================================================== //
 

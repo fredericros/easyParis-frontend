@@ -12,6 +12,7 @@ import {
   View,
   ScrollView,
 } from "react-native";
+
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import React, { useState, useEffect } from "react";
@@ -19,8 +20,11 @@ import * as Imagepicker from "expo-image-picker";
 
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../reducers/user";
+import { useFocusEffect } from "@react-navigation/native";
 
 import FontAwesome from "react-native-vector-icons/FontAwesome";
+
+import {loadReviews} from "../reducers/reviews";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -37,6 +41,16 @@ export default function ProfileScreen({ navigation }) {
 
   let reviewedPlaces;
   let reviewCount=0;
+
+  useFocusEffect(
+    React.useCallback(() => {
+      fetch(`http://192.168.1.113:3000/reviews`)
+      .then((response) => response.json())
+      .then((data) => {
+        data.result && dispatch(loadReviews(data.reviews));
+      });
+    }, [])
+  );
 
 
   if (user.token) {
