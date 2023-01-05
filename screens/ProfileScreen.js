@@ -44,7 +44,7 @@ export default function ProfileScreen({ navigation }) {
 
   useFocusEffect(
     React.useCallback(() => {
-      fetch(`http://192.168.1.113:3000/reviews`)
+      fetch(`https://easy-paris-backend.vercel.app/reviews`)
       .then((response) => response.json())
       .then((data) => {
         data.result && dispatch(loadReviews(data.reviews));

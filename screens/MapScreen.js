@@ -39,7 +39,6 @@ import {
   likePlace, 
   reviewPlace } from "../reducers/allPlaces";
 import {
-  loadReviews,
   deleteReview,
   loadMyReview,
   deleteMyReview,
@@ -104,7 +103,6 @@ export default function MapScreen({ navigation }) {
   const user = useSelector((state) => state.user.value);
   const allPlaces = useSelector((state) => state.allPlaces.value);
   const actualPlace = useSelector((state) => state.actualPlaces.value);
-  const allReviews = useSelector((state) => state.reviews.value.allReviews);
   const myReview = useSelector((state) => state.reviews.value.myReview);
 
   const [districtVisible, setDistrictVisible] = useState(true);
@@ -114,7 +112,7 @@ export default function MapScreen({ navigation }) {
 
   useFocusEffect(
     React.useCallback(() => {
-      fetch(`http://192.168.1.113:3000/places/district`)
+      fetch(`https://easy-paris-backend.vercel.app/places/district`)
         .then((response) => response.json())
         .then((data) => {
           data.result && dispatch(loadAllPlaces(data.places));
@@ -126,7 +124,7 @@ export default function MapScreen({ navigation }) {
   // === FETCH DE LA ROUTE BACKEND POUR RECUPERER LES PLACESFILTREES AU CLICK SUR UN BOUTON FILTRE ======================================= //
 
   const handleFilter = (filter) => {
-    fetch(`http://192.168.1.113:3000/places/${filter}`)
+    fetch(`https://easy-paris-backend.vercel.app/places/${filter}`)
       .then((response) => response.json())
       .then((data) => {
         data.result && dispatch(loadAllPlaces(data.places));
@@ -385,12 +383,65 @@ export default function MapScreen({ navigation }) {
     }
   };
 
+    // === GESTION DES INFOS (TABLEAUX) DE LA MODALE ============================================================================================ //
+
+    let cardHours;
+    let cardPrices;
+    let cardTips;
+    let reviewsPlace;
+  
+    if (actualPlace) {
+      cardHours = actualPlace.hours.map((data, i) => {
+        return (
+          <Text key={i} numberOfLines={2} style={styles.cardInfoText}>
+            {data}
+          </Text>
+        );
+      });
+  
+      cardPrices = actualPlace.priceRange.map((data, i) => {
+        return (
+          <Text key={i} numberOfLines={2} style={styles.cardInfoText}>
+            {data}
+          </Text>
+        );
+      });
+  
+      cardTips = actualPlace.tips.map((data, i) => {
+        return (
+          <Text key={i} numberOfLines={2} style={styles.cardInfoText}>
+            {data}
+          </Text>
+        );
+      });
+  
+      reviewsPlace = actualPlace.reviews.map((data, i) => {
+          let date = new Date(data.createdAt);
+          let formattedDate =
+            date.toLocaleDateString() +
+            " " +
+            date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+          return (
+            <View key={i}>
+              <View style={styles.slide3User}>
+                <Text style={styles.slide3UserName}>{data.author.username}</Text>
+                <Text style={styles.slide3Date}>{formattedDate}</Text>
+              </View>
+              <View>
+                <Text style={styles.slide3Description}>{data.content}</Text>
+              </View>
+            </View>
+          );
+    
+      });}
+
+
   // === GESTION DES LIKES =========================================================================================================== //
 
    // LIKER UN LIEU //
 
   const handleLike = () => {
-    fetch("http://192.168.1.113:3000/places/like", {
+    fetch("https://easy-paris-backend.vercel.app/places/like", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ token: user.token, placeId: actualPlace._id }),
@@ -434,13 +485,14 @@ export default function MapScreen({ navigation }) {
     likeStyle = { color: "#f91980" };
   }
 
+
   // === GESTION DES REVIEWS ============================================================================================================= //
 
   // POSTER UNE REVIEW //
 
   const handleSubmitReview = () => {
     if (user.token) {
-      fetch("http://192.168.1.113:3000/reviews", {
+      fetch("https://easy-paris-backend.vercel.app/reviews", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -486,7 +538,7 @@ export default function MapScreen({ navigation }) {
   // SUPPRIMER UNE REVIEW //
 
   const handleDeleteReview = () => {
-    fetch("http://192.168.1.113:3000/reviews/delete", {
+    fetch("https://easy-paris-backend.vercel.app/reviews/delete", {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -566,57 +618,6 @@ export default function MapScreen({ navigation }) {
     }
   };
 
-  // === GESTION DES INFOS (TABLEAUX) DE LA MODALE ============================================================================================ //
-
-  let cardHours;
-  let cardPrices;
-  let cardTips;
-  let reviewsPlace;
-
-  if (actualPlace) {
-    cardHours = actualPlace.hours.map((data, i) => {
-      return (
-        <Text key={i} numberOfLines={2} style={styles.cardInfoText}>
-          {data}
-        </Text>
-      );
-    });
-
-    cardPrices = actualPlace.priceRange.map((data, i) => {
-      return (
-        <Text key={i} numberOfLines={2} style={styles.cardInfoText}>
-          {data}
-        </Text>
-      );
-    });
-
-    cardTips = actualPlace.tips.map((data, i) => {
-      return (
-        <Text key={i} numberOfLines={2} style={styles.cardInfoText}>
-          {data}
-        </Text>
-      );
-    });
-
-    reviewsPlace = actualPlace.reviews.map((data, i) => {
-        let date = new Date(data.createdAt);
-        let formattedDate =
-          date.toLocaleDateString() +
-          " " +
-          date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-        return (
-          <View key={i}>
-            <View style={styles.slide3User}>
-              <Text style={styles.slide3UserName}>{data.author.username}</Text>
-              <Text style={styles.slide3Date}>{formattedDate}</Text>
-            </View>
-            <View>
-              <Text style={styles.slide3Description}>{data.content}</Text>
-            </View>
-          </View>
-        );
-  
-    });}
   
 
   // === GESTION DES QUARTIERS ===================================================================== //
@@ -742,7 +743,7 @@ export default function MapScreen({ navigation }) {
 
       <MapView
         // provider={PROVIDER_GOOGLE}
-        customMapStyle={mapStyle}
+        // customMapStyle={mapStyle}
         initialRegion={{
           latitude: 48.8584685,
           longitude: 2.3375905,
