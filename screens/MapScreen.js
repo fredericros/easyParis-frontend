@@ -743,7 +743,7 @@ export default function MapScreen({ navigation }) {
 
       <MapView
         // provider={PROVIDER_GOOGLE}
-        // customMapStyle={mapStyle}
+        customMapStyle={mapStyle}
         initialRegion={{
           latitude: 48.8584685,
           longitude: 2.3375905,
