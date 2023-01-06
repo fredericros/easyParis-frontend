@@ -2,6 +2,7 @@
   "expo": {
     "name": "easyParis",
     "slug": "frontend",
+    "owner": "fredericros",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/logoeiffel1.png",
