@@ -93,13 +93,12 @@ const ChatScreen = () => {
     ];
     // Définissez une fonction pourtrouver la réponse à une question donnée
     const findAnswer = (question) => {
-        const user = useSelector((state) => state.user.value) 
         for (let i = 0; i < questions.length; i++) {
             if (questions[i].question.toLocaleLowerCase() === question.toLocaleLowerCase()) {
                 return questions[i].answer;
             }
         }
-        return `Tu me fais chier ${user.username}` ;
+        return `Désolé, je n'ai pas la réponse à cette question` ;
     }
 
     const onSend = useCallback((messages = []) => {
