@@ -7,6 +7,7 @@ import * as Location from "expo-location";
 import MapViewDirections from 'react-native-maps-directions';
 import { useSelector } from "react-redux";
 import { useIsFocused } from '@react-navigation/native';
+import {GOOGLE_MAPS_APIKEY} from '@env';
 
 const screenWidth = Dimensions.get('window').width;
 const screenHeight = Dimensions.get('window').height;
@@ -43,7 +44,6 @@ dropLocationCors:{
 })
 
 const {pickUpCords, dropLocationCors} = state
-const GOOGLE_MAPS_APIKEY = 'AIzaSyBq886HaWXuK9TwHlP6Dc-Ze6Ur0KmdOtY'
 useEffect(() => {
   (async () => {
     const { status } = await Location.requestForegroundPermissionsAsync();
